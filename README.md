@@ -8,6 +8,7 @@ Two universal design-polish skills that take any app from 6/10 to 11/10 on atten
 
 <p align="center">
   <a href="#install"><img src="https://img.shields.io/badge/install-npx%20skills%20add%20heyimjames%2Fultrapolish-000?style=for-the-badge&logo=npm&logoColor=white" alt="Install with npx skills"></a>
+  <a href="https://jamesfrewin.com/ultrapolish"><img src="https://img.shields.io/badge/see%20it-jamesfrewin.com%2Fultrapolish-000?style=for-the-badge&logoColor=white" alt="See the before and after demos"></a>
   <a href="https://github.com/heyimjames/ultrapolish/stargazers"><img src="https://img.shields.io/github/stars/heyimjames/ultrapolish?style=for-the-badge&color=000&logo=github&logoColor=white&label=Star" alt="Star this repo"></a>
 </p>
 
@@ -22,6 +23,8 @@ Two universal design-polish skills that take any app from 6/10 to 11/10 on atten
 
 > Not a style. A craft standard and a procedure.
 > It reads your tokens first, then makes what is already there feel considered, continuous, and alive.
+>
+> Live before-and-after demos at [jamesfrewin.com/ultrapolish](https://jamesfrewin.com/ultrapolish).
 
 ---
 
