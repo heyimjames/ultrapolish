@@ -53,6 +53,7 @@ def check_skill(name: str):
     # Every assets/x link resolves.
     for a in set(re.findall(r"assets/([A-Za-z0-9_.-]+)", text + "".join(
             (d / "references" / r).read_text(encoding="utf-8") for r in present))):
+        a = a.rstrip(".")
         if not (d / "assets" / a).exists():
             problems.append(f"{name}: assets/{a} is referenced but missing")
 

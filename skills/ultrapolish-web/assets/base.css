@@ -1,0 +1,143 @@
+/*
+ * base.css
+ *
+ * The browser-smell reset. Removes defaults that make a web app feel like a
+ * web page. Drop into the project's base layer; rename nothing unless the
+ * project already has its own layer name. Carries no palette or typeface.
+ *
+ * Requires <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ * for the safe-area helpers to return anything.
+ */
+
+@layer base {
+  html {
+    /* Set per project: "light dark" if both themes exist, else the one shipped. */
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* Safe areas are ADDED to padding, never used as padding. */
+    --safe-top:    env(safe-area-inset-top, 0px);
+    --safe-right:  env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left:   env(safe-area-inset-left, 0px);
+  }
+
+  /* Scroll lock while a native dialog is open, without body position hacks. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+  }
+
+  img,
+  video,
+  svg,
+  canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Controls inherit type and stop the 300ms tap delay. */
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+    font: inherit;
+    color: inherit;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  /* Under 16px, iOS Safari zooms the page on focus. */
+  @media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1rem);
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  figcaption,
+  blockquote {
+    text-wrap: pretty;
+  }
+
+  /*
+   * Focus: only for keyboard users. currentColor is a starting point, not a
+   * guarantee; verify the ring against every adjacent colour it crosses, or
+   * replace it with a token the project has already checked.
+   */
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Anchored headings land below sticky chrome. Match to the header height. */
+  [id] {
+    scroll-margin-top: 80px;
+  }
+
+  /* Chrome is not selectable; content is. */
+  nav,
+  header,
+  footer,
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  label {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  p,
+  article,
+  main,
+  [contenteditable],
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Numbers that change must not shift the layout. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Viewport helpers. dvh for fill layouts; svh when fixed chrome must never
+     be pushed off-screen by the address bar. Never plain vh. */
+  .fill-dvh { min-height: 100dvh; }
+  .fill-svh { min-height: 100svh; }
+
+  /* Bottom chrome that respects the home indicator. */
+  .pad-safe-bottom { padding-bottom: calc(16px + var(--safe-bottom)); }
+  .pad-safe-top    { padding-top: calc(16px + var(--safe-top)); }
+}

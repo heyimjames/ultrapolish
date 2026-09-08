@@ -1,0 +1,71 @@
+/*
+ * skeleton.css
+ *
+ * Loading placeholders that match the final content's structure: same bar
+ * count, same widths, same positions. A skeleton with three lines for content
+ * that has five breaks the illusion. Colours derive from currentColor at low
+ * alpha so this carries no palette; override the two tokens per project.
+ *
+ * Show a skeleton only after 300ms of waiting, never before.
+ */
+
+:root {
+  --skeleton-base:      color-mix(in oklch, currentColor 8%, transparent);
+  --skeleton-highlight: color-mix(in oklch, currentColor 14%, transparent);
+  --skeleton-duration:  1.4s;
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton-base);
+  border-radius: 6px;
+  /* Reserve the box. Set width and height to the final content's size. */
+}
+
+/* Text placeholder sized in em so it tracks the type it stands in for. */
+.skeleton-text {
+  height: 1em;
+  border-radius: 0.25em;
+}
+
+/* Vary line widths so a paragraph reads as a paragraph, not a barcode. */
+.skeleton-line:nth-child(4n + 1) { width: 92%; }
+.skeleton-line:nth-child(4n + 2) { width: 100%; }
+.skeleton-line:nth-child(4n + 3) { width: 84%; }
+.skeleton-line:nth-child(4n + 4) { width: 61%; }
+
+.skeleton-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+/* Slow, subtle sweep. Fast shimmer reads as an error. */
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: -100% 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--skeleton-highlight) 50%,
+      transparent 100%
+    );
+    animation: skeleton-sweep var(--skeleton-duration) linear infinite;
+  }
+}
+
+@keyframes skeleton-sweep {
+  to {
+    translate: 100% 0;
+  }
+}
+
+/* Static under reduced motion; the reserved box still prevents layout shift. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+}

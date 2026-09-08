@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-label="ultrapolish: universal polish skills for iOS and web">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E0F12"/>
+      <stop offset="1" stop-color="#16181D"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.18" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="520" fill="url(#bg)"/>
+  <rect width="1600" height="520" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1599" height="519" fill="none" stroke="#FFFFFF" stroke-opacity="0.06"/>
+
+  <g font-family="-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto, Inter, Arial, sans-serif" fill="#F4F4F2">
+    <text x="112" y="150" font-size="22" font-weight="500" letter-spacing="0.08em" fill="#F4F4F2" fill-opacity="0.45">HEYIMJAMES / ULTRAPOLISH</text>
+
+    <text x="108" y="284" font-size="132" font-weight="600" letter-spacing="-0.035em">ultrapolish</text>
+
+    <text x="112" y="350" font-size="30" font-weight="400" fill="#F4F4F2" fill-opacity="0.72">Two universal design-polish skills. Any app, its own style, from 6/10 to 11/10.</text>
+
+    <line x1="112" y1="396" x2="1488" y2="396" stroke="url(#hair)" stroke-width="1"/>
+
+    <g font-size="20" font-weight="500" fill="#F4F4F2" fill-opacity="0.55">
+      <text x="112" y="436">ultrapolish-ios · Swift / SwiftUI</text>
+      <text x="520" y="436">ultrapolish-web · React / TypeScript / CSS</text>
+      <text x="1488" y="436" text-anchor="end">Claude Code · Cursor · Codex · Windsurf · Aider · Continue · Zed</text>
+    </g>
+  </g>
+</svg>

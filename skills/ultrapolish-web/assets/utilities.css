@@ -1,0 +1,161 @@
+/*
+ * utilities.css
+ *
+ * Small, style-neutral helpers the polish pass reaches for repeatedly.
+ * Rename class names to the project's convention if it has one. Carries no
+ * palette or typeface; colours are derived from currentColor or plain
+ * black/white at low alpha.
+ */
+
+:root {
+  /* Fixed z-index scale. Never 9999. Prefer isolation: isolate on components. */
+  --z-dropdown: 100;
+  --z-sticky:   150;
+  --z-overlay:  200;
+  --z-popover:  300;
+  --z-toast:    400;
+
+  /* Hairline: 1px, and half a device pixel on high-density screens. */
+  --hairline: 1px;
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
+  }
+}
+
+/* Visually hidden, still read by screen readers. 1px, not 0: some readers
+   skip zero-sized elements. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * Expand a small control's hit area to 44px without changing its look.
+ * Put this on the button or label, never the input: replaced elements do
+ * not render pseudo-elements reliably. Two .hit-area targets must not overlap.
+ */
+.hit-area {
+  position: relative;
+}
+
+.hit-area::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  translate: -50% -50%;
+}
+
+/* Hairline border via box-shadow; blends better than border on media. */
+.hairline {
+  box-shadow: 0 0 0 var(--hairline) oklch(0 0 0 / 0.1);
+}
+
+/* Image outline on user content. Pure black or white at 10%, inset. A tinted
+   grey reads as dirt on the image edge. */
+.img-outline {
+  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline-offset: -1px;
+}
+
+:root[data-theme="dark"] .img-outline,
+:root[data-theme="dark"] .hairline {
+  outline-color: oklch(1 0 0 / 0.1);
+  box-shadow: 0 0 0 var(--hairline) oklch(1 0 0 / 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .img-outline {
+    outline-color: oklch(1 0 0 / 0.1);
+  }
+  :root:not([data-theme="light"]) .hairline {
+    box-shadow: 0 0 0 var(--hairline) oklch(1 0 0 / 0.1);
+  }
+}
+
+/*
+ * Horizontal scroller with a peek. The next item shows past the edge, so
+ * people know to scroll. Children: flex: 0 0 calc(100% - 48px - 24px) or a
+ * fixed width; scroll-snap-align: start.
+ */
+.scroll-x {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-inline: 24px;
+  scroll-padding-inline: 24px;
+  scroll-snap-type: x mandatory;
+  scroll-snap-stop: always;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-x > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+/* Scrollbar styling only inside small scroll containers, never the page. */
+.panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, currentColor 28%, transparent) transparent;
+}
+
+.panel-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.panel-scroll::-webkit-scrollbar-thumb {
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-color: color-mix(in oklch, currentColor 28%, transparent);
+}
+
+.panel-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklch, currentColor 45%, transparent);
+}
+
+/*
+ * Full-bleed layout: content sits in a readable column, and any child with
+ * .full-bleed spans the viewport.
+ */
+.bleed-grid {
+  display: grid;
+  grid-template-columns: 1fr min(65ch, calc(100% - 48px)) 1fr;
+}
+
+.bleed-grid > * {
+  grid-column: 2;
+}
+
+.bleed-grid > .full-bleed {
+  grid-column: 1 / -1;
+}
+
+/* A hook for components that should hold still under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .reduce-motion-static,
+  .reduce-motion-static * {
+    animation: none !important;
+    transition-property: color, background-color, border-color, opacity !important;
+  }
+}

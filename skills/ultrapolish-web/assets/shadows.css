@@ -1,0 +1,60 @@
+/*
+ * shadows.css
+ *
+ * Depth tokens. Shadow-as-border in light mode, a single white ring in dark
+ * mode (shadows do not read on dark surfaces), and one true floating shadow
+ * for overlays. Every value is a default; the project's own tokens override.
+ * Carries no palette: black and white at low alpha only.
+ *
+ * Usage: box-shadow: var(--shadow-border);  and on hover: var(--shadow-border-hover)
+ */
+
+:root {
+  --hairline-color: oklch(0 0 0 / 0.1);
+
+  /* Three layers: a 1px ring, a contact shadow, a soft ambient. */
+  --shadow-border:
+    0 0 0 1px oklch(0 0 0 / 0.06),
+    0 1px 2px -1px oklch(0 0 0 / 0.06),
+    0 2px 4px 0 oklch(0 0 0 / 0.04);
+
+  --shadow-border-hover:
+    0 0 0 1px oklch(0 0 0 / 0.08),
+    0 1px 2px -1px oklch(0 0 0 / 0.08),
+    0 2px 4px 0 oklch(0 0 0 / 0.06);
+
+  /* Only for surfaces that truly float: popovers, command palettes, toasts. */
+  --shadow-float: 0 12px 32px oklch(0 0 0 / 0.18);
+}
+
+/* Dark mode: one ring, no blur. Explicit choice wins. */
+:root[data-theme="dark"] {
+  --hairline-color: oklch(1 0 0 / 0.1);
+  --shadow-border:       0 0 0 1px oklch(1 0 0 / 0.08);
+  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
+  --shadow-float:        0 0 0 1px oklch(1 0 0 / 0.1), 0 12px 32px oklch(0 0 0 / 0.4);
+}
+
+/* System preference, unless the page has explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hairline-color: oklch(1 0 0 / 0.1);
+    --shadow-border:       0 0 0 1px oklch(1 0 0 / 0.08);
+    --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
+    --shadow-float:        0 0 0 1px oklch(1 0 0 / 0.1), 0 12px 32px oklch(0 0 0 / 0.4);
+  }
+}
+
+/* Convenience classes. Transition only the shadow, at hover speed. */
+.surface {
+  box-shadow: var(--shadow-border);
+  transition: box-shadow 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.surface:hover {
+  box-shadow: var(--shadow-border-hover);
+}
+
+.floating {
+  box-shadow: var(--shadow-float);
+}

@@ -91,6 +91,7 @@ def full_body(skill_name: str, body: str) -> str:
     skill_dir = SKILLS_DIR / skill_name
     # Links like references/motion.md become plain text anchors in a flat file.
     body = re.sub(r"\(references/([a-z0-9-]+)\.md\)", r"(see: \1 in References below)", body)
+    body = re.sub(r"`references/([a-z0-9-]+)\.md`", r"the \1 reference below", body)
     return body.rstrip() + load_references(skill_dir)
 
 
