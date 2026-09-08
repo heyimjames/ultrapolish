@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ultrapolish",
+  "displayName": "ultrapolish",
+  "description": "Two universal design-polish skills that take any app from 6/10 to 11/10 on attention to detail, UX and cohesion, inside its own visual style. ultrapolish-ios for Swift/SwiftUI, ultrapolish-web for React/TypeScript/CSS. Motion, colour, typography, layout, sheets, haptics, sound, buttons, icons, copy, states, onboarding, paywalls, widgets, accessibility. Reads your existing tokens first and never introduces a palette, a typeface, or a motion personality. Invoke as ultrapolish:ultrapolish-ios or ultrapolish:ultrapolish-web.",
+  "author": {
+    "name": "James Frewin",
+    "url": "https://jamesfrewin.com"
+  },
+  "homepage": "https://github.com/heyimjames/ultrapolish",
+  "repository": "https://github.com/heyimjames/ultrapolish",
+  "license": "MIT",
+  "keywords": [
+    "design", "polish", "ux", "ui", "design-engineering", "swiftui", "ios", "react", "typescript", "css",
+    "motion", "animation", "typography", "color", "oklch", "haptics", "accessibility", "paywall", "onboarding", "widgets"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "ultrapolish",
+  "description": "Two universal design-polish skills by James Frewin. They take any app from 6/10 to 11/10 on detail, UX and cohesion, inside its own visual style.",
+  "owner": {
+    "name": "James Frewin",
+    "url": "https://jamesfrewin.com"
+  },
+  "plugins": [
+    {
+      "name": "ultrapolish",
+      "source": "./",
+      "description": "ultrapolish-ios (Swift/SwiftUI) and ultrapolish-web (React/TypeScript/CSS): motion, colour, typography, layout, sheets, haptics, sound, buttons, icons, copy, states, onboarding, paywalls, widgets, accessibility. Style-agnostic: reads your tokens first, never introduces a palette or a typeface.",
+      "category": "design",
+      "keywords": ["design", "polish", "ux", "ui", "swiftui", "ios", "react", "css", "motion", "accessibility", "design-engineering"]
+    }
+  ]
+}
