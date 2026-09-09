@@ -150,6 +150,17 @@ onDragEnd: (_, info) => {
 <motion.div layoutRoot style={{ position: "fixed" }} /> {/* fixed ancestors */}
 ```
 
+A shared-layout element under a continuously animating ancestor transform
+does not travel. `layout` and `layoutId` work by measuring the box before and
+after and inverting the difference; if a parent carries a CSS animation on
+`transform`, every measurement reads a different origin and the element lands
+at its destination instead of moving to it. The same applies to a parent
+being dragged, or to any ancestor whose transform is driven outside React.
+When an indicator has to slide inside a surface that is itself moving, drive
+it by index rather than by measurement: one absolutely positioned element,
+`x` animated as a percentage of its own width. A percentage of self needs no
+box read, so it is immune to whatever the ancestor is doing.
+
 ## Checks
 
 - Flick a sheet down from 10%: it dismisses. Drag slowly to 40% and release: it returns.

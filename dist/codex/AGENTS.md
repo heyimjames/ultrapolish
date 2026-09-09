@@ -120,7 +120,7 @@ These hold in every style. Break one only with a written reason.
 3. **The 100× rule.** If someone sees an interaction 100 times a day, do not animate it. Tab switches, keyboard focus, list scrolling, arrow selection: instant.
 4. **What follows a finger is linear.** Sliders, scrubbers, crop dials, drag tracking: `.linear` or no animation. Springs begin only when the finger lets go, and they inherit its velocity.
 5. **The spinner travels.** Loading appears where the result will appear, not only on the control that was tapped. A sent message shows progress in its bubble; a captured photo shows progress on the thumbnail. The control may also carry progress once the result has a home of its own; it may never be the only place it appears.
-6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, permission denied, largest Dynamic Type, Reduce Motion, dark mode. The empty state is the first impression for every new user.
+6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, permission denied, largest Dynamic Type, Reduce Motion, dark mode. The empty state is the first impression for every new user. Space reserved so the container never resizes is a hole in every state that does not fill it: each one either fills the box or centres in it.
 7. **Persistent elements never leave and come back.** If a title, toolbar, pill, or hero exists on both sides of a transition, render it in a parent that survives the transition.
 8. **A disabled control says why; a destructive action names its noun.** Never a grey button with no explanation. Never "Are you sure?" with Yes/No. "Delete project" and "Cancel".
 9. **One accent per view.** The primary action carries the colour on its background, not on its label. Selected states may tint a glyph; that is state, not emphasis.
@@ -4233,7 +4233,7 @@ These hold in every style. Break one only with a written reason.
 4. **Opacity never springs; transforms may.** Springs are for objects with mass or for anything a gesture can interrupt. Colour, opacity, and hover use a short curve. Never `transition: all`; name the property.
 5. **The spinner travels.** Progress appears where the result will appear, not only on the control that was clicked. No spinner before 300ms. A pending optimistic row is a ghost at 60% opacity, not a spinner. The control may also carry progress once the result has a home of its own: a button that doubles as a progress bar is right when the work also appears where it will land, and wrong when that is the only place it appears.
 6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, 320px, 200% zoom, reduced motion, dark mode, keyboard-only.
-7. **No layout shift, ever.** Reserve every box: images have dimensions, skeletons match final size, loading buttons lock their width, tabular numbers, fonts with `size-adjust`.
+7. **No layout shift, ever.** Reserve every box: images have dimensions, skeletons match final size, loading buttons lock their width, tabular numbers, fonts with `size-adjust`. A box reserved for the tallest state is a hole in every shorter one, so each state must fill it or centre in it; if a state can do neither, it does not belong in the sequence.
 8. **A disabled control says why; a destructive action names its noun.** Never disable submit until valid. "Delete project" and "Cancel", never "Are you sure?" with OK.
 9. **One accent per view.** The primary action carries the colour on its background, not its label. Blue text reads as a link; blue background reads as the primary.
 10. **Everyone can reach it.** Every interactive element is a real `<button>` or `<a>`, has a visible `:focus-visible` ring, a 24px minimum target (44 on touch), and a name a screen reader can say.
@@ -7790,6 +7790,17 @@ onDragEnd: (_, info) => {
 <motion.ul layoutScroll style={{ overflow: "auto" }} />  {/* scroll containers */}
 <motion.div layoutRoot style={{ position: "fixed" }} /> {/* fixed ancestors */}
 ```
+
+A shared-layout element under a continuously animating ancestor transform
+does not travel. `layout` and `layoutId` work by measuring the box before and
+after and inverting the difference; if a parent carries a CSS animation on
+`transform`, every measurement reads a different origin and the element lands
+at its destination instead of moving to it. The same applies to a parent
+being dragged, or to any ancestor whose transform is driven outside React.
+When an indicator has to slide inside a surface that is itself moving, drive
+it by index rather than by measurement: one absolutely positioned element,
+`x` animated as a percentage of its own width. A percentage of self needs no
+box read, so it is immune to whatever the ancestor is doing.
 
 ### Checks
 
