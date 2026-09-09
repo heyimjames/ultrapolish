@@ -25,6 +25,7 @@ Use this when building or reviewing a landing page, a product page, a pricing pa
 13. **Mobile first-fold check.** On a 375px phone, the first screen shows the headline, one line of what it is, and the CTA, with no scroll. Check: screenshot at 375×667.
 14. **Accessibility floor, without announcing it.** Keyboard focus visible, reduced motion respected, contrast passes, real headings in order. Do not put an "accessible" badge on the page. See `references/accessibility.md`.
 15. **Two passes.** First, write a compact token plan: 4–6 named colours, the type roles, a one-sentence layout idea. Review that plan against the brief and against rule 6 before building. Then build. Then screenshot and review again at 375 and 1280. Why: genericness is cheapest to catch before the CSS exists. Check: the plan exists as a comment or a file.
+16. **A hero video shows the product working or it is a still.** A silent four-to-eight-second loop of the real interface doing one clear thing is the most convincing element the page can carry; people at desks, abstract shapes and drone footage are decoration paying a real performance cost. The poster is the LCP, not the video. See `references/media-playback.md` for the autoplay, codec and reduced-motion rules. Check: describe the video in one sentence; if it does not mention the product doing something, ship the still.
 
 ## OG images
 

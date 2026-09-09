@@ -2075,6 +2075,8 @@ File handling is where interfaces most often forget that the person is holding s
 14. **A download names itself and its type.** A real filename with a real extension, and a `Content-Disposition` or a `download` attribute that agrees with it. `export.bin` or a UUID is a file nobody will find again. Include a date in anything periodic. Check: download and look in the Downloads folder a week later; you can tell what it is.
 15. **A generated export is a state, not a spinner on a button.** Anything over about two seconds gets progress where the result will land, a label, and permission to leave the page. Over ten seconds it notifies on completion rather than holding someone hostage. Check: export a large file and navigate away; you are told when it is ready.
 16. **The file input is labelled for a screen reader and announces what happened.** The control has a name, the selected file is announced, and progress goes through a live region rather than only a visual bar. Check: run the whole flow with a screen reader; you know what was selected, how far it got, and that it finished.
+17. **Marching ants mean the zone is armed, so they only run while a drag is in flight.** A dashed border at rest is the convention for "drop here" and needs no motion to say it. The moment a file enters the window, the dashes start travelling at roughly eight seconds a loop, which is the signal that the browser has registered the drag at all. The moment the pointer is over the target, the dashes stop and the border goes solid and accented: motion says armed, stillness says release here. CSS cannot animate the dashes of `border-style: dashed`, so draw the outline as an inline SVG `rect` and animate its `stroke-dashoffset`, or use a repeating gradient and animate `background-position`. Under reduced motion nothing travels and the border changes colour instead. Check: pick up a file anywhere on the page; the zone tells you it saw it before you reach it.
+18. **Resize by role before uploading, and say that you did.** An avatar goes to 512px and a WebP at about q80; an inline attachment to a longest edge of 2048; anything where fidelity is the product, such as a photo tool or a print job, keeps its original bytes untouched. Doing this in the browser is the difference between an instant upload and a 10MB phone photo crawling up a mobile connection to become a 40px circle. Never do it silently: print the limit next to the control before anyone picks a file, and have the row say "resized from 8.2 MB". Strip GPS from anything that will be shared, keeping the orientation tag so the image is not sideways; location is the one EXIF field that is a privacy leak rather than metadata. Check: upload a 12MP photo as an avatar and read what the row says happened to it.
 
 ### Cheat sheet
 
@@ -2092,6 +2094,12 @@ File handling is where interfaces most often forget that the person is holding s
 | Failure | Row stays, reason shown, Retry without re-picking |
 | Paste | `paste` handler reading `clipboardData.files` |
 | Download name | Real name, real extension, date if periodic |
+| Drop zone at rest | Dashed border, no motion |
+| Drag in flight | Dashes travel, ~8s per loop; background steps one rung |
+| Pointer over the zone | Dashes stop, border solid and accented |
+| Avatar | 512px, WebP ~q80, EXIF stripped except orientation |
+| Attachment | Longest edge 2048px, GPS stripped |
+| Fidelity is the product | Original bytes, untouched |
 
 ### Code
 
@@ -2129,6 +2137,64 @@ function accept(files: File[]) {
 }
 ```
 
+```html
+<!-- border-style: dashed cannot animate its dashes, so the outline is drawn.
+     vector-effect keeps the stroke 1.5px however the box is scaled. -->
+<div class="dropzone">
+  <svg class="dropzone-outline" aria-hidden="true">
+    <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="12"
+          vector-effect="non-scaling-stroke" />
+  </svg>
+  <label for="files">Drop files here, or browse</label>
+</div>
+```
+
+```css
+.dropzone-outline rect {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1.5;
+  stroke-dasharray: 8 6;
+}
+
+/* Armed: a file is somewhere over the window. The travel is the signal that
+   the drag was registered at all, before the pointer reaches the target. */
+.dropzone[data-drag="page"] .dropzone-outline rect {
+  animation: ants 8s linear infinite;
+}
+@keyframes ants { to { stroke-dashoffset: -140; } }
+
+/* On target: stillness means release here. */
+.dropzone[data-drag="over"] .dropzone-outline rect {
+  stroke: var(--accent);
+  stroke-dasharray: none;
+  animation: none;
+}
+.dropzone[data-drag="over"] { background: var(--raised); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dropzone-outline rect { animation: none !important; }
+  /* The colour carries what the motion was carrying. */
+  .dropzone[data-drag="page"] .dropzone-outline rect { stroke: var(--accent); }
+}
+```
+
+```ts
+// Resize by role. The original is never touched where fidelity is the product.
+async function prepare(file: File, role: "avatar" | "attachment" | "original") {
+  if (role === "original" || !file.type.startsWith("image/")) return { file };
+  const max = role === "avatar" ? 512 : 2048;
+  const bitmap = await createImageBitmap(file);          // honours EXIF orientation
+  if (Math.max(bitmap.width, bitmap.height) <= max) return { file };
+  const scale = max / Math.max(bitmap.width, bitmap.height);
+  const canvas = new OffscreenCanvas(bitmap.width * scale, bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  // Re-encoding drops every EXIF field, GPS included. That is the point.
+  const blob = await canvas.convertToBlob({ type: "image/webp", quality: 0.8 });
+  return { file: new File([blob], file.name, { type: "image/webp" }), from: file.size };
+}
+```
+
 ```css
 /* Focusable, operable, invisible. Never display: none. */
 .file-input {
@@ -2151,6 +2217,9 @@ function accept(files: File[]) {
 - Cancel mid-upload; the request actually aborts.
 - Kill the network mid-upload; Retry works without reopening the picker.
 - Paste a screenshot into the composer.
+- Pick up a file anywhere on the page: the zone says it saw the drag before you reach it.
+- Turn on Reduce Motion and drag: the dashes never travel and the colour changes instead.
+- Upload a 12MP photo as an avatar: the row says what happened to it, and the GPS is gone.
 - Download an export and identify it from its filename a week later.
 - Run the whole flow with a screen reader.
 
@@ -2164,6 +2233,9 @@ function accept(files: File[]) {
 - Sit at 99% while the server works.
 - Make someone re-pick a file after a failed upload.
 - Name a download `export.bin` or a UUID.
+- Run marching ants on an idle drop zone nobody is dragging onto.
+- Resize an image silently, or resize one where the original was the point.
+- Strip the orientation tag along with the GPS, then wonder why photos are sideways.
 
 <!-- references/forms-and-inputs.md -->
 
@@ -2797,6 +2869,7 @@ Use this when building or reviewing a landing page, a product page, a pricing pa
 13. **Mobile first-fold check.** On a 375px phone, the first screen shows the headline, one line of what it is, and the CTA, with no scroll. Check: screenshot at 375×667.
 14. **Accessibility floor, without announcing it.** Keyboard focus visible, reduced motion respected, contrast passes, real headings in order. Do not put an "accessible" badge on the page. See `references/accessibility.md`.
 15. **Two passes.** First, write a compact token plan: 4–6 named colours, the type roles, a one-sentence layout idea. Review that plan against the brief and against rule 6 before building. Then build. Then screenshot and review again at 375 and 1280. Why: genericness is cheapest to catch before the CSS exists. Check: the plan exists as a comment or a file.
+16. **A hero video shows the product working or it is a still.** A silent four-to-eight-second loop of the real interface doing one clear thing is the most convincing element the page can carry; people at desks, abstract shapes and drone footage are decoration paying a real performance cost. The poster is the LCP, not the video. See `references/media-playback.md` for the autoplay, codec and reduced-motion rules. Check: describe the video in one sentence; if it does not mention the product doing something, ship the still.
 
 ### OG images
 
@@ -2923,6 +2996,7 @@ A player is a control surface that people use in the dark, one-handed, on a trai
 13. **Remember the position for anything over a few minutes.** Long-form content resumes where it was left, per item, and says that it is resuming with a way to start over. Check: leave halfway, come back tomorrow, and you are offered the right thing.
 14. **Never animate the player's own chrome on a timer.** Controls fade out after about three seconds of no pointer movement and return instantly on any movement, keypress or touch. They never fade while the pointer is over them, and never while paused. Check: pause and wait; the controls stay.
 15. **Reserve the aspect ratio and never letterbox by accident.** `aspect-ratio` on the container with `object-fit: contain` for unknown sources and `cover` only where cropping is intended. Vertical video in a horizontal box with `cover` cuts people's heads off. Check: play a 9:16 clip in the component.
+16. **A hero video earns its place only by showing the product working.** A silent four-to-eight-second loop of the real interface doing one clear thing with real data is the most convincing element a marketing page can carry. Atmosphere is not: people at desks, abstract shapes, drone footage and anything stock are decoration paying a real performance cost, and a still would say the same thing faster. Keep it under about 2MB, ship AV1 or HEVC with an H.264 fallback, and make sure the poster rather than the video is the LCP element. Under `prefers-reduced-motion` or a saved-data connection, the poster is the whole hero. Check: describe the video in one sentence; if that sentence does not mention the product doing something, use a still.
 
 ### Cheat sheet
 
