@@ -1,5 +1,5 @@
 ---
-description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, tables and dense data, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, audit UI, easing, spring, Motion, hover, focus ring, shadow, radius, modal, drawer, sheet, popover, tooltip, toast, form, input, button, icon, typography, contrast, empty state, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, design tokens, table, data grid, search, bulk actions, command palette, keyboard shortcut.
+description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, tables and dense data, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, audit UI, easing, spring, Motion, hover, focus ring, shadow, radius, modal, sheet, popover, toast, form, input, button, icon, contrast, empty state, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, design tokens, table, data grid, search, bulk actions, command palette, favicon, app icon, file upload, drag and drop, video player.
 globs: ["**/*.tsx", "**/*.ts", "**/*.jsx", "**/*.js", "**/*.css", "**/*.scss", "**/*.html", "**/*.mdx", "**/*.astro", "**/*.vue", "**/*.svelte"]
 alwaysApply: false
 ---
@@ -305,6 +305,10 @@ Inputs ≥ 16px on mobile, `-webkit-appearance: none`, never disable submit unti
 
 A dense tool is not a consumer app with smaller padding. Numbers right-align and go tabular so a magnitude is visible without reading; text left-aligns; nothing centres. Row height is a documented decision, and a professional table may sit between the 24px floor and the 40px pointer default where a consumer app may not. Headers stick and sort with `aria-sort`. Search debounces at 300ms and never replaces readable rows with a spinner. Active filters are visible chips with a count of what is hidden. Select-all means the page; "all 340" is a second explicit action. Bulk actions name the verb, the count and the noun. Arrows move, Space selects, Shift extends, single-key shortcuts never fire while someone is typing.
 
+### Files: uploading, attaching and downloading → the files-and-uploads reference below
+
+The drop zone is a convenience; the real `<input type="file">` behind a real label is the interface, because dragging is invisible, impossible on touch and unreachable by keyboard. Hide the input visually, never with `display: none`. Count drag depth or the highlight flickers on every child. Print the limits before they are hit, validate on selection and again on the server, and upload the valid files out of a mixed batch rather than rejecting all of them. Show the row with a local thumbnail before the network starts, because whether the right file was picked is knowable instantly. Progress in bytes per file, never a stuck 99%. Cancel aborts, failure keeps the file and offers Retry without re-picking, and paste is a real upload path. Downloads get a real name with a real extension.
+
 ### Overlays → the overlays reference below
 
 Modal, sheet, drawer, popover, tooltip, toast: enter, exit, focus, dismissal, and the paired-element rule. Sheet choreography with the 80ms content offset. Toast floor 5s with pause on hover. Prefer inline state over toasts for anything contextual.
@@ -312,6 +316,10 @@ Modal, sheet, drawer, popover, tooltip, toast: enter, exit, focus, dismissal, an
 ### Haptics and sound on the web → the haptics-and-sound reference below
 
 `navigator.vibrate` on `pointerdown` only (light 8ms, medium 15, heavy 25, error `[10, 40, 10]`); never on scroll, hover, load, or appearance. iOS Safari has no vibration API; a switch-input trick exists and is fragile. Sound is almost always wrong on the web: it ignores the ringer switch. Exceptions are opted-in tools (metronome, timer, game).
+
+### The favicon and app icon set → the app-icon-and-favicons reference below
+
+The smallest thing you will design and the one seen most often. Design it at 16px first, because everyone designs at 512 and scales down and that is why so many are grey smudges. One idea, never the wordmark. Greyscale and blur it, then put it in a row with the twenty favicons your users actually have open; if it disappears, the shape is the problem. A favicon fills its box and a home-screen icon does not, so they are different files. Never bake in rounded corners. `apple-touch-icon` must be opaque, because iOS composites transparency onto black. Maskable icons keep content inside the centre 80%. The SVG favicon can answer dark mode; `theme-color` is the colour of the top of the page, not the brand. Ship the ICO at the root anyway, because crawlers request it without reading your markup.
 
 ### Icons → the icons reference below
 
@@ -344,6 +352,10 @@ Budgets, the frame-killer ranking, `content-visibility`, prefetch on pointerdown
 ### Canvas and generated media → the canvas-and-media reference below
 
 When the product is the pixels, most of this skill's tooling stops working: the accessibility tree is empty, CSS reaches nothing, and the render loop is the real performance budget. Name the canvas with `role="img"` and a live label, put meaning in `aria-valuetext` rather than a raw number, and give every canvas-only action a real DOM control. Ask for `{ colorSpace: "display-p3" }` or wide-gamut values clamp silently, and remember an invalid `fillStyle` is a no-op that keeps the previous colour. Back the store at `devicePixelRatio`, stop the loop off screen and when hidden, restart from now, and check reduced motion in JS because CSS cannot reach a loop. One renderer for preview and export: if changing the export resolution does not change the pixel dimensions of the file, the export path is a lie.
+
+### Video and audio playback → the media-playback reference below
+
+A player is used in the dark, one-handed, on a train. The only defensible autoplay is `autoplay muted playsinline loop` with no controls, and even that shows a poster instead under Reduce Motion. Without `playsinline`, iOS takes the whole screen. Custom controls are a commitment to rebuild keyboard access, captions, playback rate, picture-in-picture and the OS media keys, so most products should style the container and keep the native ones. Space toggles when the player has focus and must not scroll the page. A 4px scrub line needs a 24px target, and seeking follows the finger linearly, never with a spring. Time is tabular. Buffering and paused look different. Captions are for the many people watching with the sound off. One thing plays at a time.
 
 ### Accessibility as polish → the accessibility reference below
 
@@ -1158,6 +1170,97 @@ useEffect(() => {
 - Ship a global kill switch and assume JavaScript animation is covered.
 - Ship a `role=` without its keyboard contract.
 
+<!-- references/app-icon-and-favicons.md -->
+
+## The favicon and app icon set
+
+Use this when a site or app needs its icon: the browser tab, the bookmark, the phone home screen when someone installs it, the tab strip with forty tabs open. Covers the design craft and the exact files to ship.
+
+The favicon is the smallest thing you will design and the one seen most often. At 16 pixels you have about two hundred and fifty pixels to work with, and a person picking your tab out of forty is not reading it, they are matching a shape and a colour.
+
+### Rules
+
+1. **Design it at 16px first, not at 512.** Everyone designs the big one and scales down, which is why so many favicons are a grey smudge. Start at 16, get it working, then scale up and add detail the larger sizes can carry. If the mark only works at 512 it is not a favicon, it is a logo. Check: render at 16 and look at it at real size on a real screen, not zoomed.
+2. **One idea, and never the wordmark.** A letter, a shape, or the one distinctive part of the mark. Company names do not survive the resolution, and a full logo lockup at 16px is a rectangle of mud. If the brand is genuinely a single letter, use it. Check: cover the site name and ask someone which tab is yours.
+3. **The silhouette test.** Convert to greyscale, blur by two pixels, and put it in a row with the twenty favicons your users actually have open: Gmail, GitHub, Notion, Slack, Google Docs. If it disappears, the problem is the shape, not the colour. Distinct silhouette first, colour second, detail last or never. Check: do exactly that, with real competitors.
+4. **A favicon fills its box; an app icon does not.** The browser gives a favicon no margin, so artwork with generous padding baked in renders tiny. Home-screen icons are the opposite and need their safe zone respected. These are different files for a reason; do not ship one for both. Check: put the favicon next to another site's in the same tab strip and compare optical size.
+5. **Never bake in rounded corners or a shadow.** Every platform masks the icon to its own shape, so a pre-rounded square gets rounded twice and shows a pale halo at the corners. Ship a full-bleed square. Check: install to a home screen on iOS and Android and look at the corners.
+6. **`apple-touch-icon` must be opaque.** iOS composites transparency onto black, so an icon with a transparent background that looked right on white becomes an unreadable dark square on the home screen. Paint the background. 180x180 covers every current device. Check: install to an iPhone home screen and look at it on a light wallpaper.
+7. **Maskable icons keep everything important inside the middle 80%.** Android crops to whatever shape the launcher wants, from a circle to a squircle, so a maskable icon needs a full-bleed background and its content inside a centred circle of 80% diameter. Ship it as a separate manifest entry with `purpose: "maskable"`; the same file cannot serve both purposes well. Check: preview it as a circle and confirm nothing important is clipped.
+8. **The SVG favicon can answer dark mode; the PNG cannot.** A `prefers-color-scheme` media query inside the SVG lets a dark-on-light mark flip for people using a dark browser chrome, which is the difference between visible and invisible in a dark tab strip. Check: switch the OS to dark and look at the tab.
+9. **`theme-color` is per scheme and it is not the brand colour by default.** It paints the browser chrome on Android and the Safari surround on iOS, so it should be the colour of the top of the page, not the logo. Two declarations, one per scheme. A brand purple bar above a white page looks like a mistake. Check: open on Android and iOS and see whether the seam is invisible.
+10. **Ship the ICO as well, and put it at the root.** `favicon.ico` at `/favicon.ico` is still requested directly by feed readers, crawlers, chat unfurlers and older browsers that never look at your markup. Make it a multi-size ICO holding 16, 32 and 48. Check: request `/favicon.ico` directly and confirm a 200.
+11. **The icon is not the OG image.** An open-graph card is 1200x630 and read at a glance in a feed, so it carries the name and usually the page's subject; the icon carries neither. Designing one from the other produces a bad version of both. Check: they are different files with different content.
+12. **A monochrome variant exists for the places colour is stripped.** Pinned tabs, some launchers, watch complications and print all render a single colour. A mark that is only legible because of a gradient has nothing left. Check: fill the shape with solid black and confirm it still reads.
+
+### Cheat sheet
+
+| File | Size | Notes |
+|---|---|---|
+| `/favicon.ico` | 16, 32, 48 in one file | At the document root, requested without markup |
+| `/icon.svg` | vector | Primary favicon; may carry a dark-mode query inside |
+| `/apple-touch-icon.png` | 180x180 | Opaque, full bleed, no rounded corners |
+| manifest `icons[]` | 192x192, 512x512 | `purpose: "any"` |
+| manifest maskable | 512x512 | `purpose: "maskable"`, content inside the centre 80% |
+| `theme-color` | one per scheme | The colour of the top of the page, not the brand |
+| OG image | 1200x630 | A different design, not the icon scaled up |
+
+### Code
+
+```html
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- The seam between chrome and page, not the logo colour. -->
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141414" media="(prefers-color-scheme: dark)">
+```
+
+```svg
+<!-- icon.svg: one mark that survives a dark tab strip. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .mark { fill: #141414 }
+    @media (prefers-color-scheme: dark) { .mark { fill: #faf9f7 } }
+  </style>
+  <path class="mark" d="..."/>
+</svg>
+```
+
+```json
+{
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+```
+
+In a Next.js App Router project the same set is produced by file convention: `app/favicon.ico`, `app/icon.svg`, and `app/apple-icon.png`, which are emitted with the right `<link>` tags automatically. Do not hand-write the tags as well or they ship twice.
+
+### Checks
+
+- Render at 16px on a real screen at real size, next to twenty real favicons.
+- Greyscale and blur by 2px; the silhouette is still yours.
+- Request `/favicon.ico` directly; it returns 200.
+- Install to an iPhone home screen on a light wallpaper; the icon is opaque and the corners are clean.
+- Preview the maskable icon as a circle; nothing important is clipped.
+- Switch the OS to dark; the tab icon is still visible.
+- Fill the mark with solid black; it still reads.
+
+### Do not
+
+- Design at 512 and scale down.
+- Put the company name in it.
+- Bake in rounded corners, a border, or a drop shadow.
+- Ship a transparent `apple-touch-icon`.
+- Use one PNG for the favicon, the touch icon and the maskable icon.
+- Set `theme-color` to the brand colour without looking at the seam.
+- Reuse the OG image as the icon or the icon as the OG image.
+
 <!-- references/buttons-and-controls.md -->
 
 ## Buttons and controls
@@ -1947,6 +2050,122 @@ thead th {
 - Fire a single-key shortcut while someone is typing.
 - Hide active filters behind a panel.
 
+<!-- references/files-and-uploads.md -->
+
+## Files: uploading, attaching and downloading
+
+Use this when anything leaves or enters the page as a file: an avatar, an attachment, a bulk import, a generated export, a drag from the desktop. Form fields in general are in `references/forms-and-inputs.md`; progress semantics in `references/states.md`.
+
+File handling is where interfaces most often forget that the person is holding something they care about and cannot easily replace.
+
+### Rules
+
+1. **The drop zone is a convenience; the button is the interface.** Drag and drop is invisible, impossible on touch, and unavailable to keyboard users. Always ship a real `<input type="file">` behind a real label, then add dropping on top. Check: upload a file using only the keyboard.
+2. **Style the label, never the input.** `<input type="file">` cannot be styled consistently and its button text cannot be changed. Visually hide the input, keep it focusable, and let a `<label>` carry the design. Never `display: none`, which removes it from the tab order. Check: tab to the control; a focus ring appears on the visible element.
+3. **The whole drop target highlights, and it highlights on `dragenter`, not `dragover`.** Track a counter across `dragenter` and `dragleave`, because entering a child element fires a leave on the parent and makes a naive implementation flicker. Cancel `dragover` or the browser opens the file instead. Check: drag slowly across a drop zone containing text and buttons; the highlight does not flash.
+4. **Validate before uploading, and say the limit before it is hit.** Type and size are checked on selection, and the accepted types and maximum size are printed next to the control, not revealed by an error. `accept` on the input filters the picker but guarantees nothing; check again in JavaScript, and again on the server. Check: pick a 40MB file into a 10MB field; you are told immediately, without a request.
+5. **Rejection is per file and keeps the rest.** Dropping ten files where two are the wrong type uploads eight and explains the two. Never discard the whole batch, and never fail silently on the ones you skipped. Check: drop a mixed batch; eight upload and two are named with reasons.
+6. **Show the file before it finishes.** The row appears immediately with the real name, the real size and a thumbnail generated locally from the `File` object, with progress on that row. The person needs to see that the right file was picked, which is knowable instantly and has nothing to do with the network. Check: pick a large image on a throttled connection; the thumbnail is there before the upload is.
+7. **Progress per file, and a total only if there are more than about three.** A single indeterminate spinner for a batch tells nobody whether anything is happening. Bytes are the honest unit; a percentage that sits at 99 while the server processes is a lie, so switch the label to "Processing" when the transfer is done but the work is not. Check: watch a large upload; the label changes when the bytes finish.
+8. **Cancel is available for the whole of a long upload.** An `AbortController` on the request and a real Cancel on the row. Anything that can take thirty seconds needs a way out that is not closing the tab. Check: cancel a large upload mid-flight; the request stops and the row is removed.
+9. **Remove is not the same as cancel, and neither is undo.** Cancel stops an upload in progress. Remove deletes something already uploaded and should be undoable for a few seconds. If removal is genuinely permanent, say so on the button rather than in a dialog after. Check: the labels for the two states are different words.
+10. **Failure keeps the file and offers Retry.** A failed upload leaves the row in place, in an error state, with the reason and a retry that does not require picking the file again. The browser still holds the `File`; making someone find it in Finder a second time is the whole failure. Check: kill the network mid-upload; Retry works without reopening the picker.
+11. **Paste is an upload path.** Cmd-V with an image on the clipboard is how most screenshots enter a product. Handle `paste` on the relevant surface and read `event.clipboardData.files`. Check: take a screenshot and paste it into the composer.
+12. **Never block paste or drop on a text field that accepts files.** And never intercept a drag that started inside the page as if it were an external file. Check: drag a selection of text within the page; no upload starts.
+13. **Reserve the row's height before the thumbnail loads.** A list of attachments that reflows as each preview decodes is layout shift in its most avoidable form. Fixed row height, aspect-ratio box for the preview. Check: throttle and watch the list; nothing moves.
+14. **A download names itself and its type.** A real filename with a real extension, and a `Content-Disposition` or a `download` attribute that agrees with it. `export.bin` or a UUID is a file nobody will find again. Include a date in anything periodic. Check: download and look in the Downloads folder a week later; you can tell what it is.
+15. **A generated export is a state, not a spinner on a button.** Anything over about two seconds gets progress where the result will land, a label, and permission to leave the page. Over ten seconds it notifies on completion rather than holding someone hostage. Check: export a large file and navigate away; you are told when it is ready.
+16. **The file input is labelled for a screen reader and announces what happened.** The control has a name, the selected file is announced, and progress goes through a live region rather than only a visual bar. Check: run the whole flow with a screen reader; you know what was selected, how far it got, and that it finished.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Primary control | Real `<input type="file">` behind a `<label>`; drop zone added on top |
+| Hiding the input | Visually hidden and focusable, never `display: none` |
+| Drag highlight | Counter across `dragenter` / `dragleave`; cancel `dragover` |
+| Limits | Printed next to the control before anything is picked |
+| Validation | On selection, in JS, and again on the server. `accept` is a hint |
+| Mixed batch | Upload what is valid, name what was not |
+| Preview | Local thumbnail from the `File`, before the upload starts |
+| Progress | Per file; a total past about three. Bytes, not a stuck 99% |
+| Cancel | `AbortController`, available for the whole upload |
+| Failure | Row stays, reason shown, Retry without re-picking |
+| Paste | `paste` handler reading `clipboardData.files` |
+| Download name | Real name, real extension, date if periodic |
+
+### Code
+
+```tsx
+// dragenter fires again on every child, so count depth or the highlight flickers.
+const depth = useRef(0);
+const [over, setOver] = useState(false);
+
+const zone = {
+  onDragEnter: (e: React.DragEvent) => {
+    e.preventDefault();
+    depth.current += 1;
+    setOver(true);
+  },
+  onDragLeave: () => {
+    depth.current -= 1;
+    if (depth.current === 0) setOver(false);
+  },
+  // Without this the browser navigates to the file instead of dropping it.
+  onDragOver: (e: React.DragEvent) => e.preventDefault(),
+  onDrop: (e: React.DragEvent) => {
+    e.preventDefault();
+    depth.current = 0;
+    setOver(false);
+    accept([...e.dataTransfer.files]);
+  },
+};
+
+// The row exists before the network does, so the person can see they picked right.
+function accept(files: File[]) {
+  const [ok, bad] = partition(files, (f) => f.size <= MAX && TYPES.includes(f.type));
+  setRows((r) => [...r, ...ok.map((f) => ({ file: f, url: URL.createObjectURL(f), sent: 0 }))]);
+  if (bad.length) setSkipped(bad.map((f) => `${f.name}: ${reason(f)}`));
+  ok.forEach(upload);
+}
+```
+
+```css
+/* Focusable, operable, invisible. Never display: none. */
+.file-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap;
+}
+.file-input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+```
+
+### Checks
+
+- Upload a file using only the keyboard.
+- Drag slowly across a drop zone full of children; the highlight does not flicker.
+- Pick a file over the size limit; you are told at once, with no request.
+- Drop a mixed batch; the valid ones upload and the rest are named with reasons.
+- Pick a large image on a throttled connection; the thumbnail appears before the upload finishes.
+- Cancel mid-upload; the request actually aborts.
+- Kill the network mid-upload; Retry works without reopening the picker.
+- Paste a screenshot into the composer.
+- Download an export and identify it from its filename a week later.
+- Run the whole flow with a screen reader.
+
+### Do not
+
+- Ship a drop zone with no button.
+- `display: none` the file input.
+- Trust `accept` as validation.
+- Throw away a whole batch because one file was wrong.
+- Show a single indeterminate spinner for a multi-file upload.
+- Sit at 99% while the server works.
+- Make someone re-pick a file after a failed upload.
+- Name a download `export.bin` or a UUID.
+
 <!-- references/forms-and-inputs.md -->
 
 ## Forms and inputs
@@ -2425,6 +2644,8 @@ Pair with `references/typography.md` for measure and `references/surfaces-and-de
 16. **Clipping rules.** Nothing critical sits at the bottom of a resizable pane, below the fold of a fixed-height modal, or under the on-screen keyboard. If a modal's content scrolls, its action row does not.
 17. **Radii are concentric.** `outerRadius = innerRadius + padding`. A card at 16px with 8px padding holds children at 8px. Above 24px of padding, treat the layers as separate surfaces and stop calculating. See `references/surfaces-and-depth.md`.
 18. **Design for two items and for two hundred.** Every list, grid, and tag row is checked empty, with one item, with two, and with an overflowing count. A 60-character title and a four-line description must fit.
+19. **A page that anyone will print or save as PDF needs a print stylesheet, and most content pages do.** Receipts, invoices, itineraries, recipes, tickets and documentation all get printed by someone. `@media print`: force a light ground regardless of the theme, because a dark-mode page prints as a solid block of ink; drop the navigation, the cookie bar, the chat widget and anything sticky; set `break-inside: avoid` on cards, tables and figures so nothing is sliced across a page; and expand link destinations with `a[href^="http"]::after { content: " (" attr(href) ")" }` in long-form only, where a URL nobody can click is otherwise lost. Check: print to PDF in dark mode and read the result.
+20. **Print reveals what is genuinely fixed.** Anything `position: fixed` renders once, at the top, over the content. This is the usual reason a printed page has a navigation bar stamped across the middle of it. Set `position: static` for print on every fixed element rather than hiding them one at a time as they are discovered. Check: print a long page and look at every page break, not just the first.
 
 ### Cheat sheet
 
@@ -2677,6 +2898,120 @@ Active voice, sentence case, no filler. Each written element does exactly one jo
 - Number things that are not a sequence.
 - Print the URL on the OG image.
 - Introduce a display face the project does not already own.
+
+<!-- references/media-playback.md -->
+
+## Video and audio playback
+
+Use this when the page plays something: a hero clip, a product demo, a podcast, a lesson, a user's upload. `<canvas>` rendering and export are in `references/canvas-and-media.md`; scroll behaviour in `references/scroll.md`.
+
+A player is a control surface that people use in the dark, one-handed, on a train, while doing something else. Almost every rule below exists because of that.
+
+### Rules
+
+1. **Autoplay only when it is silent, decorative and short.** `autoplay muted playsinline loop` with no controls is a moving image, not a video, and is the only autoplay that is defensible. Anything with sound waits for a real gesture. Browsers will block it anyway; the point is not to design around a block you deserved. Check: load the page with the sound on; nothing makes a noise.
+2. **A background video is decoration and must be removable.** Under `prefers-reduced-motion: reduce`, show the poster and do not play. Under a metered or saved-data connection, do the same. Check: turn on Reduce Motion; the hero is a still image and the page is not broken.
+3. **`playsinline` or iOS takes over the screen.** Without it, iPhone Safari opens every video full screen on play, which destroys any layout that had the video as part of a composition. Check: play on an iPhone; the video stays where it was.
+4. **The poster is a real frame, sized to the video, and preloaded.** Without a poster the element is a black rectangle until the first frame decodes. With a poster of the wrong aspect ratio it letterboxes and shifts. Set `width`, `height` and `aspect-ratio` so the box is reserved before anything loads. Check: throttle to slow 3G; the space is held and a real image is in it.
+5. **Custom controls are a commitment to rebuild all of them.** The native ones already give you keyboard access, captions, playback rate, picture-in-picture, AirPlay and the system media keys. If you replace them, you owe every one of those. Most products should style the container and keep `controls`. Check: with custom controls, use the player entirely from the keyboard, then check the OS media keys still work.
+6. **Space plays and pauses, arrows seek, and focus decides which.** Space is the universal play toggle when the player has focus, and must not scroll the page instead. Left and right seek five seconds, up and down change volume, `f` is full screen, `m` is mute. None of them fire while focus is in a text field. Check: focus the player and press space; it plays and the page does not scroll.
+7. **The scrub bar is bigger than it looks and shows where you would land.** A 4px line is a 4px line to look at and a 24px target to hit, expanded with a pseudo-element. Dragging shows the timestamp, and on video a thumbnail of that frame if you have one. Seeking follows the finger linearly, never with a spring. Check: scrub on a phone with a thumb; you can land on a second.
+8. **Time is shown as elapsed and total, in tabular figures, and does not jump.** `font-variant-numeric: tabular-nums` or the layout twitches every second. Show remaining only if the product is about remaining. Check: watch the timer for ten seconds; nothing moves except the digits.
+9. **Buffering is not the same as paused, and the control must say which.** A spinner over the play button when the network stalls, and the play state itself unchanged. A player that silently shows a play triangle while it is actually buffering teaches people to press it twice. Check: throttle mid-playback; the state is legible.
+10. **Captions are a feature, not an accessibility checkbox.** Ship a real `<track kind="captions">`, default it on where the content is speech-led, and style the cue background so it is readable over any frame. Most people watching in public have the sound off. Check: play with the sound off and follow the content.
+11. **Audio deserves a waveform or nothing, never a fake one.** A generated waveform that does not match the audio is a lie about the content and people do use it to navigate. If you cannot compute it, show a plain progress bar. Check: compare a loud passage to the waveform.
+12. **One thing plays at a time.** Starting one player pauses every other on the page. Two audio sources overlapping is never what anyone wanted. Check: start a second player; the first stops.
+13. **Remember the position for anything over a few minutes.** Long-form content resumes where it was left, per item, and says that it is resuming with a way to start over. Check: leave halfway, come back tomorrow, and you are offered the right thing.
+14. **Never animate the player's own chrome on a timer.** Controls fade out after about three seconds of no pointer movement and return instantly on any movement, keypress or touch. They never fade while the pointer is over them, and never while paused. Check: pause and wait; the controls stay.
+15. **Reserve the aspect ratio and never letterbox by accident.** `aspect-ratio` on the container with `object-fit: contain` for unknown sources and `cover` only where cropping is intended. Vertical video in a horizontal box with `cover` cuts people's heads off. Check: play a 9:16 clip in the component.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Defensible autoplay | `autoplay muted playsinline loop`, no controls, decorative only |
+| Reduced motion | Poster only, no playback |
+| iOS | `playsinline`, always |
+| Poster | Real frame, correct aspect ratio, box reserved with `aspect-ratio` |
+| Controls | Keep native unless you will rebuild keyboard, captions, rate, PiP, media keys |
+| Keys | Space toggles, arrows seek 5s and volume, `f` full screen, `m` mute |
+| Scrub target | 24px minimum, expanded from a 4px visual |
+| Seeking | Linear, follows the finger, never a spring |
+| Time | Tabular figures, elapsed and total |
+| Captions | Real `<track>`, on by default for speech-led content |
+| Concurrency | One player at a time |
+| Controls fade | ~3s of no input, never while paused or hovered |
+
+### Code
+
+```html
+<!-- Decorative hero: silent, inline, and it holds its box before it loads. -->
+<video
+  class="hero-video"
+  autoplay muted loop playsinline
+  poster="/hero-poster.avif"
+  width="1600" height="900"
+></video>
+```
+
+```css
+.hero-video { aspect-ratio: 16 / 9; width: 100%; object-fit: cover; }
+
+/* Decoration is not worth a autoplaying video to someone who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+  .hero-poster { display: block; }
+}
+
+/* A 4px line to look at, a 24px target to hit. */
+.scrubber { position: relative; height: 4px; }
+.scrubber::before { content: ""; position: absolute; inset: -10px 0; }
+```
+
+```ts
+// Space belongs to the player when the player has focus, and to the page otherwise.
+player.addEventListener("keydown", (e) => {
+  const t = e.target as HTMLElement;
+  if (t.closest("input, textarea, [contenteditable]")) return;
+  if (e.key === " ") { e.preventDefault(); video.paused ? video.play() : video.pause(); }
+  if (e.key === "ArrowRight") video.currentTime += 5;
+  if (e.key === "ArrowLeft") video.currentTime -= 5;
+});
+
+// Two things playing at once is never what anyone wanted.
+video.addEventListener("play", () => {
+  document.querySelectorAll("video, audio").forEach((el) => {
+    if (el !== video) (el as HTMLMediaElement).pause();
+  });
+});
+```
+
+### Checks
+
+- Load the page with the sound up; nothing makes a noise.
+- Turn on Reduce Motion; the hero is a still and the page still works.
+- Play on an iPhone; the video does not go full screen.
+- Throttle to slow 3G; the box is reserved and a real poster is in it.
+- Operate the whole player from the keyboard, and confirm the OS media keys work.
+- Focus the player and press space; it plays and the page does not scroll.
+- Scrub with a thumb on a phone; you can land on a specific second.
+- Throttle mid-playback; buffering and paused look different.
+- Watch with the sound off and follow it from the captions.
+- Start a second player; the first stops.
+- Play a 9:16 clip in the component and check nothing is cropped off.
+
+### Do not
+
+- Autoplay anything with sound.
+- Omit `playsinline`.
+- Ship a video with no poster and no reserved box.
+- Replace the native controls without rebuilding keyboard, captions and media keys.
+- Let space scroll the page while the player has focus.
+- Put a 4px hit target on the scrubber.
+- Animate seeking with a spring.
+- Fake a waveform.
+- Let two things play at once.
+- Fade the controls out while paused.
 
 <!-- references/motion.md -->
 

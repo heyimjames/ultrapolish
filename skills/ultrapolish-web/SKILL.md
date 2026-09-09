@@ -1,6 +1,6 @@
 ---
 name: ultrapolish-web
-description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, tables and dense data, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, audit UI, easing, spring, Motion, hover, focus ring, shadow, radius, modal, drawer, sheet, popover, tooltip, toast, form, input, button, icon, typography, contrast, empty state, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, design tokens, table, data grid, search, bulk actions, command palette, keyboard shortcut.
+description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, tables and dense data, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, audit UI, easing, spring, Motion, hover, focus ring, shadow, radius, modal, sheet, popover, toast, form, input, button, icon, contrast, empty state, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, design tokens, table, data grid, search, bulk actions, command palette, favicon, app icon, file upload, drag and drop, video player.
 ---
 
 # ultrapolish-web
@@ -304,6 +304,10 @@ Inputs ≥ 16px on mobile, `-webkit-appearance: none`, never disable submit unti
 
 A dense tool is not a consumer app with smaller padding. Numbers right-align and go tabular so a magnitude is visible without reading; text left-aligns; nothing centres. Row height is a documented decision, and a professional table may sit between the 24px floor and the 40px pointer default where a consumer app may not. Headers stick and sort with `aria-sort`. Search debounces at 300ms and never replaces readable rows with a spinner. Active filters are visible chips with a count of what is hidden. Select-all means the page; "all 340" is a second explicit action. Bulk actions name the verb, the count and the noun. Arrows move, Space selects, Shift extends, single-key shortcuts never fire while someone is typing.
 
+### Files: uploading, attaching and downloading → `references/files-and-uploads.md`
+
+The drop zone is a convenience; the real `<input type="file">` behind a real label is the interface, because dragging is invisible, impossible on touch and unreachable by keyboard. Hide the input visually, never with `display: none`. Count drag depth or the highlight flickers on every child. Print the limits before they are hit, validate on selection and again on the server, and upload the valid files out of a mixed batch rather than rejecting all of them. Show the row with a local thumbnail before the network starts, because whether the right file was picked is knowable instantly. Progress in bytes per file, never a stuck 99%. Cancel aborts, failure keeps the file and offers Retry without re-picking, and paste is a real upload path. Downloads get a real name with a real extension.
+
 ### Overlays → `references/overlays.md`
 
 Modal, sheet, drawer, popover, tooltip, toast: enter, exit, focus, dismissal, and the paired-element rule. Sheet choreography with the 80ms content offset. Toast floor 5s with pause on hover. Prefer inline state over toasts for anything contextual.
@@ -311,6 +315,10 @@ Modal, sheet, drawer, popover, tooltip, toast: enter, exit, focus, dismissal, an
 ### Haptics and sound on the web → `references/haptics-and-sound.md`
 
 `navigator.vibrate` on `pointerdown` only (light 8ms, medium 15, heavy 25, error `[10, 40, 10]`); never on scroll, hover, load, or appearance. iOS Safari has no vibration API; a switch-input trick exists and is fragile. Sound is almost always wrong on the web: it ignores the ringer switch. Exceptions are opted-in tools (metronome, timer, game).
+
+### The favicon and app icon set → `references/app-icon-and-favicons.md`
+
+The smallest thing you will design and the one seen most often. Design it at 16px first, because everyone designs at 512 and scales down and that is why so many are grey smudges. One idea, never the wordmark. Greyscale and blur it, then put it in a row with the twenty favicons your users actually have open; if it disappears, the shape is the problem. A favicon fills its box and a home-screen icon does not, so they are different files. Never bake in rounded corners. `apple-touch-icon` must be opaque, because iOS composites transparency onto black. Maskable icons keep content inside the centre 80%. The SVG favicon can answer dark mode; `theme-color` is the colour of the top of the page, not the brand. Ship the ICO at the root anyway, because crawlers request it without reading your markup.
 
 ### Icons → `references/icons.md`
 
@@ -343,6 +351,10 @@ Budgets, the frame-killer ranking, `content-visibility`, prefetch on pointerdown
 ### Canvas and generated media → `references/canvas-and-media.md`
 
 When the product is the pixels, most of this skill's tooling stops working: the accessibility tree is empty, CSS reaches nothing, and the render loop is the real performance budget. Name the canvas with `role="img"` and a live label, put meaning in `aria-valuetext` rather than a raw number, and give every canvas-only action a real DOM control. Ask for `{ colorSpace: "display-p3" }` or wide-gamut values clamp silently, and remember an invalid `fillStyle` is a no-op that keeps the previous colour. Back the store at `devicePixelRatio`, stop the loop off screen and when hidden, restart from now, and check reduced motion in JS because CSS cannot reach a loop. One renderer for preview and export: if changing the export resolution does not change the pixel dimensions of the file, the export path is a lie.
+
+### Video and audio playback → `references/media-playback.md`
+
+A player is used in the dark, one-handed, on a train. The only defensible autoplay is `autoplay muted playsinline loop` with no controls, and even that shows a poster instead under Reduce Motion. Without `playsinline`, iOS takes the whole screen. Custom controls are a commitment to rebuild keyboard access, captions, playback rate, picture-in-picture and the OS media keys, so most products should style the container and keep the native ones. Space toggles when the player has focus and must not scroll the page. A 4px scrub line needs a 24px target, and seeking follows the finger linearly, never with a spring. Time is tabular. Buffering and paused look different. Captions are for the many people watching with the sound off. One thing plays at a time.
 
 ### Accessibility as polish → `references/accessibility.md`
 

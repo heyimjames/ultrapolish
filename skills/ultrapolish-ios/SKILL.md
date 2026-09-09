@@ -1,6 +1,6 @@
 ---
 name: ultrapolish-ios
-description: Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, microcopy, empty state, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table.
+description: Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, sheet, detent, haptic, sensoryFeedback, button, CTA, SF Symbol, microcopy, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table, app icon, notifications, badge, AVPlayer, Now Playing.
 ---
 
 # ultrapolish-ios
@@ -311,6 +311,10 @@ Haptics are punctuation, a full stop, not an exclamation mark. Budget them: one 
 
 Three to five cues, each under 200ms, each with its own volume (celebrate 0.5, success 0.34). `.ambient` category with `.mixWithOthers` so the Ring/Silent switch is respected and music never ducks. Within 10ms of its haptic. Always a settings toggle. Synthesised sound (filtered noise + ring + thud with per-play randomisation) costs zero bundle weight and never repeats exactly.
 
+### The app icon → `references/app-icon.md`
+
+The only part of the product seen before anyone decides to open it. Design at 60pt and check at 29pt; delivering a 1024 master nobody ever looked at small is how a good mark becomes a texture in Settings. One idea, no text, no transparency, no baked corners or gloss, because the system applies the mask and on iOS 26 the material too. Author all three appearances: the tinted one is generated from a greyscale reading, so a flat single-colour icon collapses and a design separated only by hue loses everything. The dark variant is not the light one inverted. Test on a photographic wallpaper next to Mail and Settings, matching their optical fill rather than a margin you invented, and make the first frame of the app share the icon's colour so the launch zoom is continuous.
+
 ### Icons and SF Symbols → `references/icons-and-symbols.md`
 
 One family, one stroke weight, matched to the adjacent text weight. `.symbolEffect(.replace)` for state swaps. Pick 3–5 symbol moments per app and pair each with a haptic. Do morph, do not breathe: `.breathe` and `.pulse` on idle icons are the number-one AI-template tell. Never mix SF Symbols and a custom set in the same row.
@@ -331,6 +335,10 @@ Value in three seconds. Four or five rooms, one purpose each: value moment, the 
 
 Value before wall. Real localised price always on screen, both total and per-month. One paid tier (or annual plus monthly). A full-size Close from frame one. Exactly one CTA. Placement: after a value moment, at a metered limit, in onboarding only after a value preview, never on cold launch, never to an existing subscriber. The honesty test: would this still work if the person understood it completely? Nothing on a paywall pulses, throbs, or counts down.
 
+### Notifications → `references/notifications.md`
+
+The only part of a product that appears on someone's screen without being asked for. Never request permission at launch: prime it yourself, after they have done something that implies wanting it, and use `.provisional` for anything non-urgent so it costs no prompt at all. The first line is the whole notification, so front-load the noun and the change and never lead with the app's name. Almost nothing is `.timeSensitive`. Group with a `threadIdentifier` or the app becomes a wall. Put the two likely responses on the notification itself. The badge counts things needing action or it does not exist. Reuse the identifier to update in place rather than stacking five notifications about one order, suppress what is already on screen, cancel reminders whose reason has gone, and give settings a toggle per category rather than one switch for everything.
+
 ### Widgets, Live Activities and Dynamic Island → `references/widgets-and-live-activities.md`
 
 Content margins, not safe areas (16pt default, 11 tight). `ContainerRelativeShape()` for every nested corner; never a literal radius. `.containerBackground(for: .widget)` is required. Three render modes are three designs: `.accented` renders from alpha and ignores hue; `.vibrant` hierarchy uses opaque greys, never white at opacity. 11pt floor, no Light weights. A widget's only life is a wash healing across the day and a number rolling when it changes. Dynamic Island compact regions hold ≤ 5 characters; the minimal is a 22×22pt glyph. `Text(timerInterval:)` ticks for free. No confetti, no breathing, no faked press states.
@@ -338,6 +346,10 @@ Content margins, not safe areas (16pt default, 11 tight). `ContainerRelativeShap
 ### Liquid Glass (iOS 26) → `references/liquid-glass.md`
 
 Glass for floating controls only. Tint the one primary action. `.interactive()` instead of your own scale style. Never glass on glass; `GlassEffectContainer` for overlapping surfaces. Content (cards, rows, bubbles) stays solid or gets a flat translucent fill; a refractive card behind a paragraph hurts legibility. Wrap in availability with a material fallback. Do not put glass on the app icon.
+
+### Video and audio playback → `references/media-playback.md`
+
+Playback is where the app stops being alone on the device: it shares the audio session, the Lock Screen, Control Centre, CarPlay and headphone buttons. Declare `.playback` for content and `.ambient` with `.mixWithOthers` for interface sound, or the app cuts someone's podcast to play a click. Fill in `MPNowPlayingInfoCenter` or the Lock Screen is blank. Wire only the remote commands that work and disable the rest. Headphones unplugged means pause; a call ending means resume only if the system says so. Scrubbing follows the finger linearly with a `.selection` haptic on markers, not pixels. Time is `.monospacedDigit()` at a reserved width. Buffering does not look like paused. `AVPlayerViewController` unless you will rebuild PiP, AirPlay and subtitles yourself.
 
 ### Accessibility as polish → `references/accessibility.md`
 

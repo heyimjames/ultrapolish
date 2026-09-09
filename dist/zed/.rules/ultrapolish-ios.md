@@ -1,6 +1,6 @@
 # ultrapolish-ios: universal polish for Swift / SwiftUI apps
 
-_Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, microcopy, empty state, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table._
+_Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, sheet, detent, haptic, sensoryFeedback, button, CTA, SF Symbol, microcopy, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table, app icon, notifications, badge, AVPlayer, Now Playing._
 
 ---
 
@@ -312,6 +312,10 @@ Haptics are punctuation, a full stop, not an exclamation mark. Budget them: one 
 
 Three to five cues, each under 200ms, each with its own volume (celebrate 0.5, success 0.34). `.ambient` category with `.mixWithOthers` so the Ring/Silent switch is respected and music never ducks. Within 10ms of its haptic. Always a settings toggle. Synthesised sound (filtered noise + ring + thud with per-play randomisation) costs zero bundle weight and never repeats exactly.
 
+### The app icon → the app-icon reference below
+
+The only part of the product seen before anyone decides to open it. Design at 60pt and check at 29pt; delivering a 1024 master nobody ever looked at small is how a good mark becomes a texture in Settings. One idea, no text, no transparency, no baked corners or gloss, because the system applies the mask and on iOS 26 the material too. Author all three appearances: the tinted one is generated from a greyscale reading, so a flat single-colour icon collapses and a design separated only by hue loses everything. The dark variant is not the light one inverted. Test on a photographic wallpaper next to Mail and Settings, matching their optical fill rather than a margin you invented, and make the first frame of the app share the icon's colour so the launch zoom is continuous.
+
 ### Icons and SF Symbols → the icons-and-symbols reference below
 
 One family, one stroke weight, matched to the adjacent text weight. `.symbolEffect(.replace)` for state swaps. Pick 3–5 symbol moments per app and pair each with a haptic. Do morph, do not breathe: `.breathe` and `.pulse` on idle icons are the number-one AI-template tell. Never mix SF Symbols and a custom set in the same row.
@@ -332,6 +336,10 @@ Value in three seconds. Four or five rooms, one purpose each: value moment, the 
 
 Value before wall. Real localised price always on screen, both total and per-month. One paid tier (or annual plus monthly). A full-size Close from frame one. Exactly one CTA. Placement: after a value moment, at a metered limit, in onboarding only after a value preview, never on cold launch, never to an existing subscriber. The honesty test: would this still work if the person understood it completely? Nothing on a paywall pulses, throbs, or counts down.
 
+### Notifications → the notifications reference below
+
+The only part of a product that appears on someone's screen without being asked for. Never request permission at launch: prime it yourself, after they have done something that implies wanting it, and use `.provisional` for anything non-urgent so it costs no prompt at all. The first line is the whole notification, so front-load the noun and the change and never lead with the app's name. Almost nothing is `.timeSensitive`. Group with a `threadIdentifier` or the app becomes a wall. Put the two likely responses on the notification itself. The badge counts things needing action or it does not exist. Reuse the identifier to update in place rather than stacking five notifications about one order, suppress what is already on screen, cancel reminders whose reason has gone, and give settings a toggle per category rather than one switch for everything.
+
 ### Widgets, Live Activities and Dynamic Island → the widgets-and-live-activities reference below
 
 Content margins, not safe areas (16pt default, 11 tight). `ContainerRelativeShape()` for every nested corner; never a literal radius. `.containerBackground(for: .widget)` is required. Three render modes are three designs: `.accented` renders from alpha and ignores hue; `.vibrant` hierarchy uses opaque greys, never white at opacity. 11pt floor, no Light weights. A widget's only life is a wash healing across the day and a number rolling when it changes. Dynamic Island compact regions hold ≤ 5 characters; the minimal is a 22×22pt glyph. `Text(timerInterval:)` ticks for free. No confetti, no breathing, no faked press states.
@@ -339,6 +347,10 @@ Content margins, not safe areas (16pt default, 11 tight). `ContainerRelativeShap
 ### Liquid Glass (iOS 26) → the liquid-glass reference below
 
 Glass for floating controls only. Tint the one primary action. `.interactive()` instead of your own scale style. Never glass on glass; `GlassEffectContainer` for overlapping surfaces. Content (cards, rows, bubbles) stays solid or gets a flat translucent fill; a refractive card behind a paragraph hurts legibility. Wrap in availability with a material fallback. Do not put glass on the app icon.
+
+### Video and audio playback → the media-playback reference below
+
+Playback is where the app stops being alone on the device: it shares the audio session, the Lock Screen, Control Centre, CarPlay and headphone buttons. Declare `.playback` for content and `.ambient` with `.mixWithOthers` for interface sound, or the app cuts someone's podcast to play a click. Fill in `MPNowPlayingInfoCenter` or the Lock Screen is blank. Wire only the remote commands that work and disable the rest. Headphones unplugged means pause; a call ending means resume only if the system says so. Scrubbing follows the finger linearly with a `.selection` haptic on markers, not pixels. Time is `.monospacedDigit()` at a reserved width. Buffering does not look like paused. `AVPlayerViewController` unless you will rebuild PiP, AirPlay and subtitles yourself.
 
 ### Accessibility as polish → the accessibility reference below
 
@@ -1187,6 +1199,75 @@ HStack { icon; VStack { title; subtitle }; Spacer(); amount }
 - Rely on the default reading order of a custom card.
 - Use `accessibilityHidden` to hide something because it was awkward to label.
 - Announce every keystroke or every scroll position.
+
+<!-- references/app-icon.md -->
+
+## The app icon
+
+Use this when designing, reviewing, or shipping an app icon, including the light, dark and tinted variants, alternate icons, and how the icon relates to the rest of the product. Liquid Glass rendering of the icon is in `references/liquid-glass.md`.
+
+The icon is the only part of the product a person sees before they decide whether to open it, and after installation it competes with sixty others on a wallpaper you did not choose.
+
+### Rules
+
+1. **Design at 60pt, check at 29pt, deliver at 1024.** The Home Screen is 60pt and Settings is 29pt. An icon designed at 1024 and never looked at small is how a perfectly good mark becomes an unreadable texture in a Settings list. Check: render the 1024 master down to 29pt and look at it at real size on a device, not on a monitor.
+2. **One idea, and no text.** No company name, no tagline, no version, no "beta" ribbon. The only defensible letterform is a brand that genuinely is a letter. Words do not survive 29pt, and the App Store already prints the name directly underneath. Check: cover the label and ask someone what the app does.
+3. **No transparency, no rounded corners, no baked-in gloss.** A 1024x1024 opaque square. The system applies the mask, and on iOS 26 it applies the material as well, so a highlight painted into the artwork renders under a second highlight. Check: open the asset; the alpha channel is fully opaque and the corners are square.
+4. **Ship the dark and tinted variants deliberately.** iOS 18 and later render three appearances. The tinted one is generated from a greyscale interpretation of the artwork, so a flat single-colour icon collapses into a featureless blob, and a design that relies on hue to separate its parts loses all of them. Give the mark internal luminance contrast so it survives. Check: view all three in Xcode's preview and in Settings; the tinted one is still recognisably the same icon.
+5. **The dark variant is not the light one on a dark background.** Reduce the brightness of large light areas rather than inverting, keep the mark's identity, and let the system's dark background do the work rather than painting your own near-black square. Check: put both on the same wallpaper and confirm they read as one icon in two conditions, not two icons.
+6. **Layered artwork, not a flat render, on iOS 26.** Icon Composer takes foreground, middle and background layers and lets the system apply the material, the specular highlight and the parallax. A pre-composited PNG gets none of that and looks visibly flat next to system apps. Check: no baked highlight, and the layers separate sensibly.
+7. **Test it on a real wallpaper, next to real neighbours.** Not on white in a design tool. Put it on a photograph, on a dark wallpaper, and beside Mail, Photos and Settings. Icons that look confident in isolation frequently vanish next to the system set, which is mostly saturated and simple. Check: screenshot a real Home Screen with your icon in it.
+8. **Fill the canvas the way the system apps do.** A mark floating in the middle of a large margin looks smaller than every icon around it, because the system's own icons run close to the edge. Match their optical weight rather than an arbitrary grid. Check: put yours in a row of system icons and compare how much of the tile each one occupies.
+9. **The icon and the launch experience agree.** The first thing on screen after the icon should share its colour and its mark, so the transition from Home Screen to app is continuous. A blue icon opening to a white screen with a grey logo is two products. Check: launch from the Home Screen and watch the zoom.
+10. **Alternate icons are a feature with a cost.** `setAlternateIconName` requires every alternate declared in the Info.plist and shipped at full size, and it triggers a system alert the user cannot suppress. Offer them only where identity genuinely matters to the person, and never as a paywall gate for something purely cosmetic unless the price is honest about that. Check: switching shows exactly one alert and the new icon survives a reboot.
+11. **The icon is not a screenshot of the UI.** A tiny rendering of the app's own interface reads as noise at every size it is actually seen. Check: squint; you should see one shape, not a layout.
+12. **A monochrome version exists, because several places demand one.** Notification grouping, some accessibility renderings and print all reduce the icon to a single colour. A mark that only separates by hue has nothing left. Check: fill the artwork with solid black on white; it still reads.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Master | 1024x1024, opaque, square corners, no alpha |
+| Appearances | Light, dark, tinted, all three authored |
+| Tinted | Generated from greyscale; needs internal luminance contrast |
+| iOS 26 | Layered artwork via Icon Composer, system applies the material |
+| Sizes to check | 60pt Home Screen, 29pt Settings, 40pt Spotlight |
+| Text in the icon | None, unless the brand is a single letter |
+| Optical fill | Match the system apps, not a margin you invented |
+| Alternates | Declared in Info.plist, full size each, one unsuppressable alert |
+
+### Code
+
+```swift
+// Alternate icons: every name here also exists in Info.plist under
+// CFBundleAlternateIcons with its own file, at full size.
+func setIcon(_ name: String?) {
+    guard UIApplication.shared.supportsAlternateIcons else { return }
+    UIApplication.shared.setAlternateIconName(name) { error in
+        if let error { print("icon change failed: \(error)") }
+    }
+}
+```
+
+### Checks
+
+- Render the master to 29pt and look at it at real size on a device.
+- View all three appearances; the tinted one is still recognisably the same icon.
+- Screenshot a real Home Screen with your icon among the system apps, on a photographic wallpaper and a dark one.
+- Compare optical fill with the icons either side of it.
+- Launch from the Home Screen; the first frame of the app shares the icon's colour and mark.
+- Fill the artwork with solid black; it still reads.
+- Confirm the alpha channel is fully opaque and no corner rounding is baked in.
+
+### Do not
+
+- Design only at 1024.
+- Put the app's name, a tagline, or a badge in the artwork.
+- Ship transparency, pre-rounded corners, or a painted gloss highlight.
+- Let the tinted variant be an afterthought.
+- Invert the light icon and call it the dark one.
+- Put a miniature of the interface in it.
+- Float the mark in a large margin while every neighbour runs to the edge.
 
 <!-- references/buttons-and-controls.md -->
 
@@ -2806,6 +2887,99 @@ Button("New") { }
 
 See also: `references/color.md` for the flat translucent content surface, `references/buttons-and-controls.md` for press styles on non-glass buttons, `references/sheets-and-navigation.md` for what sheets do automatically, `references/accessibility.md` for Reduce Transparency.
 
+<!-- references/media-playback.md -->
+
+## Video and audio playback
+
+Use this when the app plays something: a clip, a podcast, a lesson, a voice note, a user's recording. Sound design for interface feedback is in `references/sound.md`; this is content playback.
+
+Playback is where an app stops being alone on the device. It shares the audio session, the Lock Screen, the Control Centre, CarPlay, headphone buttons and the car stereo, and doing that badly is far more visible than any pixel.
+
+### Rules
+
+1. **Declare the audio session for what the app actually is.** `.playback` for content the user chose to hear, which keeps playing when the screen locks and correctly interrupts their music. `.ambient` with `.mixWithOthers` for interface sound that should never stop a podcast. Getting this backwards is why an app cuts someone's music to play a two-second effect. Check: start a podcast, open the app, and confirm the right thing happened.
+2. **Fill in Now Playing or the Lock Screen is blank.** `MPNowPlayingInfoCenter` with the title, the artist or source, the artwork, the duration and the current time, updated as playback moves. Without it the Lock Screen shows nothing and the car stereo shows nothing, and the app looks broken in the place people most often look. Check: lock the phone mid-playback and look at the screen.
+3. **Wire the remote commands, all of the ones you claim.** `MPRemoteCommandCenter` for play, pause, toggle, skip forward and back with real intervals, and next and previous only if those mean something. Disable the ones that do not apply rather than leaving them enabled and inert; a headphone button that does nothing is worse than one that is greyed out. Check: control playback entirely from the Lock Screen and from headphone buttons.
+4. **Handle interruptions and route changes, because both will happen.** A phone call interrupts; on `.ended` with `.shouldResume`, resume, and otherwise stay paused. Unplugging headphones delivers `.oldDeviceUnavailable` and the app must pause, never continue out loud into a quiet room. Check: unplug headphones mid-playback; it pauses.
+5. **Scrubbing follows the finger linearly and previews where it will land.** No spring, no easing, no animation on the thumb while a finger is on it. Show the timestamp during the drag, and on video a frame preview if you can generate one. Fire a `.selection` haptic on chapter or marker crossings, not per pixel. Check: scrub slowly; the thumb tracks exactly and the time updates continuously.
+6. **Time is monospaced and does not reflow.** `.monospacedDigit()` on elapsed and remaining, with a width reserved for the longest value the content can reach, so 9:59 becoming 10:00 does not shift the scrubber. Check: watch across a rollover from single to double digits.
+7. **Buffering and paused are different states and must look different.** A spinner over the transport while stalled, with the play or pause state itself unchanged underneath. An app that shows a play triangle while it is really buffering teaches people to tap twice and skip. Check: throttle the network mid-playback.
+8. **Video is `AVPlayerViewController` unless there is a reason.** It brings picture-in-picture, AirPlay, subtitles, audio track selection, the skip gestures and full-screen behaviour, all of which you would otherwise owe. A custom transport means rebuilding every one. Check: with a custom player, verify PiP, AirPlay and subtitle selection all still exist.
+9. **Captions and audio descriptions are shipped and respected.** Honour `.isClosedCaptioningEnabled` and the system's preferred languages, and default captions on for speech-led content. Most viewing in public happens with the sound off. Check: enable captions system-wide and confirm they appear without being asked for.
+10. **Background playback is a capability you either have or do not.** If audio should continue with the screen locked, enable the background mode, keep the session active, and keep Now Playing current. Half-implementing it, where audio continues but the Lock Screen is empty and the remote commands are dead, is worse than not supporting it. Check: lock the screen and control playback without unlocking.
+11. **A waveform is either real or absent.** A decorative waveform that does not match the audio misleads someone using it to navigate. If you cannot compute one, show a plain progress bar. Check: compare a loud passage against the drawing.
+12. **Remember the position for anything long, per item.** Resume where they left off, say that you are doing it, and offer starting over. Check: leave halfway, return tomorrow.
+13. **One thing plays at a time inside the app.** Starting a second item stops the first, always. Check: start another and confirm the first stops rather than mixing.
+14. **Reserve the video's aspect ratio before it loads.** Otherwise the layout jumps when the first frame arrives. A poster or a placeholder at the correct ratio, then the player. Check: load on a throttled connection; nothing moves.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Content playback | `.playback`; keeps playing when locked, interrupts other audio |
+| Interface sound | `.ambient` + `.mixWithOthers`; never stops their music |
+| Lock Screen | `MPNowPlayingInfoCenter`, kept current, with artwork |
+| Remote commands | Enable only what works; disable the rest explicitly |
+| Headphones unplugged | `.oldDeviceUnavailable` means pause |
+| Call ended | `.shouldResume` means resume, otherwise stay paused |
+| Scrubbing | Linear, follows the finger, `.selection` on markers only |
+| Time labels | `.monospacedDigit()` with a reserved width |
+| Video | `AVPlayerViewController` unless you will rebuild PiP, AirPlay and subtitles |
+| Captions | Default on for speech-led content; honour the system setting |
+
+### Code
+
+```swift
+// The session declares what the app is. Getting this wrong is why apps
+// stop someone's podcast to play a click.
+try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+try AVAudioSession.sharedInstance().setActive(true)
+
+// Without this the Lock Screen and the car stereo are blank.
+MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+    MPMediaItemPropertyTitle: episode.title,
+    MPMediaItemPropertyArtist: show.name,
+    MPMediaItemPropertyPlaybackDuration: episode.duration,
+    MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentTime().seconds,
+    MPNowPlayingInfoPropertyPlaybackRate: player.rate,
+]
+
+// Headphones out means pause, not "keep playing out loud on the train".
+NotificationCenter.default.addObserver(
+    forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main
+) { note in
+    guard
+        let raw = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+        AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable
+    else { return }
+    player.pause()
+}
+```
+
+### Checks
+
+- Start a podcast, then open the app: the right thing happens to their audio.
+- Lock the phone mid-playback: title, artwork and progress are on the Lock Screen.
+- Control playback from the Lock Screen and from headphone buttons.
+- Unplug headphones mid-playback: it pauses.
+- Take a call and end it: it resumes only if the system said to.
+- Scrub slowly: the thumb tracks the finger exactly and the time is continuous.
+- Watch a rollover from 9:59 to 10:00: nothing shifts.
+- Throttle mid-playback: buffering does not look like paused.
+- Turn on system captions: they appear without being asked for.
+- Load a video on a slow connection: the box is reserved.
+
+### Do not
+
+- Use `.playback` for a tap sound, or `.ambient` for content.
+- Ship playback with an empty Lock Screen.
+- Leave remote commands enabled but inert.
+- Keep playing when the headphones come out.
+- Animate the scrubber thumb while a finger is on it.
+- Let a buffering player look paused.
+- Rebuild a video transport without PiP, AirPlay and subtitles.
+- Draw a waveform that is not the audio.
+
 <!-- references/motion.md -->
 
 ## Motion
@@ -3011,6 +3185,115 @@ extension Animation {
 - Let a `Timer` drive anything visual.
 - Ship a loop that snaps to its first frame.
 - Strip all animation under Reduce Motion.
+
+<!-- references/notifications.md -->
+
+## Notifications
+
+Use this when the app sends anything to the Lock Screen or Notification Centre: a push, a local reminder, a scheduled nudge, a badge. Live Activities and the Dynamic Island are in `references/widgets-and-live-activities.md`; the permission primer pattern is in `references/onboarding.md`.
+
+A notification is the only part of a product that appears on someone's screen without being asked for. Every rule here follows from that.
+
+### Rules
+
+1. **Ask at the moment the person wants the thing, never at launch.** The system prompt can be shown once, ever, and a decline is close to permanent. Prime it with a screen of your own that says exactly what will be sent and how often, and only after they have done something that implies wanting it. If they decline your primer, do not show the system one; ask again later when the context is stronger. Check: the system alert only ever appears after a screen you designed.
+2. **Provisional authorisation is the right default for anything non-urgent.** `.provisional` delivers quietly to Notification Centre with no prompt at all, and the person promotes or turns it off from the notification itself. It costs nothing and it does not spend your one alert. Check: a fresh install receives quiet notifications without ever being asked.
+3. **The first line is the whole notification.** People read the Lock Screen at arm's length. Front-load the noun and the change: "Anna replied to Q3 report", not "You have a new message". Never lead with the app's own name; iOS already prints it above. Check: read only the first forty characters and say whether you would open it.
+4. **Interruption levels are the honest signal, and almost nothing is `.timeSensitive`.** `.passive` for things that can wait until they next look, `.active` as the normal case, `.timeSensitive` only for something with a real deadline the person has agreed to, and `.critical` essentially never without an entitlement and a life-safety reason. Marketing dressed as time-sensitive is the fastest way to be turned off entirely. Check: list every notification type with its level and justify each one above `.active`.
+5. **Group with a `threadIdentifier` or the app becomes a wall.** One thread per conversation, per document, per subject. Set `summaryArgument` so the collapsed stack reads "3 more messages from Anna" rather than a count of nothing. Check: send five related notifications; they collapse into one legible stack.
+6. **Actions belong on the notification, so the app does not have to open.** Reply, complete, snooze, archive, whatever the two most likely responses are. A destructive action is marked `.destructive` and any action carrying real consequence sets `.authenticationRequired`. Check: handle the most common response entirely from the Lock Screen.
+7. **The badge is a count of things the person must act on, or it is nothing.** Not unread marketing, not a nudge, not a number that only clears by opening a specific screen nobody can find. If you cannot name what decrements it, remove it. Clear it when the thing is actually dealt with, including from a notification action and from another device. Check: act on everything and confirm the badge reaches zero without hunting.
+8. **Rich content earns its place or is left off.** A `UNNotificationContentExtension` or an attached image is right when the image is the content, such as a photo someone was sent. It is wrong as decoration, because it delays delivery and consumes memory. Check: every attachment is information rather than branding.
+9. **Deep link to the exact thing, and preserve where they were.** Tapping a notification lands on the specific message or item, not the app's home screen, and going back returns somewhere coherent rather than into an empty stack. Check: tap a notification from cold launch and press back.
+10. **Never send what the person can already see.** Suppress delivery for the conversation currently open, and use `willPresent` to decide, rather than banner-ing something two inches above where it already appeared. Check: keep a thread open and receive a message in it.
+11. **Update rather than stack for the same fact.** Reuse the identifier so "Order out for delivery" becomes "Order arriving" in place. Five notifications about one order is four too many. Check: run a multi-step process and count the notifications.
+12. **Local notifications are cancelled when the reason goes away.** Complete a task and its reminder is removed; delete an event and its alerts go with it. A notification about something that no longer exists is the clearest possible signal that nobody is maintaining the app. Check: schedule, complete, and wait; nothing arrives.
+13. **Quiet hours are respected without being asked.** Anything scheduled by the app rather than by the person avoids the middle of the night in the device's own timezone, not the server's. Check: change the device timezone and see when things fire.
+14. **The settings screen mirrors what you actually send.** A per-category toggle for each kind of notification, matching the categories in the copy of the primer, plus a route to the system settings. An all-or-nothing switch means the only way to stop the one annoying kind is to stop all of them. Check: turn off exactly one kind and confirm the others still arrive.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Permission | Your primer first, system alert only after; never at launch |
+| Non-urgent default | `.provisional`, no prompt at all |
+| First line | Noun and change, front-loaded, no app name |
+| Level | `.passive` / `.active` default; `.timeSensitive` needs a real deadline |
+| Grouping | `threadIdentifier` per subject, plus `summaryArgument` |
+| Actions | The two most likely responses; destructive marked, sensitive authenticated |
+| Badge | Count of things needing action, or absent |
+| Same fact | Reuse the identifier and update in place |
+| Foreground | Suppress what is already on screen, via `willPresent` |
+| Settings | Per category, matching the primer's promises |
+
+### Code
+
+```swift
+let content = UNMutableNotificationContent()
+// The noun and the change, in the first forty characters.
+content.title = "Anna replied to Q3 report"
+content.body = "\"Numbers look right to me, shipping it.\""
+// One thread per conversation, so five of these collapse instead of stacking.
+content.threadIdentifier = "thread-\(conversation.id)"
+content.summaryArgument = "Anna"
+content.interruptionLevel = .active   // .timeSensitive needs a real deadline
+content.categoryIdentifier = "reply"
+
+// Reusing the identifier updates in place rather than adding another row.
+let request = UNNotificationRequest(
+    identifier: "conversation-\(conversation.id)",
+    content: content,
+    trigger: nil
+)
+
+// Two likely responses, handled without opening the app.
+let category = UNNotificationCategory(
+    identifier: "reply",
+    actions: [
+        UNTextInputNotificationAction(identifier: "reply", title: "Reply",
+                                      options: [], textInputButtonTitle: "Send",
+                                      textInputPlaceholder: "Message"),
+        UNNotificationAction(identifier: "mute", title: "Mute", options: []),
+    ],
+    intentIdentifiers: []
+)
+```
+
+```swift
+// Do not banner something the person is already looking at.
+func userNotificationCenter(_ c: UNUserNotificationCenter,
+                            willPresent n: UNNotification) async
+    -> UNNotificationPresentationOptions {
+    let id = n.request.content.threadIdentifier
+    return openConversationID == id ? [] : [.banner, .sound, .list]
+}
+```
+
+### Checks
+
+- The system permission alert only ever appears after a screen you designed.
+- A fresh install receives provisional notifications with no prompt.
+- Read only the first forty characters of each notification type and decide whether you would open it.
+- List every type with its interruption level; justify anything above `.active`.
+- Send five related notifications; they collapse into one legible stack.
+- Handle the most common response entirely from the Lock Screen.
+- Act on everything; the badge reaches zero without hunting for a screen.
+- Tap a notification from a cold launch, then press back.
+- Keep a thread open and receive a message in it; nothing banners.
+- Complete a task with a scheduled reminder; the reminder does not arrive.
+- Turn off one category in settings; the others still arrive.
+
+### Do not
+
+- Request permission on first launch.
+- Lead with the app's name.
+- Mark marketing as `.timeSensitive`.
+- Ship without a `threadIdentifier`.
+- Badge something the person cannot act on.
+- Send five notifications about one order.
+- Banner a message in the conversation already on screen.
+- Leave a reminder scheduled for something already done.
+- Offer a single on/off switch for every kind of notification you send.
 
 <!-- references/onboarding.md -->
 
