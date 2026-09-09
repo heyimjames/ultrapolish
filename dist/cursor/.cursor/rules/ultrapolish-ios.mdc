@@ -21,6 +21,7 @@ Read this before touching a pixel.
 5. **No system? Propose one before polishing.** Offer the 15-line design contract from the design-contract-template reference below, get it agreed, then work inside it. Polishing without a contract produces a second, competing style.
 6. **Restraint is a deliverable.** The right change is often "remove", "align", or "reuse". Every finding must name what the user gains. If you cannot, it is not a finding.
 
+7. **Look at it.** Reading the code tells you what was intended; only the rendered result tells you what happened. Render the screen, screenshot it, and play any motion back at a tenth speed before writing a finding about it. Half the findings worth having are invisible in the source: the thing that lands a frame late, the two greys that turned out identical, the row that reflows at the second breakpoint, the state nobody wired up. A finding you have not seen is a guess, and it belongs in the output marked as one.
 ## 1. Workflow
 
 ### 1.1 Intake (always, ~2 minutes)
@@ -48,6 +49,11 @@ A row can end in three states, and they are not the same finding:
 
 Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
+
+The table above is what the project already does. Two things about the *work* decide how the defaults apply, and neither is visible in the code, so ask or infer them before proposing anything:
+
+- **How often is this used?** Once ever, a few times a session, or a hundred times a day. Frequency is the input to half the motion rules here, and a screen nobody has told you the frequency of will get the wrong answer from all of them.
+- **What is the person feeling when they arrive?** Someone filing a complaint, cancelling a subscription, or looking at an error is not in the same state as someone browsing. Care that reads as delight on a calm screen reads as flippancy on a stressful one.
 ### 1.2 Mode
 
 - **build**: you are writing the feature. Apply the standard as you go. The output table becomes the change log.
@@ -99,6 +105,22 @@ Severity: **HIGH** blocks a task, misleads, hides content, or loses data. **MEDI
 Verdict vocabulary: `Ship` (no HIGH, no MEDIUM), `Needs changes`, `Block` (any HIGH).
 
 The "What this changes for the user" column is mandatory. It is the test of whether a finding is real.
+
+### 1.5 When two findings disagree
+
+They will. A transition that makes a flow continuous costs a frame. A denser table fits more rows and shrinks the target. A softer grey is calmer and fails contrast. Resolve in this order, and a lower concern never overrides a higher one.
+
+1. **Correctness.** The interface tells the truth about the data and the state. Nothing is invented to make a transition smoother or a number rounder.
+2. **Reach.** Everyone can operate it: keyboard, screen reader, largest type, reduced motion, one hand, 200% zoom.
+3. **Comprehension.** A person can tell what this is, what happened, and what to do next.
+4. **The project's own conventions.** Consistency inside the product beats a better idea applied in one place. This is the same reason the intake outranks the defaults here.
+5. **Responsiveness.** It answers immediately, and only then is it allowed to take its time.
+6. **Continuity.** Things move from somewhere to somewhere, and what persists is not rebuilt.
+7. **Character.** Everything above is intact and there is budget left.
+
+The order maps onto severity, which is why it is worth stating rather than assuming: a finding that breaches 1, 2 or 3 is HIGH. One that breaches 4 or 5 is MEDIUM. One that breaches 6 or 7 is LOW, before the systemic step is applied.
+
+It also settles the argument the other way. **Character that costs anything above it is a defect, not a feature**, and should be reported as one. An animation that delays a destructive confirmation, a hover that makes a dense table jitter, a celebration that blocks the next action: each of those is a finding, not a flourish, and the row says so.
 
 ## 2. The ten laws
 
@@ -519,6 +541,9 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 | Grid | 4pt base, 8pt rhythm, 16 to 24 margins. Not 8-only |
 | Icon states | Two: outline at rest, filled when selected. Never a third that is only a colour |
+| Conflicting findings | Correctness, reach, comprehension, the project's conventions, responsiveness, continuity, character, in that order. A lower concern never overrides a higher one, and the order maps onto severity |
+| Data in motion | Interpolate the presentation, never the value. A number a person could act on is never smoothed through figures that were not true |
+| Icon transitions | Rotate when it is the same shape at another angle; only morph or replace when the drawings genuinely differ |
 
 ## 8. Further reading inside this skill
 
@@ -2467,6 +2492,7 @@ It does not pick an icon family. It makes whichever family the project uses read
 13. **Custom symbols are built as symbols, not PNGs.** Export a template from the SF Symbols app, provide the S / M / L optical sizes and the weights the project uses, and add it to the asset catalog as a Symbol Image. Then it weight-matches, scales, and animates like a system symbol. Check: a custom symbol beside `.body` text at AX5 still matches.
 14. **Tab bar icons: outline unselected, fill selected, same visual weight across all tabs, one-word labels.** The selected tab does not bounce. Check: all tab glyphs occupy about the same area.
 15. **SF Symbols are functional, not the brand.** App icon, hero art, and onboarding illustration are custom artwork. Check: the app icon contains no SF Symbol.
+16. **Rotate when the shape is the same at another angle; replace when it is not.** `chevron.right` to `chevron.down` is one shape at two rotations, so animate `rotationEffect` and it is exact at every frame. `play.fill` to `pause.fill` is two different drawings, so it is `.contentTransition(.symbolEffect(.replace))`, which the system interpolates properly. What is never right is hand-rolling a path interpolation between two shapes that differ: the strokes bow on the way through, which is the wobble in a lot of otherwise careful icon animation. Check: play it at a tenth speed and watch the middle frame; if a straight line bows, it should have been a rotation or a replace.
 
 ### Cheat sheet
 
@@ -2591,6 +2617,7 @@ It does not pick a density. It makes the project's density consistent and its hi
 13. **Nothing critical under the keyboard or below a fixed sheet's fold.** If a sheet's content scrolls, its action row does not. Check: open every form with the keyboard up.
 14. **Widths come from content, not from English.** Buttons size from padding, never a fixed width. Use `minHeight` not `height`. Check: German and Finnish previews.
 15. **Density is per platform.** iPhone tap targets are 44pt; iPad pointer and Mac targets can drop to 24pt, and inspector panes run tighter (12pt padding). Check: the same view on iPhone and Mac uses the platform's density, not the phone's.
+16. **Reveal complexity, do not dump it.** One primary action per view; everything a person does not need yet appears when it becomes relevant. A twelve-field form is three steps of four. An advanced section is closed until asked for. This is not about having fewer features, it is about how many of them are on screen at once, and the test is whether someone can tell within a second what to do next. Complexity that is genuinely needed is not hidden behind a gesture nobody will find: progressive disclosure needs a visible affordance, and content with no cue may as well not exist. Check: count the actions competing for attention on the primary screen; if it is more than one, name which is primary and demote the rest.
 
 ### Cheat sheet
 
@@ -3004,6 +3031,7 @@ The goal is a small named vocabulary that every animation in the app comes from,
 12. **Loops act, rest, then ease home.** A loop that snaps back to its start frame reads as a glitch. Do the thing, park the payoff so it dwells, then ease home. Check: watch any loop at 10% speed and find the snap.
 13. **Write the storyboard as a comment above the constants.** Every state of the feature, top to bottom, with ms after trigger. It is the only document that survives refactors because it lives next to the numbers. Check: the motion file opens with the storyboard.
 14. **Reduce Motion is a crossfade, not nothing.** Replace travel, scale, and 3D with `.easeInOut(duration: 0.18)` on opacity. Keep haptics. Stripping every animation makes the app feel broken. Check: toggle Reduce Motion in the simulator and walk the primary path.
+15. **Interpolate the presentation, never the data.** A number that counts up to a total must pass through values that were never true, so it may only do that where the intermediate values carry no meaning: a confetti-free "1,284 readers" is fine, an account balance, a dose, a score, a countdown to a deadline and a progress figure are not. Never smooth a value by inventing one, never round to make a transition land, and snap the last fraction rather than easing through a number the system does not believe. If a chart's range must grow to fit a new high, expand it instantly so the line is never drawn outside its own axis, and ease it back in when the spike passes. Check: pause the animation mid-flight and read the number on screen; if a person could act on that value and it is wrong, the animation is lying.
 
 ### Cheat sheet
 

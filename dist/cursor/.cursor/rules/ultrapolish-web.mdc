@@ -21,6 +21,7 @@ Read this before touching a pixel.
 5. **No system? Propose one before polishing.** Offer the 15-line design contract from the design-contract-template reference below, get it agreed, then work inside it. Polishing without a contract produces a second, competing style.
 6. **Restraint is a deliverable.** The right change is often "remove", "align", or "reuse". Every finding must name what the user gains. If you cannot, it is not a finding.
 
+7. **Look at it.** Reading the code tells you what was intended; only the rendered result tells you what happened. Render the screen, screenshot it, and play any motion back at a tenth speed before writing a finding about it. Half the findings worth having are invisible in the source: the thing that lands a frame late, the two greys that turned out identical, the row that reflows at the second breakpoint, the state nobody wired up. A finding you have not seen is a guess, and it belongs in the output marked as one.
 ## 1. Workflow
 
 ### 1.1 Intake (always, ~2 minutes)
@@ -46,6 +47,11 @@ A row can end in three states, and they are not the same finding:
 
 Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
+
+The table above is what the project already does. Two things about the *work* decide how the defaults apply, and neither is visible in the code, so ask or infer them before proposing anything:
+
+- **How often is this used?** Once ever, a few times a session, or a hundred times a day. Frequency is the input to half the motion rules here, and a screen nobody has told you the frequency of will get the wrong answer from all of them.
+- **What is the person feeling when they arrive?** Someone filing a complaint, cancelling a subscription, or looking at an error is not in the same state as someone browsing. Care that reads as delight on a calm screen reads as flippancy on a stressful one.
 ### 1.2 Mode
 
 - **build**: you are writing the feature. Apply the standard as you go. The output table becomes the change log.
@@ -99,6 +105,22 @@ Verdict vocabulary: `Ship`, `Needs changes`, `Block` (any HIGH).
 Two columns earn their place and are easy to get wrong. **Where else** is what makes a systemic finding legible as one row instead of five; write "only here" when it is genuinely local. **What is wrong, and what it should be** is one prose cell, not a two-word before and a two-word after: a real finding needs the defect, the fix, and the reason in the same breath.
 
 The "What this changes for the user" column is mandatory. It is the test of whether a finding is real.
+
+### 1.5 When two findings disagree
+
+They will. A transition that makes a flow continuous costs a frame. A denser table fits more rows and shrinks the target. A softer grey is calmer and fails contrast. Resolve in this order, and a lower concern never overrides a higher one.
+
+1. **Correctness.** The interface tells the truth about the data and the state. Nothing is invented to make a transition smoother or a number rounder.
+2. **Reach.** Everyone can operate it: keyboard, screen reader, largest type, reduced motion, one hand, 200% zoom.
+3. **Comprehension.** A person can tell what this is, what happened, and what to do next.
+4. **The project's own conventions.** Consistency inside the product beats a better idea applied in one place. This is the same reason the intake outranks the defaults here.
+5. **Responsiveness.** It answers immediately, and only then is it allowed to take its time.
+6. **Continuity.** Things move from somewhere to somewhere, and what persists is not rebuilt.
+7. **Character.** Everything above is intact and there is budget left.
+
+The order maps onto severity, which is why it is worth stating rather than assuming: a finding that breaches 1, 2 or 3 is HIGH. One that breaches 4 or 5 is MEDIUM. One that breaches 6 or 7 is LOW, before the systemic step is applied.
+
+It also settles the argument the other way. **Character that costs anything above it is a defect, not a feature**, and should be reported as one. An animation that delays a destructive confirmation, a hover that makes a dense table jitter, a celebration that blocks the next action: each of those is a finding, not a flourish, and the row says so.
 
 ## 2. The ten laws
 
@@ -514,6 +536,9 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 | Grid | 4px base, 8px rhythm, 16 to 24 container padding. Not 8-only |
 | Icon states | Two: outline at rest, filled when active. Never a third that is only a colour |
+| Conflicting findings | Correctness, reach, comprehension, the project's conventions, responsiveness, continuity, character, in that order. A lower concern never overrides a higher one, and the order maps onto severity |
+| Data in motion | Interpolate the presentation, never the value. A number a person could act on is never smoothed through figures that were not true |
+| Icon transitions | Rotate when it is the same shape at another angle; only morph or replace when the drawings genuinely differ |
 
 ## 8. Further reading inside this skill
 
@@ -2568,6 +2593,7 @@ Pair with `references/typography.md` for weight matching and `references/accessi
 15. **Corners follow the type.** A rounded typeface wants round-capped strokes; a sharp one wants square caps and joins. Check the family's `stroke-linecap` against the letterforms.
 16. **No idle animation.** An icon that breathes, pulses, or wiggles while nothing is happening is the loudest template tell. Animate only on a state change, and pair it with the change.
 17. **Selected state is the fill, not the colour.** A filled glyph in `currentColor` marks selection without the accent. The accent on a selected tab is a house choice; record it in the design contract.
+18. **Rotate when the shape is the same at another angle; morph only when the geometry genuinely differs.** A chevron becoming a down-arrow, a plus becoming a cross, a caret flipping: these are one shape at two rotations, and rotating them is exact at every frame. Interpolating their coordinates instead makes the strokes bend and warp on the way, which is the wobble you see in a lot of otherwise careful icon animation. Reserve coordinate morphing for pairs that are actually different drawings, and give those a shared point count so the interpolation has somewhere sensible to go. A swap with no relationship at all crossfades. Check: play it at a tenth speed and watch the middle frame; if a straight line bows, it should have been a rotation.
 
 ### Cheat sheet
 
@@ -2719,6 +2745,7 @@ Pair with `references/typography.md` for measure and `references/surfaces-and-de
 18. **Design for two items and for two hundred.** Every list, grid, and tag row is checked empty, with one item, with two, and with an overflowing count. A 60-character title and a four-line description must fit.
 19. **A page that anyone will print or save as PDF needs a print stylesheet, and most content pages do.** Receipts, invoices, itineraries, recipes, tickets and documentation all get printed by someone. `@media print`: force a light ground regardless of the theme, because a dark-mode page prints as a solid block of ink; drop the navigation, the cookie bar, the chat widget and anything sticky; set `break-inside: avoid` on cards, tables and figures so nothing is sliced across a page; and expand link destinations with `a[href^="http"]::after { content: " (" attr(href) ")" }` in long-form only, where a URL nobody can click is otherwise lost. Check: print to PDF in dark mode and read the result.
 20. **Print reveals what is genuinely fixed.** Anything `position: fixed` renders once, at the top, over the content. This is the usual reason a printed page has a navigation bar stamped across the middle of it. Set `position: static` for print on every fixed element rather than hiding them one at a time as they are discovered. Check: print a long page and look at every page break, not just the first.
+21. **Reveal complexity, do not dump it.** One primary action per view; everything a person does not need yet appears when it becomes relevant. A twelve-field form is three steps of four. An advanced section is closed until asked for. This is not about having fewer features, it is about how many of them are on screen at once, and the test is whether someone can tell within a second what to do next. Complexity that is genuinely needed is not hidden behind a gesture nobody will find: progressive disclosure needs a visible affordance, and content with no cue may as well not exist. Check: count the actions competing for attention on the primary screen; if it is more than one, name which is primary and demote the rest.
 
 ### Cheat sheet
 
@@ -3107,6 +3134,7 @@ Use this when you add, review, or tune any transition, entrance, exit, hover, or
 9. **Loops act, rest, then ease home.** A demo or ambient loop does the thing, parks the payoff so it dwells, then eases back. It never snaps to the start. Check: watch two cycles; the reset is invisible.
 10. **Reduced motion is opt-in.** Wrap motion in `@media (prefers-reduced-motion: no-preference)`. Where a global kill switch is unavoidable, use `0.01ms`, never `none`, so `animationend` and `transitionend` still fire. Replace travel and scale with crossfades; keep functional feedback. Check: toggle the OS setting; nothing slides, everything still changes state.
 11. **Review at 10% speed.** Open the browser's Animations panel, set playback to 10%, and trigger each pair. Overshoot, mismatched pairs, and late stagger are obvious at that speed and invisible at 100%. Check: done before any motion PR merges.
+12. **Interpolate the presentation, never the data.** A number that counts up to a total must pass through values that were never true, so it may only do that where the intermediate values carry no meaning: a confetti-free "1,284 readers" is fine, an account balance, a dose, a score, a countdown to a deadline and a progress figure are not. Never smooth a value by inventing one, never round to make a transition land, and snap the last fraction rather than easing through a number the system does not believe. If a chart's range must grow to fit a new high, expand it instantly so the line is never drawn outside its own axis, and ease it back in when the spike passes. Check: pause the animation mid-flight and read the number on screen; if a person could act on that value and it is wrong, the animation is lying.
 
 ### Cheat sheet
 

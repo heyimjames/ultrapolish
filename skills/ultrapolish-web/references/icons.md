@@ -22,6 +22,7 @@ Pair with `references/typography.md` for weight matching and `references/accessi
 15. **Corners follow the type.** A rounded typeface wants round-capped strokes; a sharp one wants square caps and joins. Check the family's `stroke-linecap` against the letterforms.
 16. **No idle animation.** An icon that breathes, pulses, or wiggles while nothing is happening is the loudest template tell. Animate only on a state change, and pair it with the change.
 17. **Selected state is the fill, not the colour.** A filled glyph in `currentColor` marks selection without the accent. The accent on a selected tab is a house choice; record it in the design contract.
+18. **Rotate when the shape is the same at another angle; morph only when the geometry genuinely differs.** A chevron becoming a down-arrow, a plus becoming a cross, a caret flipping: these are one shape at two rotations, and rotating them is exact at every frame. Interpolating their coordinates instead makes the strokes bend and warp on the way, which is the wobble you see in a lot of otherwise careful icon animation. Reserve coordinate morphing for pairs that are actually different drawings, and give those a shared point count so the interpolation has somewhere sensible to go. A swap with no relationship at all crossfades. Check: play it at a tenth speed and watch the middle frame; if a straight line bows, it should have been a rotation.
 
 ## Cheat sheet
 

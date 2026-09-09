@@ -20,6 +20,7 @@ It does not pick an icon family. It makes whichever family the project uses read
 13. **Custom symbols are built as symbols, not PNGs.** Export a template from the SF Symbols app, provide the S / M / L optical sizes and the weights the project uses, and add it to the asset catalog as a Symbol Image. Then it weight-matches, scales, and animates like a system symbol. Check: a custom symbol beside `.body` text at AX5 still matches.
 14. **Tab bar icons: outline unselected, fill selected, same visual weight across all tabs, one-word labels.** The selected tab does not bounce. Check: all tab glyphs occupy about the same area.
 15. **SF Symbols are functional, not the brand.** App icon, hero art, and onboarding illustration are custom artwork. Check: the app icon contains no SF Symbol.
+16. **Rotate when the shape is the same at another angle; replace when it is not.** `chevron.right` to `chevron.down` is one shape at two rotations, so animate `rotationEffect` and it is exact at every frame. `play.fill` to `pause.fill` is two different drawings, so it is `.contentTransition(.symbolEffect(.replace))`, which the system interpolates properly. What is never right is hand-rolling a path interpolation between two shapes that differ: the strokes bow on the way through, which is the wobble in a lot of otherwise careful icon animation. Check: play it at a tenth speed and watch the middle frame; if a straight line bows, it should have been a rotation or a replace.
 
 ## Cheat sheet
 

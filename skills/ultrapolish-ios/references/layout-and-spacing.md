@@ -20,6 +20,7 @@ It does not pick a density. It makes the project's density consistent and its hi
 13. **Nothing critical under the keyboard or below a fixed sheet's fold.** If a sheet's content scrolls, its action row does not. Check: open every form with the keyboard up.
 14. **Widths come from content, not from English.** Buttons size from padding, never a fixed width. Use `minHeight` not `height`. Check: German and Finnish previews.
 15. **Density is per platform.** iPhone tap targets are 44pt; iPad pointer and Mac targets can drop to 24pt, and inspector panes run tighter (12pt padding). Check: the same view on iPhone and Mac uses the platform's density, not the phone's.
+16. **Reveal complexity, do not dump it.** One primary action per view; everything a person does not need yet appears when it becomes relevant. A twelve-field form is three steps of four. An advanced section is closed until asked for. This is not about having fewer features, it is about how many of them are on screen at once, and the test is whether someone can tell within a second what to do next. Complexity that is genuinely needed is not hidden behind a gesture nobody will find: progressive disclosure needs a visible affordance, and content with no cue may as well not exist. Check: count the actions competing for attention on the primary screen; if it is more than one, name which is primary and demote the rest.
 
 ## Cheat sheet
 
