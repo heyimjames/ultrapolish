@@ -364,9 +364,9 @@ A player is used in the dark, one-handed, on a train. The only defensible autopl
 
 No scroll-triggered fade-ups on every section; no scroll hijacking; no non-1:1 parallax; no auto-advancing carousels. One orchestrated moment beats scattered effects. Spend boldness in one place. OG images survive at 200px wide: headline ≥ 80px at 1200 wide, 3–8 words, one focal point, tested in greyscale.
 
-### Native feel (opt-in) → `references/native-feel.md`
+### Native feel → `references/native-feel.md`
 
-The iOS-on-web layer: 17px body, negative tracking by size, materials, sheet physics, edge-swipe back. A style choice, clearly labelled. Load only when the project wants to feel like a native app.
+The default for app-like products and wrong for site-like ones. A dashboard, an editor, a tool, a PWA or anything behind a login takes the whole iOS layer unless the design contract opts out; marketing, documentation and landing pages take the neutral references only. All or nothing when taken, because a sheet that drags without carrying velocity into its settle is worse than one that does not drag, and a push without an interruptible back-swipe is worse than a fade. A project's own established motion or type system still wins over any of it, exactly as the universality guard says everywhere else.
 
 ## 5. Anti-patterns and AI tells
 
@@ -489,7 +489,6 @@ Where sources disagree, this skill takes these positions. Change them only in th
 
 | Topic | Decision |
 |---|---|
-| Grid | 4px base, 8px rhythm, 16/24 container padding |
 | Exit curve | `cubic-bezier(0.4, 0, 1, 1)` at ~0.65× entrance, no bounce; entrances never ease-in |
 | Springs | `visualDuration` + `bounce`; CSS `linear()` generated from the same tokens |
 | Springs vs curves | Springs for gesture-driven, interruptible, or weighted; curves for hover, colour, opacity; opacity never springs |
@@ -509,9 +508,11 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead |
 | Elevation | A step in surface value, 2 to 3 points of L in light and 3 to 4 in dark, carrying the palette hue. Shadows mean only "this floats and can be dismissed"; hairlines only where no step is available |
 | Hover | Background moves a rung, 150ms, nothing translates. A lift promises a click |
-| Native feel | Opt-in and all or nothing. A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half |
+| Native feel | The default for app-like products (a tool, an editor, a dashboard, a PWA, anything behind a login) and wrong for site-like ones. All or nothing when taken, because the half that behaves natively teaches people to expect the other half. An established motion or type system still wins over it |
 | Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
 | Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
+| Grid | 4px base, 8px rhythm, 16 to 24 container padding. Not 8-only |
+| Icon states | Two: outline at rest, filled when active. Never a third that is only a colour |
 
 ## 8. Further reading inside this skill
 

@@ -38,6 +38,16 @@ def check_skill(name: str):
     if lines > MAX_SKILL_LINES:
         problems.append(f"{name}: SKILL.md is {lines} lines (soft max {MAX_SKILL_LINES})")
 
+    # Every numbered section is present. A careless slice through SKILL.md can
+    # delete a whole section without touching frontmatter, links or line counts,
+    # so nothing else here would notice.
+    sections = re.findall(r"^## (\d+)\. ", text, re.M)
+    expected = [str(i) for i in range(0, 9)]
+    if sections != expected:
+        problems.append(
+            f"{name}: SKILL.md sections are {sections or 'none'}, expected {expected}"
+        )
+
     # Every references/x.md link resolves, and every reference file is linked.
     linked = set(re.findall(r"references/([a-z0-9-]+\.md)", text))
     present = {p.name for p in (d / "references").glob("*.md")} if (d / "references").exists() else set()

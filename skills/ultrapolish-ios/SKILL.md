@@ -341,7 +341,7 @@ The only part of a product that appears on someone's screen without being asked 
 
 ### Widgets, Live Activities and Dynamic Island → `references/widgets-and-live-activities.md`
 
-Content margins, not safe areas (16pt default, 11 tight). `ContainerRelativeShape()` for every nested corner; never a literal radius. `.containerBackground(for: .widget)` is required. Three render modes are three designs: `.accented` renders from alpha and ignores hue; `.vibrant` hierarchy uses opaque greys, never white at opacity. 11pt floor, no Light weights. A widget's only life is a wash healing across the day and a number rolling when it changes. Dynamic Island compact regions hold ≤ 5 characters; the minimal is a 22×22pt glyph. `Text(timerInterval:)` ticks for free. No confetti, no breathing, no faked press states.
+Content margins, not safe areas: the system hands you about 16pt, but 24pt is the target and 16 the floor, because a widget is read at arm's length and wants more air than a screen. 11pt only in a tight accessory. `ContainerRelativeShape()` for every nested corner; never a literal radius. `.containerBackground(for: .widget)` is required. Three render modes are three designs: `.accented` renders from alpha and ignores hue; `.vibrant` hierarchy uses opaque greys, never white at opacity. 11pt floor, no Light weights. A widget's only life is a wash healing across the day and a number rolling when it changes. Dynamic Island compact regions hold ≤ 5 characters; the minimal is a 22×22pt glyph. `Text(timerInterval:)` ticks for free. No confetti, no breathing, no faked press states.
 
 ### Liquid Glass (iOS 26) → `references/liquid-glass.md`
 
@@ -496,7 +496,6 @@ Where sources disagree, this skill takes these positions. Change them only in th
 
 | Topic | Decision |
 |---|---|
-| Grid | 4pt base, 8pt rhythm, 16/20/24 margins |
 | Exit curve | Accelerating exit at ~0.65× entrance, bounce 0; entrances never `.easeIn` |
 | Spring notation | `.spring(duration:bounce:)`; `bounce ≈ 1 − dampingFraction` |
 | Springs vs curves | Springs for gesture-driven, interruptible, or weighted objects; curves for colour and opacity; opacity never springs |
@@ -507,7 +506,7 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Reduce Motion | 180ms crossfade; keep haptics and functional feedback |
 | Long-press | 0.45s reactions, 0.5s system, 0.7s destructive |
 | Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead: things land, settle, roll, and morph rather than appearing and cutting |
-| Widget margins | 16pt default / 11pt tight; `ContainerRelativeShape` |
+| Widget padding | 24pt target, 16pt floor (the system default), 11pt tight accessory; `ContainerRelativeShape` |
 | Onboarding length | 4–5 rooms; longer only when each step builds toward one payoff |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Icons | Two states (outline, fill), not three |
@@ -517,6 +516,8 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Onboarding indicator | Equal dots that never move or stretch; only the fill changes, over 180ms |
 | Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
 | Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
+| Grid | 4pt base, 8pt rhythm, 16 to 24 margins. Not 8-only |
+| Icon states | Two: outline at rest, filled when selected. Never a third that is only a colour |
 
 ## 8. Further reading inside this skill
 

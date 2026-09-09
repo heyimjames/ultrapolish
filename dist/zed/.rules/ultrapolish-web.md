@@ -365,9 +365,9 @@ A player is used in the dark, one-handed, on a train. The only defensible autopl
 
 No scroll-triggered fade-ups on every section; no scroll hijacking; no non-1:1 parallax; no auto-advancing carousels. One orchestrated moment beats scattered effects. Spend boldness in one place. OG images survive at 200px wide: headline ≥ 80px at 1200 wide, 3–8 words, one focal point, tested in greyscale.
 
-### Native feel (opt-in) → the native-feel reference below
+### Native feel → the native-feel reference below
 
-The iOS-on-web layer: 17px body, negative tracking by size, materials, sheet physics, edge-swipe back. A style choice, clearly labelled. Load only when the project wants to feel like a native app.
+The default for app-like products and wrong for site-like ones. A dashboard, an editor, a tool, a PWA or anything behind a login takes the whole iOS layer unless the design contract opts out; marketing, documentation and landing pages take the neutral references only. All or nothing when taken, because a sheet that drags without carrying velocity into its settle is worse than one that does not drag, and a push without an interruptible back-swipe is worse than a fade. A project's own established motion or type system still wins over any of it, exactly as the universality guard says everywhere else.
 
 ## 5. Anti-patterns and AI tells
 
@@ -490,7 +490,6 @@ Where sources disagree, this skill takes these positions. Change them only in th
 
 | Topic | Decision |
 |---|---|
-| Grid | 4px base, 8px rhythm, 16/24 container padding |
 | Exit curve | `cubic-bezier(0.4, 0, 1, 1)` at ~0.65× entrance, no bounce; entrances never ease-in |
 | Springs | `visualDuration` + `bounce`; CSS `linear()` generated from the same tokens |
 | Springs vs curves | Springs for gesture-driven, interruptible, or weighted; curves for hover, colour, opacity; opacity never springs |
@@ -510,9 +509,11 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead |
 | Elevation | A step in surface value, 2 to 3 points of L in light and 3 to 4 in dark, carrying the palette hue. Shadows mean only "this floats and can be dismissed"; hairlines only where no step is available |
 | Hover | Background moves a rung, 150ms, nothing translates. A lift promises a click |
-| Native feel | Opt-in and all or nothing. A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half |
+| Native feel | The default for app-like products (a tool, an editor, a dashboard, a PWA, anything behind a login) and wrong for site-like ones. All or nothing when taken, because the half that behaves natively teaches people to expect the other half. An established motion or type system still wins over it |
 | Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
 | Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
+| Grid | 4px base, 8px rhythm, 16 to 24 container padding. Not 8-only |
+| Icon states | Two: outline at rest, filled when active. Never a third that is only a colour |
 
 ## 8. Further reading inside this skill
 
@@ -3291,11 +3292,20 @@ Reduced-motion global fallback, only where per-element opt-in is impossible:
 
 <!-- references/native-feel.md -->
 
-## Native feel (opt-in)
+## Native feel
 
-**This is a style choice. Load only when the project wants to feel like a native iOS app.** Everything universal lives in the neutral references; this file adds the iOS-specific layer on top. If the project's design contract does not say "feels like a native app", close this file.
+**The default for app-like products, and wrong for site-like ones.** Everything universal lives in the neutral references; this file is the iOS-specific layer on top of them.
 
-Use this when building a PWA, an app-like web product, or a companion web view that should be indistinguishable from SwiftUI. Do not use it to make a marketing site or a data tool "feel iOS".
+Decide which the project is before anything else:
+
+| Shape | Examples | Default |
+|---|---|---|
+| App-like | A dashboard, an editor, a tool, a PWA, anything behind a login | This file, in full, unless the design contract opts out |
+| Site-like | Marketing, documentation, a blog, a landing page | The neutral references only. Close this file |
+
+Two things still outrank that default. A project with an established motion or type system keeps it, because the universality guard applies here exactly as it does everywhere else: these are defaults for projects without an established value, and a consistent existing token always wins. And a design contract that says "this is not an iOS app" closes the file regardless of shape.
+
+Do not use it to make a marketing site feel iOS. A dense data tool is app-like and takes the layer, but its own documented row heights and timings win wherever they exist, which in a mature tool is most places.
 
 **It is all or nothing.** A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half. A sheet that drags but does not carry its velocity into the settle is worse than a sheet that does not drag. A push transition without an interruptible back-swipe is worse than a fade. If the project cannot afford every rule below, take none of them and build something that is excellent as web instead; the neutral references already cover that completely. Check before starting: every rule in this file has an owner, or the file is closed.
 

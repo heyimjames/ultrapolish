@@ -1,8 +1,17 @@
-# Native feel (opt-in)
+# Native feel
 
-**This is a style choice. Load only when the project wants to feel like a native iOS app.** Everything universal lives in the neutral references; this file adds the iOS-specific layer on top. If the project's design contract does not say "feels like a native app", close this file.
+**The default for app-like products, and wrong for site-like ones.** Everything universal lives in the neutral references; this file is the iOS-specific layer on top of them.
 
-Use this when building a PWA, an app-like web product, or a companion web view that should be indistinguishable from SwiftUI. Do not use it to make a marketing site or a data tool "feel iOS".
+Decide which the project is before anything else:
+
+| Shape | Examples | Default |
+|---|---|---|
+| App-like | A dashboard, an editor, a tool, a PWA, anything behind a login | This file, in full, unless the design contract opts out |
+| Site-like | Marketing, documentation, a blog, a landing page | The neutral references only. Close this file |
+
+Two things still outrank that default. A project with an established motion or type system keeps it, because the universality guard applies here exactly as it does everywhere else: these are defaults for projects without an established value, and a consistent existing token always wins. And a design contract that says "this is not an iOS app" closes the file regardless of shape.
+
+Do not use it to make a marketing site feel iOS. A dense data tool is app-like and takes the layer, but its own documented row heights and timings win wherever they exist, which in a mature tool is most places.
 
 **It is all or nothing.** A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half. A sheet that drags but does not carry its velocity into the settle is worse than a sheet that does not drag. A push transition without an interruptible back-swipe is worse than a fade. If the project cannot afford every rule below, take none of them and build something that is excellent as web instead; the neutral references already cover that completely. Check before starting: every rule in this file has an owner, or the file is closed.
 
