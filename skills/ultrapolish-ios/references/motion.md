@@ -82,7 +82,8 @@ enum Motion {
 ```swift
 /* MOTION STORYBOARD
  * Read top-to-bottom. Each value is ms after trigger.
- * Motion is earned: the frequent moments are near-instant, the rare ones get the theatre.
+ * Motion is earned: the frequent moments are near-instant, the rare ones get the fuller
+ * transition. The ceiling is a considered transition, never a set piece.
  *
  * POWER ON (once per connection; rare)
  *     0ms   surface already there, pads at scale 0.92, opacity 0

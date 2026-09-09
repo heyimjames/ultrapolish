@@ -342,7 +342,7 @@ Reject on sight. Each of these reads as "made by nobody in particular".
 
 - A symbol that breathes, pulses, or bounces while idle
 - Purple → blue → pink gradient; any gradient interpolated in RGB (grey in the middle)
-- Confetti on save; a celebration for an ordinary act; silence on a real milestone
+- Confetti or a particle burst anywhere; a set piece standing in for craft in the ordinary interactions around it
 - A state that teleports: value changes with no `.animation(_, value:)`
 - `.animation(...)` with no `value:`; `withAnimation` wrapping unrelated state
 - `Color(red:green:blue:)` without `.displayP3`; a hex literal with no light/dark pair
@@ -487,12 +487,17 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Hit area | 44pt; macOS pointer 24pt |
 | Reduce Motion | 180ms crossfade; keep haptics and functional feedback |
 | Long-press | 0.45s reactions, 0.5s system, 0.7s destructive |
-| Confetti | Rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s, never in widgets |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead: things land, settle, roll, and morph rather than appearing and cutting |
 | Widget margins | 16pt default / 11pt tight; `ContainerRelativeShape` |
 | Onboarding length | 4–5 rooms; longer only when each step builds toward one payoff |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Icons | Two states (outline, fill), not three |
 | Toasts | Only for minor, reversible, global outcomes; ~2.2s with Undo; anything with an action persists |
+| Haptic budget | Anything with a physical metaphor earns a texture: toggles, tab changes, drag pick-up and drop, pull thresholds, long-press arming, reorder crossings. Never on scroll, launch, timers, per item in a batch, or duplicating a system-fired one |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Onboarding indicator | Equal dots that never move or stretch; only the fill changes, over 180ms |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 
@@ -973,11 +978,11 @@ Why: it cannot localise, it flashes, and it delays the first real frame.
 Fix: the launch screen matches the first screen's chrome and has no text.
 Spot it: `LaunchScreen.storyboard` with a `UILabel`.
 
-#### Confetti on save
-A particle burst on an ordinary action.
-Why: the inversion: theatre for the routine, silence for the milestone.
-Fix: rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s.
-Spot it: confetti calls in save or complete handlers.
+#### Confetti
+A particle burst, at any frequency, for anything.
+Why: it is memorable twice. After that it is a thing to sit through, and it spent the budget that would have made the four hundred ordinary interactions better. A product that throws particles is telling you where its craft stopped.
+Fix: no particle system at all. Mark the moment by having the interface behave well: the number lands, the symbol morphs, one `.success` haptic, and the same care goes into every checkmark and row settle in the app.
+Spot it: any particle emitter, any Lottie celebration, any `CAEmitterLayer`.
 
 #### Haptic spam
 `.selection` on every scroll tick; `.success` on every read receipt.
@@ -1395,6 +1400,20 @@ VStack(spacing: 8) {
 
 Use this when you are defining, auditing, or fixing colour tokens, dark mode, gradients, shadows, or translucent surfaces in a SwiftUI app.
 It does not pick a palette. It makes the project's palette hold together in both appearances and on wide-gamut screens.
+
+### Choosing the palette
+
+The rules below tune a palette. This chooses one. Do it first, and only when the project has no palette already: if it has one, your job is to make it consistent, not to replace it.
+
+**1. Name the subject before you name a hue.** Write one sentence about what the product is for, then pick the hue family a stranger would agree carries it. A tool for photographers wants a ground that does not tint the work, so near-neutral with a trace of warmth and a single decisive accent. A finance tool wants a hue that reads as steady rather than urgent, which rules out anything within about 30 degrees of the danger colour. A product about being outdoors can afford a hue drawn from the thing itself. Write the sentence into the design contract; a palette nobody can justify in one line is a palette that drifts.
+
+**2. Neighbours read as a family, opposites read as an argument.** Hues within about 60 degrees of each other belong to one system. Hues 180 degrees apart read as two systems fighting for the same screen, which is why the complementary pairs that work on a colour wheel usually fail in an interface. Pick a primary, then take the rest of the set as steps around it in one direction. Semantic colours are the exception and must sit at least 25 degrees off the accent, or a success message gets mistaken for a primary action.
+
+**3. Every hue in the set shares one lightness ramp and one chroma percentage.** Not one absolute chroma. Cyan runs out of gamut near C 0.09 at mid lightness where purple is still climbing past 0.29, so identical numbers give wildly unequal colour and the set looks arbitrary. Fix each rung's L (95 / 88 / 75 / 60 / 45 / 30 is a reasonable start), then set each hue's chroma to the same percentage of its own gamut edge at that L. This is the only reason a chart legend reads as one system rather than six unrelated colours.
+
+**4. Muddy is almost always chroma set too low, not too high.** The instinct when a palette looks cheap is to desaturate, and that is the move that made it muddy. A colour at mid lightness with chroma well inside its gamut edge has no identity: it reads as a grey someone tinted by accident. Push chroma to the gamut edge for that lightness, then step back about 5% for safety, and judge it there. Two other things cause mud: interpolating between colours in sRGB rather than OKLCH, which drags saturated pairs through grey at the midpoint, and hues in the 90 to 110 degree band, where yellow-green goes olive fast as lightness drops.
+
+**5. Check the set as a set, not swatch by swatch.** Render every hue at every rung as one grid, in both themes, and look for the one that jumps forward or sinks back. That one is off the shared chroma percentage. Then desaturate the whole grid to greyscale: rungs that were meant to be the same L should now be indistinguishable, and any that are not will be the ones misbehaving in charts and in dark mode.
 
 ### Rules
 
@@ -1927,13 +1946,14 @@ Haptics are punctuation. A full stop, not an exclamation mark. The apps that fee
 2. **One `.success` per commit.** Sending, saving, completing: one haptic for the whole batch, never one per item. Check: complete a batch of ten; count the ticks (expect one).
 3. **`.selection` on the crossing, not per pixel.** Pickers, segmented controls, detents, week boundaries: fire when the value changes, not while the finger moves. Check: drag slowly across a picker; each tick lines up with a value change.
 4. **Prepare before predictable moments.** `prepare()` on a `UIFeedbackGenerator` cuts latency from ~50ms to under 5ms and stays warm for ~2 seconds. Call it on touch-down for the release haptic, or when a countdown enters its last second. With `.sensoryFeedback` the system prepares for you; use the UIKit generator only when you need the timing control. Check: a haptic tied to a visual lands within the same frame.
-5. **Throttle continuous haptics and scale them with density.** Scrubbing, flipping, ticking: at most one transient per 30ms (45ms when many things move), intensity `0.35 + 0.35 × density`, sharpness `0.5 + 0.4 × density`. The landing is heavier and duller (intensity 0.9, sharpness 0.25). Check: a full-board cascade reads as a flutter, not machine-gun fire.
-6. **Never double-fire what the system already fires.** Context-menu open (`.medium`), context-menu select (`.medium`), dismiss-outside (`.soft`), widget button taps, Camera Control half-press, `Toggle`, `Picker`, pull-to-refresh, and `.sensoryFeedback`-backed system controls all fire on their own. Check: strip your haptics from these and compare.
-7. **Fire yourself where the system is silent.** Action Button intents, custom buttons, custom sliders, drag thresholds, and completions get nothing from the system. Check: every custom control has a press-down haptic.
-8. **Haptic and sound land within 10ms.** Latency between them destroys the illusion of one event. Trigger both from the same line, sound already prepared. Check: record with a high-speed camera or trust the ear; any gap reads as two events.
-9. **Guard iPad and Mac.** iPads have no haptic engine; `.sensoryFeedback` is a no-op there, but `CHHapticEngine()` throws. Check `CHHapticEngine.capabilitiesForHardware().supportsHaptics` before building an engine. Check: run on an iPad simulator; nothing crashes, nothing logs.
-10. **Budget per session.** A screen that ticks on every state change is noise; the user stops feeling any of them. Decide which three to five moments per app deserve a signature, and give everything else the standard vocabulary or nothing. Check: list every haptic the app fires on the primary path; if it exceeds ~8 distinct moments, cut.
-11. **Never haptic** cold launch, list scrolling, foreground notifications, saved settings, read receipts (once per conversation per session at most), loading completions the user did not wait for, or anything on a timer. Check: grep `sensoryFeedback` and `impactOccurred`; each site maps to a user action.
+5. **Anything with a physical metaphor earns a texture.** Not just commits. A toggle flipping, a tab changing, a drag handle picked up and put down, a pull crossing its refresh threshold, a long-press arming, a reordered row crossing its neighbour: each is an object behaving like an object, and each gets one. Use `.impact(.light)` for pick-up and thresholds, `.impact(.rigid)` for a drop, `.impact(.soft)` for arming, and `.selection` for crossings. This widens the budget deliberately; it does not touch the two exclusions, never double-firing what the system already fires and never firing on scroll, launch, timers or per item in a batch, which both still hold. Check: every texture maps to something the user would expect to feel if the object were real, and none of them fires on scroll, on launch, or per item in a batch.
+6. **Throttle continuous haptics and scale them with density.** Scrubbing, flipping, ticking: at most one transient per 30ms (45ms when many things move), intensity `0.35 + 0.35 × density`, sharpness `0.5 + 0.4 × density`. The landing is heavier and duller (intensity 0.9, sharpness 0.25). Check: a full-board cascade reads as a flutter, not machine-gun fire.
+7. **Never double-fire what the system already fires.** Context-menu open (`.medium`), context-menu select (`.medium`), dismiss-outside (`.soft`), widget button taps, Camera Control half-press, `Toggle`, `Picker`, pull-to-refresh, and `.sensoryFeedback`-backed system controls all fire on their own. Check: strip your haptics from these and compare.
+8. **Fire yourself where the system is silent.** Action Button intents, custom buttons, custom sliders, drag thresholds, and completions get nothing from the system. Check: every custom control has a press-down haptic.
+9. **Haptic and sound land within 10ms.** Latency between them destroys the illusion of one event. Trigger both from the same line, sound already prepared. Check: record with a high-speed camera or trust the ear; any gap reads as two events.
+10. **Guard iPad and Mac.** iPads have no haptic engine; `.sensoryFeedback` is a no-op there, but `CHHapticEngine()` throws. Check `CHHapticEngine.capabilitiesForHardware().supportsHaptics` before building an engine. Check: run on an iPad simulator; nothing crashes, nothing logs.
+11. **Budget per session.** A screen that ticks on every state change is noise; the user stops feeling any of them. Decide which three to five moments per app deserve a signature, and give everything else the standard vocabulary or nothing. Check: list every haptic the app fires on the primary path; if it exceeds ~8 distinct moments, cut.
+12. **Never haptic** cold launch, list scrolling, foreground notifications, saved settings, read receipts (once per conversation per session at most), loading completions the user did not wait for, or anything on a timer. Check: grep `sensoryFeedback` and `impactOccurred`; each site maps to a user action.
 
 ### Cheat sheet
 
@@ -2095,7 +2115,7 @@ Load with `CHHapticPattern(contentsOf:)`.
 - Drag slowly across each picker and detent: one tick per value change, none between.
 - Open a context menu with your own haptic disabled: the system already ticks.
 - Run on iPad: no crash, no console noise.
-- List every haptic on the primary path: ≤ ~8 distinct moments, none on scroll, launch, or timers.
+- List every haptic on the primary path: none on scroll, launch, or timers, and none duplicating a system-fired one. The count is not capped, but every entry names the physical event it stands for; a haptic you cannot name that way is decoration.
 - Trigger the paired sound and haptic together: they land as one event.
 
 ### Do not
@@ -2639,7 +2659,8 @@ enum Motion {
 ```swift
 /* MOTION STORYBOARD
  * Read top-to-bottom. Each value is ms after trigger.
- * Motion is earned: the frequent moments are near-instant, the rare ones get the theatre.
+ * Motion is earned: the frequent moments are near-instant, the rare ones get the fuller
+ * transition. The ceiling is a considered transition, never a set piece.
  *
  * POWER ON (once per connection; rare)
  *     0ms   surface already there, pads at scale 0.92, opacity 0
@@ -2771,7 +2792,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 2. **Four or five rooms, one purpose each.** Value moment → the one input → the payoff → a permission primer only if the very next step needs it → handoff. Why: each extra screen loses a share of users. Check: name each screen's single job; if a screen has two, split it or cut it.
 3. **Sign-in and the paywall are not rooms.** Guest-first; ask for an account when there is something to save, sync, or unlock. Show the paywall only after a value preview, and skippable. Why: forced sign-in is the top abandonment point. Check: the user reaches the payoff without an account.
 4. **The launch screen is not a design canvas.** It matches the first real screen, contains no text (it cannot be localised), and no logo unless the logo is part of the first screen. Why: it is a placeholder for a fraction of a second; a splash reads as a delay. Check: the launch storyboard has no `UILabel`.
-5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. The active dot is a capsule 2.5–3× the inactive width, same height, and glides to the new index. Inactive dots at about 0.25 opacity of the ink. Check: the dots never teleport.
+5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. Every dot is the same size and stays where it is; only the fill changes, over about 180ms. Inactive dots at about 0.25 opacity of the ink, the active one at full. Nothing stretches, nothing travels, nothing changes width, so the only thing moving on the screen is the content. Check: screenshot two consecutive steps and diff them; the dots differ in colour and in nothing else.
 6. **Do not count the primer or the celebration as steps.** Five dots that only reach three is a broken promise. Check: dot count equals the number of screens the user actually pages through.
 7. **The CTA is pinned.** A fixed distance from the bottom safe area, same on every screen; body copy grows upward. Why: a button that moves between screens reads as "made by nobody in particular". Check: page through; the button's Y never changes.
 8. **Forward enters from the trailing edge; back returns to it.** `.spring(duration: 0.45, bounce: 0.15)`. Background art travels at 30–40% of the foreground. Why: direction encodes progress. Check: a cross-fade in place is a finding.
@@ -2780,7 +2801,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 11. **Ask at the point of value, never at launch.** Camera when the user taps scan; notifications after the first thing worth being told about. Check: no permission alert fires before the user has done anything.
 12. **Sign in with Apple, when offered, uses the system button and is no smaller than any other sign-in option.** Do not ask for a password afterwards, and do not ask for a real email when a private relay address arrives. Check: `ASAuthorizationAppleIDButton` or `SignInWithAppleButton`, full width if others are full width.
 13. **Request a review only after a completed value sequence, weeks in.** Never at first-run completion, never as a direct result of a tap. The system allows three prompts per year. Check: `requestReview` is not called from onboarding.
-14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. Save particles for milestones. Check: no confetti on "You're all set".
+14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. There are no particles to save for later; see `references/states.md` rule 10. Check: no confetti on "You're all set", and none anywhere else either.
 15. **Dots are hidden from VoiceOver; the flow announces "Step n of m".** Check: `.accessibilityHidden(true)` on the dots; `.accessibilityValue` on the container.
 
 ### Cheat sheet
@@ -2797,8 +2818,8 @@ The first thirty seconds decide whether someone stays. Every screen either build
 |---|---|
 | Page transition | `.spring(duration: 0.45, bounce: 0.15)`, forward from trailing |
 | Background parallax | 30–40% of foreground travel |
-| Dot size | 7pt inactive; active capsule ~2.75× wide |
-| Dot glide | `.spring(duration: 0.4, bounce: 0.15)` (legacy `response: 0.4, dampingFraction: 0.85`); Reduce Motion `.easeInOut(0.2)` |
+| Dot size | 7pt, identical on every dot, active and inactive |
+| Dot fill | `.easeInOut(duration: 0.18)` on opacity only; no size, position, or width animation to reduce |
 | Inactive dot opacity | ~0.25 of the ink |
 | CTA position | Fixed inset from bottom safe area, identical on every room |
 | Stagger within a room | 30–80ms, first appearance only |
@@ -2842,7 +2863,7 @@ struct OnboardingFlow: View {
 }
 ```
 
-Dots that glide.
+Dots that change fill and nothing else.
 
 ```swift
 struct OnboardingDots: View {
@@ -3574,11 +3595,11 @@ The empty state is the first impression for every new user, and the error state 
 3. **The spinner travels.** Progress appears where the result will land, not only on the control that was tapped. Why: the eye follows one location, so anchor it to the destination. The control may carry progress as well once the result has a home of its own; it may never be the only place it appears. Check: after tapping Send, the bubble shows the progress, whether or not the button does too.
 4. **Skeletons structurally match.** Same bar count, widths, and positions as the real content. Why: three bars for five-line content breaks the illusion the moment it resolves. Check: overlay the skeleton on a loaded cell; the boxes line up.
 5. **Optimistic first.** Apply the change immediately; a pending item is a ghost at opacity 0.6; revert with an inline reason on failure. Why: the user's action causes the visible effect; the network is an implementation detail. Check: airplane mode, tap Like; the heart fills, then reverts with a line under it.
-6. **Empty states invite.** A symbol or small illustration, one warm line of why, one action. Never "No items". Why: it is the only screen every new user sees. Check: the copy names what to do next and there is one button or a pointer to one.
+6. **The empty state shows the destination, not just the door.** Name what is missing, one line of what goes here, a ghosted non-interactive preview of what the filled state looks like, and the one action that gets there. Never "No items". Why: this is the most-seen screen for a new user and the last place to be terse; a person who cannot picture the filled state cannot want it. Check: cover the button; can someone still tell what this screen becomes?
 7. **First-run and empty are different states.** First-run introduces; empty after use reflects ("You cleared everything. Nice."). Check: both exist when the difference matters.
 8. **Errors rise in context and keep the last good value visible.** A strip or line at the thing that failed, not a toast in the sky. Why: the user is looking at the thing; the fix belongs there. Check: the failed row still shows its previous content, dimmed, with the reason underneath.
 9. **Undo must actually undo.** Reverse the effect, not just hide the toast. Check: Undo restores the row, the memory, the setting; the model state matches.
-10. **Celebrate rarely.** At most one celebration per session, for milestones, 60–120 particles, under 3s. Why: confetti on every save is exhausting by day three. Check: list every celebration trigger; each is weekly or rarer.
+10. **No set pieces. Spend the budget on every interaction instead.** No confetti, no particles, no full-screen moment, at any frequency. The craft goes into the ordinary: a checkmark that lands rather than appears, a row that settles rather than pops, a number that rolls rather than swaps, an icon that morphs rather than cuts. Why: a set piece is memorable twice and tiresome after, and it costs the budget that would have made the other four hundred interactions better. This is a tool, not a toy. Check: grep for a particle system; there is none. Then list the five most frequent interactions; each has a considered settle.
 11. **Offline is a state, not an error.** Cached content stays usable; a quiet banner says what is stale. Check: airplane mode; the app is still useful.
 12. **Overflow is a state.** 200 items, a 60-character title, a 4-line description. Check: run with a fake store of 5000 rows and a long-string locale.
 13. **Permission denied has its own screen with a Settings path.** Why: the system alert only appears once; after that the app must explain and offer `UIApplication.openSettingsURLString`. Check: deny in Settings, relaunch, see the screen.
@@ -3825,6 +3846,10 @@ It does not choose a typeface. It makes whatever face the project uses read as o
 14. **All-caps is a house choice.** If the contract uses it: 11–13pt, `.semibold` or `.medium`, tracking +1.2 to +2.0pt, secondary colour. If the contract does not mention it, do not introduce it. Check: design contract row 2.
 15. **Readouts that update rapidly use tabular or mono digits.** ISO, shutter, timers, and any value that ticks jitter with proportional digits. Check: watch the readout during change.
 16. **Optical sizes matter above 20pt.** SF Pro switches from Text to Display automatically in the system font; custom faces with `opsz` axes need `font-optical-sizing` equivalents or separate files. Check: the same face at 13 and 34 does not look like two fonts.
+17. **Ligatures on in prose, off wherever a character must be read on its own.** Turn them off for codes, licence keys, serial numbers, IDs, and filenames, where an `fi` ligature is a character somebody cannot type back. In SwiftUI, apply a descriptor with `kLigaturesType` disabled, or set the string in a face that has none for those fields. Check: render a booking reference containing `fi` and `ffi`; the glyphs stay separate.
+18. **Zeros that cannot be an O, wherever it matters.** SF Pro ships an alternate slashed zero as a stylistic set; find the set number in Font Book rather than guessing it, and apply it through `UIFontDescriptor.featureSettings` with `kStylisticAlternativesType` on codes, keys and IDs only. Not in prose. Check: render `O0` in a code field; the two are unmistakable.
+19. **Real small caps or none.** Drawn small caps carry the correct stroke weight; `.uppercase` at a smaller point size produces letters too light for their neighbours, which reads as wrong without being nameable. SF Pro has no true small caps, so on the system face the answer is not to use them. Check: if the design calls for small caps, the face is a custom one that actually has them.
+20. **Use the real characters.** A typographic apostrophe and quotes, an ellipsis as one character rather than three periods, an en dash for ranges, a real multiplication sign in dimensions, a minus sign rather than a hyphen in negative figures, and a non-breaking space between a number and its unit so "12 MB" never breaks across lines. Check: grep the string catalogue for `'`, `"`, `...` and ` x `; each is a mistake.
 
 ### Cheat sheet
 

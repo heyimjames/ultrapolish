@@ -9,7 +9,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 2. **Four or five rooms, one purpose each.** Value moment → the one input → the payoff → a permission primer only if the very next step needs it → handoff. Why: each extra screen loses a share of users. Check: name each screen's single job; if a screen has two, split it or cut it.
 3. **Sign-in and the paywall are not rooms.** Guest-first; ask for an account when there is something to save, sync, or unlock. Show the paywall only after a value preview, and skippable. Why: forced sign-in is the top abandonment point. Check: the user reaches the payoff without an account.
 4. **The launch screen is not a design canvas.** It matches the first real screen, contains no text (it cannot be localised), and no logo unless the logo is part of the first screen. Why: it is a placeholder for a fraction of a second; a splash reads as a delay. Check: the launch storyboard has no `UILabel`.
-5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. The active dot is a capsule 2.5–3× the inactive width, same height, and glides to the new index. Inactive dots at about 0.25 opacity of the ink. Check: the dots never teleport.
+5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. Every dot is the same size and stays where it is; only the fill changes, over about 180ms. Inactive dots at about 0.25 opacity of the ink, the active one at full. Nothing stretches, nothing travels, nothing changes width, so the only thing moving on the screen is the content. Check: screenshot two consecutive steps and diff them; the dots differ in colour and in nothing else.
 6. **Do not count the primer or the celebration as steps.** Five dots that only reach three is a broken promise. Check: dot count equals the number of screens the user actually pages through.
 7. **The CTA is pinned.** A fixed distance from the bottom safe area, same on every screen; body copy grows upward. Why: a button that moves between screens reads as "made by nobody in particular". Check: page through; the button's Y never changes.
 8. **Forward enters from the trailing edge; back returns to it.** `.spring(duration: 0.45, bounce: 0.15)`. Background art travels at 30–40% of the foreground. Why: direction encodes progress. Check: a cross-fade in place is a finding.
@@ -18,7 +18,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 11. **Ask at the point of value, never at launch.** Camera when the user taps scan; notifications after the first thing worth being told about. Check: no permission alert fires before the user has done anything.
 12. **Sign in with Apple, when offered, uses the system button and is no smaller than any other sign-in option.** Do not ask for a password afterwards, and do not ask for a real email when a private relay address arrives. Check: `ASAuthorizationAppleIDButton` or `SignInWithAppleButton`, full width if others are full width.
 13. **Request a review only after a completed value sequence, weeks in.** Never at first-run completion, never as a direct result of a tap. The system allows three prompts per year. Check: `requestReview` is not called from onboarding.
-14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. Save particles for milestones. Check: no confetti on "You're all set".
+14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. There are no particles to save for later; see `references/states.md` rule 10. Check: no confetti on "You're all set", and none anywhere else either.
 15. **Dots are hidden from VoiceOver; the flow announces "Step n of m".** Check: `.accessibilityHidden(true)` on the dots; `.accessibilityValue` on the container.
 
 ## Cheat sheet
@@ -35,8 +35,8 @@ The first thirty seconds decide whether someone stays. Every screen either build
 |---|---|
 | Page transition | `.spring(duration: 0.45, bounce: 0.15)`, forward from trailing |
 | Background parallax | 30–40% of foreground travel |
-| Dot size | 7pt inactive; active capsule ~2.75× wide |
-| Dot glide | `.spring(duration: 0.4, bounce: 0.15)` (legacy `response: 0.4, dampingFraction: 0.85`); Reduce Motion `.easeInOut(0.2)` |
+| Dot size | 7pt, identical on every dot, active and inactive |
+| Dot fill | `.easeInOut(duration: 0.18)` on opacity only; no size, position, or width animation to reduce |
 | Inactive dot opacity | ~0.25 of the ink |
 | CTA position | Fixed inset from bottom safe area, identical on every room |
 | Stagger within a room | 30–80ms, first appearance only |
@@ -80,7 +80,7 @@ struct OnboardingFlow: View {
 }
 ```
 
-Dots that glide.
+Dots that change fill and nothing else.
 
 ```swift
 struct OnboardingDots: View {

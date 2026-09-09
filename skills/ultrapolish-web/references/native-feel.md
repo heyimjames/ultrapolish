@@ -4,6 +4,8 @@
 
 Use this when building a PWA, an app-like web product, or a companion web view that should be indistinguishable from SwiftUI. Do not use it to make a marketing site or a data tool "feel iOS".
 
+**It is all or nothing.** A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half. A sheet that drags but does not carry its velocity into the settle is worse than a sheet that does not drag. A push transition without an interruptible back-swipe is worse than a fade. If the project cannot afford every rule below, take none of them and build something that is excellent as web instead; the neutral references already cover that completely. Check before starting: every rule in this file has an owner, or the file is closed.
+
 ## Rules
 
 1. **Body is 17px, not 16.** The whole scale shifts with it (cheat sheet). Why: every web default is 16; the one pixel is subliminal and it is most of the difference. Check: computed `font-size` on `<p>` is 17px.

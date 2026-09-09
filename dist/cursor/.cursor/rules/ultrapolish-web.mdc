@@ -32,7 +32,7 @@ Read this before touching a pixel.
 | Radii | Distinct values, whether nested radii are concentric | `--radius*`, `rounded-*` |
 | Spacing | Grid step, container padding, gaps | `gap-*`, `p-*`, `--spacing` |
 | Motion | Easing tokens, durations, spring library, `prefers-reduced-motion` handling | `--ease*`, `transition`, `motion/react` |
-| Surfaces | Shadow recipe, border vs shadow-as-border, image outlines | `box-shadow`, `border`, `outline` |
+| Surfaces | The elevation ladder and its L steps, where shadows and hairlines are still used, image outlines | `--surface`, `--raised`, `box-shadow`, `border` |
 | Overlays | Modal/sheet/popover library, z-index scale, focus handling | `<dialog>`, Base UI, Radix, Vaul, `--z-*` |
 | Forms | Input height, error placement, validation timing | `<input>`, `aria-invalid` |
 | States | Which of empty / loading / error / success / offline exist | skeleton components, `Suspense` |
@@ -197,11 +197,11 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 
 ### 3.6 Surfaces
 
-- **Shadow as border (light)**: `0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04)`; hover raises to `.08 / .08 / .06`.
-- **Dark mode** collapses to a single ring: `0 0 0 1px oklch(1 0 0 / 0.08)`, hover `0.13`. Shadows do not read on dark.
+- **Elevation is a step in value.** `--ground` / `--surface` / `--raised` / `--overlay`, about 2–3 points of L apart in the light and 3–4 in the dark, all carrying the palette's hue at C 0.004–0.016 so no grey is dead. Not a shadow, not a border. If two surfaces do not separate, increase the step.
+- **Hover moves a rung**, 150ms, background only. Nothing translates: a lift promises a click.
+- **Shadows mean one thing**: this floats above the page and can be dismissed. Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)` tinted toward the canvas hue. Never on a card, a row, or a section. For a modal the scrim and the pushed-back page do the work; the shadow is a detail.
+- **Hairlines only where no step is available**, such as rows inside one card: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`. A grid of separately outlined cards is the template tell.
 - **Image outline** (non-negotiable on user content): `outline: 1px solid oklch(0 0 0 / 0.1)` light, `oklch(1 0 0 / 0.1)` dark, `outline-offset: -1px`. Never a tinted grey; it reads as dirt.
-- **Hairline**: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`.
-- **Elevation ladder** by named surface (`--surface`, `--raised`, `--overlay`) beats ad-hoc shadows.
 - **Backdrop blur**: needs `saturate(180%)` or it is grey mush; 2–3 per screen, static chrome only, never on a scrolling or animating element.
 - **z-index scale**: `--z-dropdown: 100; --z-sticky: 150; --z-overlay: 200; --z-popover: 300; --z-toast: 400`. Never 9999. Prefer `isolation: isolate` on components.
 
@@ -271,7 +271,7 @@ Each topic below is the 30-second version. The reference has the full rules, num
 
 ### Motion and transitions → the motion reference below
 
-Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets theatre, daily gets instant. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
+Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets the fuller transition, daily gets instant. The ceiling on "rare" is choreography, never a set piece; there is no confetti at any frequency. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
 
 ### Springs, gestures and scroll → the springs-and-gestures reference below
 
@@ -489,7 +489,14 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Icons | Two states (outline, fill), not three |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Blur | Static backdrop blur up to 50px is fine; never animate blur above 20px |
-| Shadow recipe | 3-layer shadow-as-border in light; single 8% white ring in dark |
+| Elevation | A step in surface value, 2–3 L in light and 3–4 in dark, carrying the palette hue. Shadows are reserved for things that genuinely float; hairlines only where no step is available |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead |
+| Elevation | A step in surface value, 2 to 3 points of L in light and 3 to 4 in dark, carrying the palette hue. Shadows mean only "this floats and can be dismissed"; hairlines only where no step is available |
+| Hover | Background moves a rung, 150ms, nothing translates. A lift promises a click |
+| Native feel | Opt-in and all or nothing. A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 
@@ -1564,6 +1571,20 @@ See `references/performance.md` for the frame budget and `visibilitychange`, `re
 Use this when you are choosing, converting, checking, or auditing colour on the web: tokens, palettes, contrast, dark pairs, gamut, and how colour carries meaning.
 Pair with `references/theming-and-dark-mode.md` for the switching mechanism and `references/surfaces-and-depth.md` for shadows and outlines.
 
+### Choosing the palette
+
+The rules below tune a palette. This chooses one. Do it first, and only when the project has no palette already: if it has one, your job is to make it consistent, not to replace it.
+
+**1. Name the subject before you name a hue.** Write one sentence about what the product is for, then pick the hue family a stranger would agree carries it. A tool for photographers wants a ground that does not tint the work, so near-neutral with a trace of warmth and a single decisive accent. A finance tool wants a hue that reads as steady rather than urgent, which rules out anything within about 30 degrees of the danger colour. A product about being outdoors can afford a hue drawn from the thing itself. Write the sentence into the design contract; a palette nobody can justify in one line is a palette that drifts.
+
+**2. Neighbours read as a family, opposites read as an argument.** Hues within about 60 degrees of each other belong to one system. Hues 180 degrees apart read as two systems fighting for the same screen, which is why the complementary pairs that work on a colour wheel usually fail in an interface. Pick a primary, then take the rest of the set as steps around it in one direction. Semantic colours are the exception and must sit at least 25 degrees off the accent, or a success message gets mistaken for a primary action.
+
+**3. Every hue in the set shares one lightness ramp and one chroma percentage.** Not one absolute chroma. Cyan runs out of gamut near C 0.09 at mid lightness where purple is still climbing past 0.29, so identical numbers give wildly unequal colour and the set looks arbitrary. Fix each rung's L (95 / 88 / 75 / 60 / 45 / 30 is a reasonable start), then set each hue's chroma to the same percentage of its own gamut edge at that L. This is the only reason a chart legend reads as one system rather than six unrelated colours.
+
+**4. Muddy is almost always chroma set too low, not too high.** The instinct when a palette looks cheap is to desaturate, and that is the move that made it muddy. A colour at mid lightness with chroma well inside its gamut edge has no identity: it reads as a grey someone tinted by accident. Push chroma to the gamut edge for that lightness, then step back about 5% for safety, and judge it there. Two other things cause mud: interpolating between colours in sRGB rather than OKLCH, which drags saturated pairs through grey at the midpoint, and hues in the 90 to 110 degree band, where yellow-green goes olive fast as lightness drops.
+
+**5. Check the set as a set, not swatch by swatch.** Render every hue at every rung as one grid, in both themes, and look for the one that jumps forward or sinks back. That one is off the shared chroma percentage. Then desaturate the whole grid to greyscale: rungs that were meant to be the same L should now be indistinguishable, and any that are not will be the ones misbehaving in charts and in dark mode.
+
 ### Rules
 
 1. **Work in OKLCH.** It is perceptually uniform, so equal steps in L look equal and hue does not drift as you lighten. Format: `oklch(L C H / alpha)`, three decimals for L and C, integer or one decimal for H, `0` never `-0`. Check: no new colour is authored in hex or HSL; hex appears only as a legacy fallback.
@@ -2567,7 +2588,7 @@ Use this when you add, review, or tune any transition, entrance, exit, hover, or
 
 1. **Name every property you transition.** `transition: all` animates properties you did not intend (layout, colour on theme switch, `border-radius` on hover) and costs a style recalc on each. Write `transition: transform 150ms var(--ease), opacity 150ms var(--ease)`. Check: grep for `transition: all` and `transition-property: all`; both should return nothing. Tailwind's bare `transition` is a curated list (colors, opacity, shadow, transform), not `all`; `transition-transform` covers `transform, translate, scale, rotate`.
 2. **Build a vocabulary, then refuse anything outside it.** Five to eight named tokens, each with a stated job, in one file. Add the line: "If a new animation does not fit one of these, the answer is usually don't." Check: every `transition` and `animate` in the codebase references a token, not a literal.
-3. **Frequency decides motion.** Seen 100+ times a day: instant, or a colour change ≤ 150ms. Seen a few times a day: 150–250ms. Seen rarely (onboarding, a milestone, a first paint): the theatre. Check: list the three most frequent interactions; none should have a transform animation over 150ms.
+3. **Frequency decides motion.** Seen 100+ times a day: instant, or a colour change ≤ 150ms. Seen a few times a day: 150–250ms. Seen rarely (onboarding, a milestone, a first paint): the fuller transition, whose ceiling is a considered piece of choreography and never a particle burst. Check: list the three most frequent interactions; none should have a transform animation over 150ms.
 4. **Entrances decelerate, exits accelerate.** Enter on an ease-out (`cubic-bezier(0.165, 0.84, 0.44, 1)` for small, `cubic-bezier(0.16, 1, 0.3, 1)` for large). Exit on `cubic-bezier(0.4, 0, 1, 1)` at about 0.65× the entrance duration, never with bounce. Check: exits are visibly shorter when replayed at 10% speed.
 5. **Paired elements share timing.** Modal and backdrop, tooltip and arrow, drawer and scrim, a number and its bar: identical easing and duration, or the pair reads as two things. Check: the two `transition` declarations are the same token.
 6. **Stagger by kind.** List items 30–40ms apart, cap around 8 (240ms total). Semantic chunks (title, body, actions) 80–100ms apart. First appearance only, never re-run on scroll into view. Check: item 9 onward has no delay.
@@ -2766,6 +2787,8 @@ Reduced-motion global fallback, only where per-element opt-in is impossible:
 **This is a style choice. Load only when the project wants to feel like a native iOS app.** Everything universal lives in the neutral references; this file adds the iOS-specific layer on top. If the project's design contract does not say "feels like a native app", close this file.
 
 Use this when building a PWA, an app-like web product, or a companion web view that should be indistinguishable from SwiftUI. Do not use it to make a marketing site or a data tool "feel iOS".
+
+**It is all or nothing.** A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half. A sheet that drags but does not carry its velocity into the settle is worse than a sheet that does not drag. A push transition without an interruptible back-swipe is worse than a fade. If the project cannot afford every rule below, take none of them and build something that is excellent as web instead; the neutral references already cover that completely. Check before starting: every rule in this file has an owner, or the file is closed.
 
 ### Rules
 
@@ -3711,7 +3734,7 @@ Every state gets the same care as the happy path; the empty state is the first t
 3. **No spinner before 300ms.** A flash of spinner for a 120ms request reads as slower than no indicator at all. Check: set a 300ms delay before any spinner mounts.
 4. **Skeletons match the structure.** Same number of lines, same widths, same positions as the content that will replace them. Three bars for five lines is a broken promise. Shimmer 1.2–1.5s, subtle, static under `prefers-reduced-motion`. Check: overlay the skeleton on the loaded state; edges align.
 5. **Optimistic first, ghost while pending.** Apply the change immediately at 60% opacity, confirm to 100% on success, revert with an inline reason on failure. Not a spinner; a ghost. Check: send a message with the network off; it appears, then reverts with a reason next to it.
-6. **Empty states have three parts.** The name of what is missing, one line of why, one action. "No projects yet. Create one to start tracking time. [New project]". Never "No items". Check: every empty state has exactly one button.
+6. **The empty state shows the destination, not just the door.** The name of what is missing, one line of what goes here, a ghosted non-interactive preview of the filled state, and the one action that gets there. "No projects yet. Create one to start tracking time. [New project]", above a dimmed sketch of a project row. Never "No items". Why: this is the most-seen screen for a new user and the last place to be terse; a person who cannot picture the filled state cannot want it. Check: cover the button; can someone still tell what this screen becomes?
 7. **Search and filter empties name the query and offer an exit.** "No results for 'quarterly'. Clear filters." Check: filter to zero results; the filter can be cleared from the empty state.
 8. **Never park crucial persistent information in an empty state.** It disappears the moment there is one item. Settings, limits, and instructions live somewhere permanent. Check: add one item; did any important text vanish?
 9. **First-run is not the empty state.** First-run invites and can show an example; empty after deletion is quieter and offers the same action without the tour. Check: delete everything; you do not see the welcome again.
@@ -3905,12 +3928,21 @@ Pair with `references/theming-and-dark-mode.md` for what depth becomes in the da
 ### Rules
 
 1. **A card needs a reason.** A card separates something that could be moved, selected, or acted on as a unit. Content that is simply a section gets space and a heading, not a box. The identical-rounded-card kit with the same grey shadow under each is the most recognisable template tell.
-2. **Shadow as border in the light.** `box-shadow: 0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04)`. Hover raises to `0.08 / 0.08 / 0.06`. The 1px ring does the work; the two soft layers give it contact. A `border` sits inside the box and shifts layout; a shadow ring does not.
-3. **A single ring in the dark.** Shadows do not read on dark grounds. Collapse to `0 0 0 1px oklch(1 0 0 / 0.08)`, hover `0.13`. Elevation in the dark comes from a slightly lighter surface plus the ring.
-4. **Hairlines are 1px, 0.5px on dense screens.** `--hairline: 1px`, overridden to `0.5px` at `min-resolution: 2dppx`. Anything thinner disappears; anything thicker reads as a rule, not a hairline.
+2. **Elevation is a step in value, not a shadow and not a line.** Surfaces separate because they are different tones of the same ground. Name the ladder as tokens and let every component pick a rung; nobody types a shadow and nobody draws a border to make a card visible. In the light the ground is the darkest rung and each layer above it is lighter; in the dark the ground is darkest and each layer is lighter too, so the direction of "up" never changes.
+
+   | Rung | Light | Dark |
+   |---|---|---|
+   | `--ground` | `oklch(96.5% C H)` | `oklch(12% C H)` |
+   | `--surface` | `oklch(98.5% C H)` | `oklch(16% C H)` |
+   | `--raised` | `oklch(100% 0 0)` | `oklch(20% C H)` |
+   | `--overlay` | `oklch(100% 0 0)` | `oklch(24% C H)` |
+
+   Steps run about 2 to 3 points of L in the light and 3 to 4 in the dark, where flare and low screen brightness eat the difference. `C` and `H` are the palette's own, at a chroma of roughly 0.004 to 0.016, so the greys are never dead and light and dark read as one palette at two lightnesses. Check: screenshot two adjacent rungs, sample both, and confirm the L difference; if you cannot see the separation, increase the step rather than reaching for a border.
+3. **Where a value step cannot work, and what to do instead.** Three cases. Over photography or video the ground is not a known value, so use a scrim or a material and set the text against that. Where two surfaces on the same rung must be told apart, such as rows inside one card, a hairline is correct because there is no step available; keep it to one place. Where the surface is transparent, the rung underneath is whatever scrolled behind it, so pick colours against the lightest and darkest content that can pass. Everywhere else, if two things are not separating, the step is too small. Check: grep for `border` and `box-shadow` on non-overlay components; each remaining one names which of these three cases it is.
+4. **When a hairline is genuinely needed it is 1px, 0.5px on dense screens.** `--hairline: 1px`, overridden to `0.5px` at `min-resolution: 2dppx`. Anything thinner disappears; anything thicker reads as a rule, not a hairline. A grid of cards each drawn with its own outline is the template tell; the value step should be doing that work.
 5. **Outline every user image.** `outline: 1px solid oklch(0 0 0 / 0.1)` in the light, `oklch(1 0 0 / 0.1)` in the dark, `outline-offset: -1px`. Pure black or white at 10%, never a tinted grey; a tinted outline reads as dirt on the image edge. Without it a white product shot floats loose on a white canvas.
-6. **Name your elevation ladder.** `--surface`, `--raised`, `--overlay` (and their hover variants) as tokens, each with its own background and shadow. Components pick a rung; nobody types a shadow.
-7. **Only true floating overlays get a drop shadow.** Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)`, tinted toward the canvas hue rather than neutral black. Cards, rows, and sections do not float and do not get one.
+6. **Hover moves a component up a rung.** Not a lift, not a new shadow: the background steps to the next tone over 150ms and nothing on the page moves. A card that translates upward is promising a click, so if the whole card is not a link it must not move. Check: hover a card and diff the two frames; only the background differs.
+7. **Only true floating overlays get a drop shadow, and the scrim carries most of the meaning.** Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)`, tinted toward the canvas hue rather than neutral black. Cards, rows, and sections do not float and do not get one. When surfaces are separated by value rather than shadow, a shadow becomes a word with exactly one meaning, "this is above the page and can be dismissed", and it should never be spent on anything else. A modal says the same thing far more loudly with a scrim and the page pushed back; the shadow is a supporting detail there, not the mechanism.
 8. **Bigger surfaces read thicker.** A full sheet gets a stronger blur and a deeper shadow than a tooltip. Depth cues scale with the size of the thing that is supposedly above the page.
 9. **Never stack two translucent surfaces.** Legibility collapses; text on the upper one is fighting two backgrounds. The second layer becomes solid.
 10. **Backdrop blur needs saturation and a budget.** `backdrop-filter: blur(20px) saturate(180%)`; without `saturate` it is grey mush. Two or three per screen, on static chrome (headers, bars, sheet frames) only. Never on a scrolling or animating element; it is the number-one frame killer.
@@ -4425,6 +4457,11 @@ Pair with `references/layout-and-spacing.md` for measure and rhythm and `referen
 22. **Variable-font axis honesty.** A face's weight axis may run 350–900 or 425–625, not 100–900. Map named weights (regular, medium, semibold, bold) to real axis values in exactly one place, and let every renderer (DOM, canvas, export) read that map. A "semibold" that resolves to the same number as "bold" is a bug you find at 2am.
 23. **Pair for contrast, not similarity.** Rarely more than three faces. A serif with a sans, a mono for data. "Display" in a font's name does not make it a display face; pick by size, and if the family ships Text and Display cuts, switch at about 20px.
 24. **X-height explains size mismatch.** Two faces at the same `font-size` look different sizes because their x-heights differ. Retune size and line-height per face; never swap faces at a fixed size.
+25. **Ligatures on in prose, off wherever a character must be read on its own.** `font-variant-ligatures: common-ligatures` is the default and should stay. Set `none` on anything a person has to transcribe, compare, or read aloud: codes, licence keys, serial numbers, IDs, passwords, filenames. An `fi` ligature in a booking reference is a character somebody cannot type back. Check: set a code field to a string containing `fi`, `fl` and `ffi` and confirm the glyphs stay separate.
+26. **Zeros that cannot be an O, wherever it matters.** `font-variant-numeric: slashed-zero` on codes, keys, IDs, and anything read over a phone. Not in prose, where a slashed zero reads as technical for no reason. Check: render `O0` in every code field; the two are unmistakable.
+27. **Figures have two jobs and one screen should not mix them.** Lining figures (the default) sit at cap height and belong in UI, tables, and anything aligned. Oldstyle figures (`font-variant-numeric: oldstyle-nums`) have ascenders and descenders and belong in running prose set in a serif, where lining figures shout. Pick per context and never both in one view. `diagonal-fractions` for real fractions, `ordinal` for `1st`, rather than superscript markup.
+28. **Real small caps, never faked ones.** `font-variant-caps: small-caps` uses drawn glyphs with the correct stroke weight. `text-transform: uppercase` at a smaller size produces letters that are too light for their neighbours, which is visible even to people who cannot name what is wrong. If the face has no small caps, do not use small caps. Check: set both next to each other at 14px and compare stroke weight.
+29. **Stylistic sets are a house choice, applied once at the root.** `font-feature-settings: "ss01"` for an alternate single-storey `a`, a straight-tailed `l`, a different `g`. Decide once, record it in the design contract, and set it on `:root` so the whole product agrees. A stylistic set applied to one component is how a product ends up with two typefaces that are the same typeface. Check: grep `font-feature-settings`; every stylistic set is declared in one place.
 
 ### Cheat sheet
 

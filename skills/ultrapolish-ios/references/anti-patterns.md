@@ -223,11 +223,11 @@ Why: it cannot localise, it flashes, and it delays the first real frame.
 Fix: the launch screen matches the first screen's chrome and has no text.
 Spot it: `LaunchScreen.storyboard` with a `UILabel`.
 
-### Confetti on save
-A particle burst on an ordinary action.
-Why: the inversion: theatre for the routine, silence for the milestone.
-Fix: rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s.
-Spot it: confetti calls in save or complete handlers.
+### Confetti
+A particle burst, at any frequency, for anything.
+Why: it is memorable twice. After that it is a thing to sit through, and it spent the budget that would have made the four hundred ordinary interactions better. A product that throws particles is telling you where its craft stopped.
+Fix: no particle system at all. Mark the moment by having the interface behave well: the number lands, the symbol morphs, one `.success` haptic, and the same care goes into every checkmark and row settle in the app.
+Spot it: any particle emitter, any Lottie celebration, any `CAEmitterLayer`.
 
 ### Haptic spam
 `.selection` on every scroll tick; `.success` on every read receipt.

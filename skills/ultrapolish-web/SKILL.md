@@ -31,7 +31,7 @@ Read this before touching a pixel.
 | Radii | Distinct values, whether nested radii are concentric | `--radius*`, `rounded-*` |
 | Spacing | Grid step, container padding, gaps | `gap-*`, `p-*`, `--spacing` |
 | Motion | Easing tokens, durations, spring library, `prefers-reduced-motion` handling | `--ease*`, `transition`, `motion/react` |
-| Surfaces | Shadow recipe, border vs shadow-as-border, image outlines | `box-shadow`, `border`, `outline` |
+| Surfaces | The elevation ladder and its L steps, where shadows and hairlines are still used, image outlines | `--surface`, `--raised`, `box-shadow`, `border` |
 | Overlays | Modal/sheet/popover library, z-index scale, focus handling | `<dialog>`, Base UI, Radix, Vaul, `--z-*` |
 | Forms | Input height, error placement, validation timing | `<input>`, `aria-invalid` |
 | States | Which of empty / loading / error / success / offline exist | skeleton components, `Suspense` |
@@ -196,11 +196,11 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 
 ### 3.6 Surfaces
 
-- **Shadow as border (light)**: `0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04)`; hover raises to `.08 / .08 / .06`.
-- **Dark mode** collapses to a single ring: `0 0 0 1px oklch(1 0 0 / 0.08)`, hover `0.13`. Shadows do not read on dark.
+- **Elevation is a step in value.** `--ground` / `--surface` / `--raised` / `--overlay`, about 2–3 points of L apart in the light and 3–4 in the dark, all carrying the palette's hue at C 0.004–0.016 so no grey is dead. Not a shadow, not a border. If two surfaces do not separate, increase the step.
+- **Hover moves a rung**, 150ms, background only. Nothing translates: a lift promises a click.
+- **Shadows mean one thing**: this floats above the page and can be dismissed. Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)` tinted toward the canvas hue. Never on a card, a row, or a section. For a modal the scrim and the pushed-back page do the work; the shadow is a detail.
+- **Hairlines only where no step is available**, such as rows inside one card: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`. A grid of separately outlined cards is the template tell.
 - **Image outline** (non-negotiable on user content): `outline: 1px solid oklch(0 0 0 / 0.1)` light, `oklch(1 0 0 / 0.1)` dark, `outline-offset: -1px`. Never a tinted grey; it reads as dirt.
-- **Hairline**: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`.
-- **Elevation ladder** by named surface (`--surface`, `--raised`, `--overlay`) beats ad-hoc shadows.
 - **Backdrop blur**: needs `saturate(180%)` or it is grey mush; 2–3 per screen, static chrome only, never on a scrolling or animating element.
 - **z-index scale**: `--z-dropdown: 100; --z-sticky: 150; --z-overlay: 200; --z-popover: 300; --z-toast: 400`. Never 9999. Prefer `isolation: isolate` on components.
 
@@ -270,7 +270,7 @@ Each topic below is the 30-second version. The reference has the full rules, num
 
 ### Motion and transitions → `references/motion.md`
 
-Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets theatre, daily gets instant. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
+Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets the fuller transition, daily gets instant. The ceiling on "rare" is choreography, never a set piece; there is no confetti at any frequency. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
 
 ### Springs, gestures and scroll → `references/springs-and-gestures.md`
 
@@ -488,7 +488,14 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Icons | Two states (outline, fill), not three |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Blur | Static backdrop blur up to 50px is fine; never animate blur above 20px |
-| Shadow recipe | 3-layer shadow-as-border in light; single 8% white ring in dark |
+| Elevation | A step in surface value, 2–3 L in light and 3–4 in dark, carrying the palette hue. Shadows are reserved for things that genuinely float; hairlines only where no step is available |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead |
+| Elevation | A step in surface value, 2 to 3 points of L in light and 3 to 4 in dark, carrying the palette hue. Shadows mean only "this floats and can be dismissed"; hairlines only where no step is available |
+| Hover | Background moves a rung, 150ms, nothing translates. A lift promises a click |
+| Native feel | Opt-in and all or nothing. A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 

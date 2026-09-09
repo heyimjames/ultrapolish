@@ -3,6 +3,20 @@
 Use this when you are defining, auditing, or fixing colour tokens, dark mode, gradients, shadows, or translucent surfaces in a SwiftUI app.
 It does not pick a palette. It makes the project's palette hold together in both appearances and on wide-gamut screens.
 
+## Choosing the palette
+
+The rules below tune a palette. This chooses one. Do it first, and only when the project has no palette already: if it has one, your job is to make it consistent, not to replace it.
+
+**1. Name the subject before you name a hue.** Write one sentence about what the product is for, then pick the hue family a stranger would agree carries it. A tool for photographers wants a ground that does not tint the work, so near-neutral with a trace of warmth and a single decisive accent. A finance tool wants a hue that reads as steady rather than urgent, which rules out anything within about 30 degrees of the danger colour. A product about being outdoors can afford a hue drawn from the thing itself. Write the sentence into the design contract; a palette nobody can justify in one line is a palette that drifts.
+
+**2. Neighbours read as a family, opposites read as an argument.** Hues within about 60 degrees of each other belong to one system. Hues 180 degrees apart read as two systems fighting for the same screen, which is why the complementary pairs that work on a colour wheel usually fail in an interface. Pick a primary, then take the rest of the set as steps around it in one direction. Semantic colours are the exception and must sit at least 25 degrees off the accent, or a success message gets mistaken for a primary action.
+
+**3. Every hue in the set shares one lightness ramp and one chroma percentage.** Not one absolute chroma. Cyan runs out of gamut near C 0.09 at mid lightness where purple is still climbing past 0.29, so identical numbers give wildly unequal colour and the set looks arbitrary. Fix each rung's L (95 / 88 / 75 / 60 / 45 / 30 is a reasonable start), then set each hue's chroma to the same percentage of its own gamut edge at that L. This is the only reason a chart legend reads as one system rather than six unrelated colours.
+
+**4. Muddy is almost always chroma set too low, not too high.** The instinct when a palette looks cheap is to desaturate, and that is the move that made it muddy. A colour at mid lightness with chroma well inside its gamut edge has no identity: it reads as a grey someone tinted by accident. Push chroma to the gamut edge for that lightness, then step back about 5% for safety, and judge it there. Two other things cause mud: interpolating between colours in sRGB rather than OKLCH, which drags saturated pairs through grey at the midpoint, and hues in the 90 to 110 degree band, where yellow-green goes olive fast as lightness drops.
+
+**5. Check the set as a set, not swatch by swatch.** Render every hue at every rung as one grid, in both themes, and look for the one that jumps forward or sinks back. That one is off the shared chroma percentage. Then desaturate the whole grid to greyscale: rungs that were meant to be the same L should now be indistinguishable, and any that are not will be the ones misbehaving in charts and in dark mode.
+
 ## Rules
 
 1. **Pick in OKLCH, ship in Display P3, fall back to sRGB automatically.** OKLCH keeps lightness and chroma perceptually honest; P3 is what every iPhone since 7 displays. `Color(red:green:blue:)` with no colour space silently produces sRGB, which is the most common wide-gamut bug. Check: grep for `Color(red:` and `Color(hex:` and confirm each passes `.displayP3`.

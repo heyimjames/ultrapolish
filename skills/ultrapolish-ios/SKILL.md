@@ -341,7 +341,7 @@ Reject on sight. Each of these reads as "made by nobody in particular".
 
 - A symbol that breathes, pulses, or bounces while idle
 - Purple → blue → pink gradient; any gradient interpolated in RGB (grey in the middle)
-- Confetti on save; a celebration for an ordinary act; silence on a real milestone
+- Confetti or a particle burst anywhere; a set piece standing in for craft in the ordinary interactions around it
 - A state that teleports: value changes with no `.animation(_, value:)`
 - `.animation(...)` with no `value:`; `withAnimation` wrapping unrelated state
 - `Color(red:green:blue:)` without `.displayP3`; a hex literal with no light/dark pair
@@ -486,12 +486,17 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Hit area | 44pt; macOS pointer 24pt |
 | Reduce Motion | 180ms crossfade; keep haptics and functional feedback |
 | Long-press | 0.45s reactions, 0.5s system, 0.7s destructive |
-| Confetti | Rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s, never in widgets |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead: things land, settle, roll, and morph rather than appearing and cutting |
 | Widget margins | 16pt default / 11pt tight; `ContainerRelativeShape` |
 | Onboarding length | 4–5 rooms; longer only when each step builds toward one payoff |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Icons | Two states (outline, fill), not three |
 | Toasts | Only for minor, reversible, global outcomes; ~2.2s with Undo; anything with an action persists |
+| Haptic budget | Anything with a physical metaphor earns a texture: toggles, tab changes, drag pick-up and drop, pull thresholds, long-press arming, reorder crossings. Never on scroll, launch, timers, per item in a batch, or duplicating a system-fired one |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Onboarding indicator | Equal dots that never move or stretch; only the fill changes, over 180ms |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 

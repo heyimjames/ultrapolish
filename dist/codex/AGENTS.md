@@ -353,7 +353,7 @@ Reject on sight. Each of these reads as "made by nobody in particular".
 
 - A symbol that breathes, pulses, or bounces while idle
 - Purple → blue → pink gradient; any gradient interpolated in RGB (grey in the middle)
-- Confetti on save; a celebration for an ordinary act; silence on a real milestone
+- Confetti or a particle burst anywhere; a set piece standing in for craft in the ordinary interactions around it
 - A state that teleports: value changes with no `.animation(_, value:)`
 - `.animation(...)` with no `value:`; `withAnimation` wrapping unrelated state
 - `Color(red:green:blue:)` without `.displayP3`; a hex literal with no light/dark pair
@@ -498,12 +498,17 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Hit area | 44pt; macOS pointer 24pt |
 | Reduce Motion | 180ms crossfade; keep haptics and functional feedback |
 | Long-press | 0.45s reactions, 0.5s system, 0.7s destructive |
-| Confetti | Rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s, never in widgets |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead: things land, settle, roll, and morph rather than appearing and cutting |
 | Widget margins | 16pt default / 11pt tight; `ContainerRelativeShape` |
 | Onboarding length | 4–5 rooms; longer only when each step builds toward one payoff |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Icons | Two states (outline, fill), not three |
 | Toasts | Only for minor, reversible, global outcomes; ~2.2s with Undo; anything with an action persists |
+| Haptic budget | Anything with a physical metaphor earns a texture: toggles, tab changes, drag pick-up and drop, pull thresholds, long-press arming, reorder crossings. Never on scroll, launch, timers, per item in a batch, or duplicating a system-fired one |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Onboarding indicator | Equal dots that never move or stretch; only the fill changes, over 180ms |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 
@@ -984,11 +989,11 @@ Why: it cannot localise, it flashes, and it delays the first real frame.
 Fix: the launch screen matches the first screen's chrome and has no text.
 Spot it: `LaunchScreen.storyboard` with a `UILabel`.
 
-#### Confetti on save
-A particle burst on an ordinary action.
-Why: the inversion: theatre for the routine, silence for the milestone.
-Fix: rare milestones only, ≤ 1 per session, 60–120 particles, ≤ 3s.
-Spot it: confetti calls in save or complete handlers.
+#### Confetti
+A particle burst, at any frequency, for anything.
+Why: it is memorable twice. After that it is a thing to sit through, and it spent the budget that would have made the four hundred ordinary interactions better. A product that throws particles is telling you where its craft stopped.
+Fix: no particle system at all. Mark the moment by having the interface behave well: the number lands, the symbol morphs, one `.success` haptic, and the same care goes into every checkmark and row settle in the app.
+Spot it: any particle emitter, any Lottie celebration, any `CAEmitterLayer`.
 
 #### Haptic spam
 `.selection` on every scroll tick; `.success` on every read receipt.
@@ -1406,6 +1411,20 @@ VStack(spacing: 8) {
 
 Use this when you are defining, auditing, or fixing colour tokens, dark mode, gradients, shadows, or translucent surfaces in a SwiftUI app.
 It does not pick a palette. It makes the project's palette hold together in both appearances and on wide-gamut screens.
+
+### Choosing the palette
+
+The rules below tune a palette. This chooses one. Do it first, and only when the project has no palette already: if it has one, your job is to make it consistent, not to replace it.
+
+**1. Name the subject before you name a hue.** Write one sentence about what the product is for, then pick the hue family a stranger would agree carries it. A tool for photographers wants a ground that does not tint the work, so near-neutral with a trace of warmth and a single decisive accent. A finance tool wants a hue that reads as steady rather than urgent, which rules out anything within about 30 degrees of the danger colour. A product about being outdoors can afford a hue drawn from the thing itself. Write the sentence into the design contract; a palette nobody can justify in one line is a palette that drifts.
+
+**2. Neighbours read as a family, opposites read as an argument.** Hues within about 60 degrees of each other belong to one system. Hues 180 degrees apart read as two systems fighting for the same screen, which is why the complementary pairs that work on a colour wheel usually fail in an interface. Pick a primary, then take the rest of the set as steps around it in one direction. Semantic colours are the exception and must sit at least 25 degrees off the accent, or a success message gets mistaken for a primary action.
+
+**3. Every hue in the set shares one lightness ramp and one chroma percentage.** Not one absolute chroma. Cyan runs out of gamut near C 0.09 at mid lightness where purple is still climbing past 0.29, so identical numbers give wildly unequal colour and the set looks arbitrary. Fix each rung's L (95 / 88 / 75 / 60 / 45 / 30 is a reasonable start), then set each hue's chroma to the same percentage of its own gamut edge at that L. This is the only reason a chart legend reads as one system rather than six unrelated colours.
+
+**4. Muddy is almost always chroma set too low, not too high.** The instinct when a palette looks cheap is to desaturate, and that is the move that made it muddy. A colour at mid lightness with chroma well inside its gamut edge has no identity: it reads as a grey someone tinted by accident. Push chroma to the gamut edge for that lightness, then step back about 5% for safety, and judge it there. Two other things cause mud: interpolating between colours in sRGB rather than OKLCH, which drags saturated pairs through grey at the midpoint, and hues in the 90 to 110 degree band, where yellow-green goes olive fast as lightness drops.
+
+**5. Check the set as a set, not swatch by swatch.** Render every hue at every rung as one grid, in both themes, and look for the one that jumps forward or sinks back. That one is off the shared chroma percentage. Then desaturate the whole grid to greyscale: rungs that were meant to be the same L should now be indistinguishable, and any that are not will be the ones misbehaving in charts and in dark mode.
 
 ### Rules
 
@@ -1938,13 +1957,14 @@ Haptics are punctuation. A full stop, not an exclamation mark. The apps that fee
 2. **One `.success` per commit.** Sending, saving, completing: one haptic for the whole batch, never one per item. Check: complete a batch of ten; count the ticks (expect one).
 3. **`.selection` on the crossing, not per pixel.** Pickers, segmented controls, detents, week boundaries: fire when the value changes, not while the finger moves. Check: drag slowly across a picker; each tick lines up with a value change.
 4. **Prepare before predictable moments.** `prepare()` on a `UIFeedbackGenerator` cuts latency from ~50ms to under 5ms and stays warm for ~2 seconds. Call it on touch-down for the release haptic, or when a countdown enters its last second. With `.sensoryFeedback` the system prepares for you; use the UIKit generator only when you need the timing control. Check: a haptic tied to a visual lands within the same frame.
-5. **Throttle continuous haptics and scale them with density.** Scrubbing, flipping, ticking: at most one transient per 30ms (45ms when many things move), intensity `0.35 + 0.35 × density`, sharpness `0.5 + 0.4 × density`. The landing is heavier and duller (intensity 0.9, sharpness 0.25). Check: a full-board cascade reads as a flutter, not machine-gun fire.
-6. **Never double-fire what the system already fires.** Context-menu open (`.medium`), context-menu select (`.medium`), dismiss-outside (`.soft`), widget button taps, Camera Control half-press, `Toggle`, `Picker`, pull-to-refresh, and `.sensoryFeedback`-backed system controls all fire on their own. Check: strip your haptics from these and compare.
-7. **Fire yourself where the system is silent.** Action Button intents, custom buttons, custom sliders, drag thresholds, and completions get nothing from the system. Check: every custom control has a press-down haptic.
-8. **Haptic and sound land within 10ms.** Latency between them destroys the illusion of one event. Trigger both from the same line, sound already prepared. Check: record with a high-speed camera or trust the ear; any gap reads as two events.
-9. **Guard iPad and Mac.** iPads have no haptic engine; `.sensoryFeedback` is a no-op there, but `CHHapticEngine()` throws. Check `CHHapticEngine.capabilitiesForHardware().supportsHaptics` before building an engine. Check: run on an iPad simulator; nothing crashes, nothing logs.
-10. **Budget per session.** A screen that ticks on every state change is noise; the user stops feeling any of them. Decide which three to five moments per app deserve a signature, and give everything else the standard vocabulary or nothing. Check: list every haptic the app fires on the primary path; if it exceeds ~8 distinct moments, cut.
-11. **Never haptic** cold launch, list scrolling, foreground notifications, saved settings, read receipts (once per conversation per session at most), loading completions the user did not wait for, or anything on a timer. Check: grep `sensoryFeedback` and `impactOccurred`; each site maps to a user action.
+5. **Anything with a physical metaphor earns a texture.** Not just commits. A toggle flipping, a tab changing, a drag handle picked up and put down, a pull crossing its refresh threshold, a long-press arming, a reordered row crossing its neighbour: each is an object behaving like an object, and each gets one. Use `.impact(.light)` for pick-up and thresholds, `.impact(.rigid)` for a drop, `.impact(.soft)` for arming, and `.selection` for crossings. This widens the budget deliberately; it does not touch the two exclusions, never double-firing what the system already fires and never firing on scroll, launch, timers or per item in a batch, which both still hold. Check: every texture maps to something the user would expect to feel if the object were real, and none of them fires on scroll, on launch, or per item in a batch.
+6. **Throttle continuous haptics and scale them with density.** Scrubbing, flipping, ticking: at most one transient per 30ms (45ms when many things move), intensity `0.35 + 0.35 × density`, sharpness `0.5 + 0.4 × density`. The landing is heavier and duller (intensity 0.9, sharpness 0.25). Check: a full-board cascade reads as a flutter, not machine-gun fire.
+7. **Never double-fire what the system already fires.** Context-menu open (`.medium`), context-menu select (`.medium`), dismiss-outside (`.soft`), widget button taps, Camera Control half-press, `Toggle`, `Picker`, pull-to-refresh, and `.sensoryFeedback`-backed system controls all fire on their own. Check: strip your haptics from these and compare.
+8. **Fire yourself where the system is silent.** Action Button intents, custom buttons, custom sliders, drag thresholds, and completions get nothing from the system. Check: every custom control has a press-down haptic.
+9. **Haptic and sound land within 10ms.** Latency between them destroys the illusion of one event. Trigger both from the same line, sound already prepared. Check: record with a high-speed camera or trust the ear; any gap reads as two events.
+10. **Guard iPad and Mac.** iPads have no haptic engine; `.sensoryFeedback` is a no-op there, but `CHHapticEngine()` throws. Check `CHHapticEngine.capabilitiesForHardware().supportsHaptics` before building an engine. Check: run on an iPad simulator; nothing crashes, nothing logs.
+11. **Budget per session.** A screen that ticks on every state change is noise; the user stops feeling any of them. Decide which three to five moments per app deserve a signature, and give everything else the standard vocabulary or nothing. Check: list every haptic the app fires on the primary path; if it exceeds ~8 distinct moments, cut.
+12. **Never haptic** cold launch, list scrolling, foreground notifications, saved settings, read receipts (once per conversation per session at most), loading completions the user did not wait for, or anything on a timer. Check: grep `sensoryFeedback` and `impactOccurred`; each site maps to a user action.
 
 ### Cheat sheet
 
@@ -2106,7 +2126,7 @@ Load with `CHHapticPattern(contentsOf:)`.
 - Drag slowly across each picker and detent: one tick per value change, none between.
 - Open a context menu with your own haptic disabled: the system already ticks.
 - Run on iPad: no crash, no console noise.
-- List every haptic on the primary path: ≤ ~8 distinct moments, none on scroll, launch, or timers.
+- List every haptic on the primary path: none on scroll, launch, or timers, and none duplicating a system-fired one. The count is not capped, but every entry names the physical event it stands for; a haptic you cannot name that way is decoration.
 - Trigger the paired sound and haptic together: they land as one event.
 
 ### Do not
@@ -2650,7 +2670,8 @@ enum Motion {
 ```swift
 /* MOTION STORYBOARD
  * Read top-to-bottom. Each value is ms after trigger.
- * Motion is earned: the frequent moments are near-instant, the rare ones get the theatre.
+ * Motion is earned: the frequent moments are near-instant, the rare ones get the fuller
+ * transition. The ceiling is a considered transition, never a set piece.
  *
  * POWER ON (once per connection; rare)
  *     0ms   surface already there, pads at scale 0.92, opacity 0
@@ -2782,7 +2803,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 2. **Four or five rooms, one purpose each.** Value moment → the one input → the payoff → a permission primer only if the very next step needs it → handoff. Why: each extra screen loses a share of users. Check: name each screen's single job; if a screen has two, split it or cut it.
 3. **Sign-in and the paywall are not rooms.** Guest-first; ask for an account when there is something to save, sync, or unlock. Show the paywall only after a value preview, and skippable. Why: forced sign-in is the top abandonment point. Check: the user reaches the payoff without an account.
 4. **The launch screen is not a design canvas.** It matches the first real screen, contains no text (it cannot be localised), and no logo unless the logo is part of the first screen. Why: it is a placeholder for a fraction of a second; a splash reads as a delay. Check: the launch storyboard has no `UILabel`.
-5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. The active dot is a capsule 2.5–3× the inactive width, same height, and glides to the new index. Inactive dots at about 0.25 opacity of the ink. Check: the dots never teleport.
+5. **Progress is dots, never a bar.** A bar reads as loading; dots read as position in a short journey. Every dot is the same size and stays where it is; only the fill changes, over about 180ms. Inactive dots at about 0.25 opacity of the ink, the active one at full. Nothing stretches, nothing travels, nothing changes width, so the only thing moving on the screen is the content. Check: screenshot two consecutive steps and diff them; the dots differ in colour and in nothing else.
 6. **Do not count the primer or the celebration as steps.** Five dots that only reach three is a broken promise. Check: dot count equals the number of screens the user actually pages through.
 7. **The CTA is pinned.** A fixed distance from the bottom safe area, same on every screen; body copy grows upward. Why: a button that moves between screens reads as "made by nobody in particular". Check: page through; the button's Y never changes.
 8. **Forward enters from the trailing edge; back returns to it.** `.spring(duration: 0.45, bounce: 0.15)`. Background art travels at 30–40% of the foreground. Why: direction encodes progress. Check: a cross-fade in place is a finding.
@@ -2791,7 +2812,7 @@ The first thirty seconds decide whether someone stays. Every screen either build
 11. **Ask at the point of value, never at launch.** Camera when the user taps scan; notifications after the first thing worth being told about. Check: no permission alert fires before the user has done anything.
 12. **Sign in with Apple, when offered, uses the system button and is no smaller than any other sign-in option.** Do not ask for a password afterwards, and do not ask for a real email when a private relay address arrives. Check: `ASAuthorizationAppleIDButton` or `SignInWithAppleButton`, full width if others are full width.
 13. **Request a review only after a completed value sequence, weeks in.** Never at first-run completion, never as a direct result of a tap. The system allows three prompts per year. Check: `requestReview` is not called from onboarding.
-14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. Save particles for milestones. Check: no confetti on "You're all set".
+14. **The celebration is a quiet landing beat.** The number lands, the symbol morphs, one `.success` haptic. There are no particles to save for later; see `references/states.md` rule 10. Check: no confetti on "You're all set", and none anywhere else either.
 15. **Dots are hidden from VoiceOver; the flow announces "Step n of m".** Check: `.accessibilityHidden(true)` on the dots; `.accessibilityValue` on the container.
 
 ### Cheat sheet
@@ -2808,8 +2829,8 @@ The first thirty seconds decide whether someone stays. Every screen either build
 |---|---|
 | Page transition | `.spring(duration: 0.45, bounce: 0.15)`, forward from trailing |
 | Background parallax | 30–40% of foreground travel |
-| Dot size | 7pt inactive; active capsule ~2.75× wide |
-| Dot glide | `.spring(duration: 0.4, bounce: 0.15)` (legacy `response: 0.4, dampingFraction: 0.85`); Reduce Motion `.easeInOut(0.2)` |
+| Dot size | 7pt, identical on every dot, active and inactive |
+| Dot fill | `.easeInOut(duration: 0.18)` on opacity only; no size, position, or width animation to reduce |
 | Inactive dot opacity | ~0.25 of the ink |
 | CTA position | Fixed inset from bottom safe area, identical on every room |
 | Stagger within a room | 30–80ms, first appearance only |
@@ -2853,7 +2874,7 @@ struct OnboardingFlow: View {
 }
 ```
 
-Dots that glide.
+Dots that change fill and nothing else.
 
 ```swift
 struct OnboardingDots: View {
@@ -3585,11 +3606,11 @@ The empty state is the first impression for every new user, and the error state 
 3. **The spinner travels.** Progress appears where the result will land, not only on the control that was tapped. Why: the eye follows one location, so anchor it to the destination. The control may carry progress as well once the result has a home of its own; it may never be the only place it appears. Check: after tapping Send, the bubble shows the progress, whether or not the button does too.
 4. **Skeletons structurally match.** Same bar count, widths, and positions as the real content. Why: three bars for five-line content breaks the illusion the moment it resolves. Check: overlay the skeleton on a loaded cell; the boxes line up.
 5. **Optimistic first.** Apply the change immediately; a pending item is a ghost at opacity 0.6; revert with an inline reason on failure. Why: the user's action causes the visible effect; the network is an implementation detail. Check: airplane mode, tap Like; the heart fills, then reverts with a line under it.
-6. **Empty states invite.** A symbol or small illustration, one warm line of why, one action. Never "No items". Why: it is the only screen every new user sees. Check: the copy names what to do next and there is one button or a pointer to one.
+6. **The empty state shows the destination, not just the door.** Name what is missing, one line of what goes here, a ghosted non-interactive preview of what the filled state looks like, and the one action that gets there. Never "No items". Why: this is the most-seen screen for a new user and the last place to be terse; a person who cannot picture the filled state cannot want it. Check: cover the button; can someone still tell what this screen becomes?
 7. **First-run and empty are different states.** First-run introduces; empty after use reflects ("You cleared everything. Nice."). Check: both exist when the difference matters.
 8. **Errors rise in context and keep the last good value visible.** A strip or line at the thing that failed, not a toast in the sky. Why: the user is looking at the thing; the fix belongs there. Check: the failed row still shows its previous content, dimmed, with the reason underneath.
 9. **Undo must actually undo.** Reverse the effect, not just hide the toast. Check: Undo restores the row, the memory, the setting; the model state matches.
-10. **Celebrate rarely.** At most one celebration per session, for milestones, 60–120 particles, under 3s. Why: confetti on every save is exhausting by day three. Check: list every celebration trigger; each is weekly or rarer.
+10. **No set pieces. Spend the budget on every interaction instead.** No confetti, no particles, no full-screen moment, at any frequency. The craft goes into the ordinary: a checkmark that lands rather than appears, a row that settles rather than pops, a number that rolls rather than swaps, an icon that morphs rather than cuts. Why: a set piece is memorable twice and tiresome after, and it costs the budget that would have made the other four hundred interactions better. This is a tool, not a toy. Check: grep for a particle system; there is none. Then list the five most frequent interactions; each has a considered settle.
 11. **Offline is a state, not an error.** Cached content stays usable; a quiet banner says what is stale. Check: airplane mode; the app is still useful.
 12. **Overflow is a state.** 200 items, a 60-character title, a 4-line description. Check: run with a fake store of 5000 rows and a long-string locale.
 13. **Permission denied has its own screen with a Settings path.** Why: the system alert only appears once; after that the app must explain and offer `UIApplication.openSettingsURLString`. Check: deny in Settings, relaunch, see the screen.
@@ -3836,6 +3857,10 @@ It does not choose a typeface. It makes whatever face the project uses read as o
 14. **All-caps is a house choice.** If the contract uses it: 11–13pt, `.semibold` or `.medium`, tracking +1.2 to +2.0pt, secondary colour. If the contract does not mention it, do not introduce it. Check: design contract row 2.
 15. **Readouts that update rapidly use tabular or mono digits.** ISO, shutter, timers, and any value that ticks jitter with proportional digits. Check: watch the readout during change.
 16. **Optical sizes matter above 20pt.** SF Pro switches from Text to Display automatically in the system font; custom faces with `opsz` axes need `font-optical-sizing` equivalents or separate files. Check: the same face at 13 and 34 does not look like two fonts.
+17. **Ligatures on in prose, off wherever a character must be read on its own.** Turn them off for codes, licence keys, serial numbers, IDs, and filenames, where an `fi` ligature is a character somebody cannot type back. In SwiftUI, apply a descriptor with `kLigaturesType` disabled, or set the string in a face that has none for those fields. Check: render a booking reference containing `fi` and `ffi`; the glyphs stay separate.
+18. **Zeros that cannot be an O, wherever it matters.** SF Pro ships an alternate slashed zero as a stylistic set; find the set number in Font Book rather than guessing it, and apply it through `UIFontDescriptor.featureSettings` with `kStylisticAlternativesType` on codes, keys and IDs only. Not in prose. Check: render `O0` in a code field; the two are unmistakable.
+19. **Real small caps or none.** Drawn small caps carry the correct stroke weight; `.uppercase` at a smaller point size produces letters too light for their neighbours, which reads as wrong without being nameable. SF Pro has no true small caps, so on the system face the answer is not to use them. Check: if the design calls for small caps, the face is a custom one that actually has them.
+20. **Use the real characters.** A typographic apostrophe and quotes, an ellipsis as one character rather than three periods, an en dash for ranges, a real multiplication sign in dimensions, a minus sign rather than a hyphen in negative figures, and a non-breaking space between a number and its unit so "12 MB" never breaks across lines. Check: grep the string catalogue for `'`, `"`, `...` and ` x `; each is a mistake.
 
 ### Cheat sheet
 
@@ -4155,7 +4180,7 @@ Read this before touching a pixel.
 | Radii | Distinct values, whether nested radii are concentric | `--radius*`, `rounded-*` |
 | Spacing | Grid step, container padding, gaps | `gap-*`, `p-*`, `--spacing` |
 | Motion | Easing tokens, durations, spring library, `prefers-reduced-motion` handling | `--ease*`, `transition`, `motion/react` |
-| Surfaces | Shadow recipe, border vs shadow-as-border, image outlines | `box-shadow`, `border`, `outline` |
+| Surfaces | The elevation ladder and its L steps, where shadows and hairlines are still used, image outlines | `--surface`, `--raised`, `box-shadow`, `border` |
 | Overlays | Modal/sheet/popover library, z-index scale, focus handling | `<dialog>`, Base UI, Radix, Vaul, `--z-*` |
 | Forms | Input height, error placement, validation timing | `<input>`, `aria-invalid` |
 | States | Which of empty / loading / error / success / offline exist | skeleton components, `Suspense` |
@@ -4320,11 +4345,11 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 
 ### 3.6 Surfaces
 
-- **Shadow as border (light)**: `0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04)`; hover raises to `.08 / .08 / .06`.
-- **Dark mode** collapses to a single ring: `0 0 0 1px oklch(1 0 0 / 0.08)`, hover `0.13`. Shadows do not read on dark.
+- **Elevation is a step in value.** `--ground` / `--surface` / `--raised` / `--overlay`, about 2–3 points of L apart in the light and 3–4 in the dark, all carrying the palette's hue at C 0.004–0.016 so no grey is dead. Not a shadow, not a border. If two surfaces do not separate, increase the step.
+- **Hover moves a rung**, 150ms, background only. Nothing translates: a lift promises a click.
+- **Shadows mean one thing**: this floats above the page and can be dismissed. Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)` tinted toward the canvas hue. Never on a card, a row, or a section. For a modal the scrim and the pushed-back page do the work; the shadow is a detail.
+- **Hairlines only where no step is available**, such as rows inside one card: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`. A grid of separately outlined cards is the template tell.
 - **Image outline** (non-negotiable on user content): `outline: 1px solid oklch(0 0 0 / 0.1)` light, `oklch(1 0 0 / 0.1)` dark, `outline-offset: -1px`. Never a tinted grey; it reads as dirt.
-- **Hairline**: `--hairline: 1px`, `0.5px` at `min-resolution: 2dppx`.
-- **Elevation ladder** by named surface (`--surface`, `--raised`, `--overlay`) beats ad-hoc shadows.
 - **Backdrop blur**: needs `saturate(180%)` or it is grey mush; 2–3 per screen, static chrome only, never on a scrolling or animating element.
 - **z-index scale**: `--z-dropdown: 100; --z-sticky: 150; --z-overlay: 200; --z-popover: 300; --z-toast: 400`. Never 9999. Prefer `isolation: isolate` on components.
 
@@ -4394,7 +4419,7 @@ Each topic below is the 30-second version. The reference has the full rules, num
 
 ### Motion and transitions → the motion reference below
 
-Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets theatre, daily gets instant. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
+Name every property you transition. Build a motion vocabulary of 5–8 named tokens, each with a job, and the rule "if a new animation does not fit one of these, don't". Write the storyboard as a comment above the tokens. Frequency decides motion: rare gets the fuller transition, daily gets instant. The ceiling on "rare" is choreography, never a set piece; there is no confetti at any frequency. Exits accelerate. Loops act, rest, then ease home; never snap. Skip entrance animation on page load for above-the-fold chrome. Replay at 10% speed in the Animations panel before shipping.
 
 ### Springs, gestures and scroll → the springs-and-gestures reference below
 
@@ -4612,7 +4637,14 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Icons | Two states (outline, fill), not three |
 | Emoji / em-dash | Defaults: none in chrome, none in UI copy; house style may override in the design contract |
 | Blur | Static backdrop blur up to 50px is fine; never animate blur above 20px |
-| Shadow recipe | 3-layer shadow-as-border in light; single 8% white ring in dark |
+| Elevation | A step in surface value, 2–3 L in light and 3–4 in dark, carrying the palette hue. Shadows are reserved for things that genuinely float; hairlines only where no step is available |
+| Empty states | Show the destination, not just the door: name, one line, a ghosted preview of the filled state, one action |
+| Celebration | No particles, no set pieces, at any frequency. The budget goes into every ordinary interaction instead |
+| Elevation | A step in surface value, 2 to 3 points of L in light and 3 to 4 in dark, carrying the palette hue. Shadows mean only "this floats and can be dismissed"; hairlines only where no step is available |
+| Hover | Background moves a rung, 150ms, nothing translates. A lift promises a click |
+| Native feel | Opt-in and all or nothing. A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half |
+| Palette choice | Justify the hue family in one sentence about the product. Neighbours within 60 degrees read as one family; semantic colours sit 25 degrees off the accent. One L ramp and one chroma percentage across every hue. Muddy is chroma too low, not too high |
+| Type detail | Ligatures off wherever a character must be transcribed; slashed zero on codes only; lining and oldstyle figures never mixed in a view; real small caps or none; stylistic sets declared once at the root |
 
 ## 8. Further reading inside this skill
 
@@ -5687,6 +5719,20 @@ See `references/performance.md` for the frame budget and `visibilitychange`, `re
 Use this when you are choosing, converting, checking, or auditing colour on the web: tokens, palettes, contrast, dark pairs, gamut, and how colour carries meaning.
 Pair with `references/theming-and-dark-mode.md` for the switching mechanism and `references/surfaces-and-depth.md` for shadows and outlines.
 
+### Choosing the palette
+
+The rules below tune a palette. This chooses one. Do it first, and only when the project has no palette already: if it has one, your job is to make it consistent, not to replace it.
+
+**1. Name the subject before you name a hue.** Write one sentence about what the product is for, then pick the hue family a stranger would agree carries it. A tool for photographers wants a ground that does not tint the work, so near-neutral with a trace of warmth and a single decisive accent. A finance tool wants a hue that reads as steady rather than urgent, which rules out anything within about 30 degrees of the danger colour. A product about being outdoors can afford a hue drawn from the thing itself. Write the sentence into the design contract; a palette nobody can justify in one line is a palette that drifts.
+
+**2. Neighbours read as a family, opposites read as an argument.** Hues within about 60 degrees of each other belong to one system. Hues 180 degrees apart read as two systems fighting for the same screen, which is why the complementary pairs that work on a colour wheel usually fail in an interface. Pick a primary, then take the rest of the set as steps around it in one direction. Semantic colours are the exception and must sit at least 25 degrees off the accent, or a success message gets mistaken for a primary action.
+
+**3. Every hue in the set shares one lightness ramp and one chroma percentage.** Not one absolute chroma. Cyan runs out of gamut near C 0.09 at mid lightness where purple is still climbing past 0.29, so identical numbers give wildly unequal colour and the set looks arbitrary. Fix each rung's L (95 / 88 / 75 / 60 / 45 / 30 is a reasonable start), then set each hue's chroma to the same percentage of its own gamut edge at that L. This is the only reason a chart legend reads as one system rather than six unrelated colours.
+
+**4. Muddy is almost always chroma set too low, not too high.** The instinct when a palette looks cheap is to desaturate, and that is the move that made it muddy. A colour at mid lightness with chroma well inside its gamut edge has no identity: it reads as a grey someone tinted by accident. Push chroma to the gamut edge for that lightness, then step back about 5% for safety, and judge it there. Two other things cause mud: interpolating between colours in sRGB rather than OKLCH, which drags saturated pairs through grey at the midpoint, and hues in the 90 to 110 degree band, where yellow-green goes olive fast as lightness drops.
+
+**5. Check the set as a set, not swatch by swatch.** Render every hue at every rung as one grid, in both themes, and look for the one that jumps forward or sinks back. That one is off the shared chroma percentage. Then desaturate the whole grid to greyscale: rungs that were meant to be the same L should now be indistinguishable, and any that are not will be the ones misbehaving in charts and in dark mode.
+
 ### Rules
 
 1. **Work in OKLCH.** It is perceptually uniform, so equal steps in L look equal and hue does not drift as you lighten. Format: `oklch(L C H / alpha)`, three decimals for L and C, integer or one decimal for H, `0` never `-0`. Check: no new colour is authored in hex or HSL; hex appears only as a legacy fallback.
@@ -6690,7 +6736,7 @@ Use this when you add, review, or tune any transition, entrance, exit, hover, or
 
 1. **Name every property you transition.** `transition: all` animates properties you did not intend (layout, colour on theme switch, `border-radius` on hover) and costs a style recalc on each. Write `transition: transform 150ms var(--ease), opacity 150ms var(--ease)`. Check: grep for `transition: all` and `transition-property: all`; both should return nothing. Tailwind's bare `transition` is a curated list (colors, opacity, shadow, transform), not `all`; `transition-transform` covers `transform, translate, scale, rotate`.
 2. **Build a vocabulary, then refuse anything outside it.** Five to eight named tokens, each with a stated job, in one file. Add the line: "If a new animation does not fit one of these, the answer is usually don't." Check: every `transition` and `animate` in the codebase references a token, not a literal.
-3. **Frequency decides motion.** Seen 100+ times a day: instant, or a colour change ≤ 150ms. Seen a few times a day: 150–250ms. Seen rarely (onboarding, a milestone, a first paint): the theatre. Check: list the three most frequent interactions; none should have a transform animation over 150ms.
+3. **Frequency decides motion.** Seen 100+ times a day: instant, or a colour change ≤ 150ms. Seen a few times a day: 150–250ms. Seen rarely (onboarding, a milestone, a first paint): the fuller transition, whose ceiling is a considered piece of choreography and never a particle burst. Check: list the three most frequent interactions; none should have a transform animation over 150ms.
 4. **Entrances decelerate, exits accelerate.** Enter on an ease-out (`cubic-bezier(0.165, 0.84, 0.44, 1)` for small, `cubic-bezier(0.16, 1, 0.3, 1)` for large). Exit on `cubic-bezier(0.4, 0, 1, 1)` at about 0.65× the entrance duration, never with bounce. Check: exits are visibly shorter when replayed at 10% speed.
 5. **Paired elements share timing.** Modal and backdrop, tooltip and arrow, drawer and scrim, a number and its bar: identical easing and duration, or the pair reads as two things. Check: the two `transition` declarations are the same token.
 6. **Stagger by kind.** List items 30–40ms apart, cap around 8 (240ms total). Semantic chunks (title, body, actions) 80–100ms apart. First appearance only, never re-run on scroll into view. Check: item 9 onward has no delay.
@@ -6889,6 +6935,8 @@ Reduced-motion global fallback, only where per-element opt-in is impossible:
 **This is a style choice. Load only when the project wants to feel like a native iOS app.** Everything universal lives in the neutral references; this file adds the iOS-specific layer on top. If the project's design contract does not say "feels like a native app", close this file.
 
 Use this when building a PWA, an app-like web product, or a companion web view that should be indistinguishable from SwiftUI. Do not use it to make a marketing site or a data tool "feel iOS".
+
+**It is all or nothing.** A partial native layer feels worse than none, because the half that behaves natively teaches people to expect the other half. A sheet that drags but does not carry its velocity into the settle is worse than a sheet that does not drag. A push transition without an interruptible back-swipe is worse than a fade. If the project cannot afford every rule below, take none of them and build something that is excellent as web instead; the neutral references already cover that completely. Check before starting: every rule in this file has an owner, or the file is closed.
 
 ### Rules
 
@@ -7834,7 +7882,7 @@ Every state gets the same care as the happy path; the empty state is the first t
 3. **No spinner before 300ms.** A flash of spinner for a 120ms request reads as slower than no indicator at all. Check: set a 300ms delay before any spinner mounts.
 4. **Skeletons match the structure.** Same number of lines, same widths, same positions as the content that will replace them. Three bars for five lines is a broken promise. Shimmer 1.2–1.5s, subtle, static under `prefers-reduced-motion`. Check: overlay the skeleton on the loaded state; edges align.
 5. **Optimistic first, ghost while pending.** Apply the change immediately at 60% opacity, confirm to 100% on success, revert with an inline reason on failure. Not a spinner; a ghost. Check: send a message with the network off; it appears, then reverts with a reason next to it.
-6. **Empty states have three parts.** The name of what is missing, one line of why, one action. "No projects yet. Create one to start tracking time. [New project]". Never "No items". Check: every empty state has exactly one button.
+6. **The empty state shows the destination, not just the door.** The name of what is missing, one line of what goes here, a ghosted non-interactive preview of the filled state, and the one action that gets there. "No projects yet. Create one to start tracking time. [New project]", above a dimmed sketch of a project row. Never "No items". Why: this is the most-seen screen for a new user and the last place to be terse; a person who cannot picture the filled state cannot want it. Check: cover the button; can someone still tell what this screen becomes?
 7. **Search and filter empties name the query and offer an exit.** "No results for 'quarterly'. Clear filters." Check: filter to zero results; the filter can be cleared from the empty state.
 8. **Never park crucial persistent information in an empty state.** It disappears the moment there is one item. Settings, limits, and instructions live somewhere permanent. Check: add one item; did any important text vanish?
 9. **First-run is not the empty state.** First-run invites and can show an example; empty after deletion is quieter and offers the same action without the tour. Check: delete everything; you do not see the welcome again.
@@ -8028,12 +8076,21 @@ Pair with `references/theming-and-dark-mode.md` for what depth becomes in the da
 ### Rules
 
 1. **A card needs a reason.** A card separates something that could be moved, selected, or acted on as a unit. Content that is simply a section gets space and a heading, not a box. The identical-rounded-card kit with the same grey shadow under each is the most recognisable template tell.
-2. **Shadow as border in the light.** `box-shadow: 0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04)`. Hover raises to `0.08 / 0.08 / 0.06`. The 1px ring does the work; the two soft layers give it contact. A `border` sits inside the box and shifts layout; a shadow ring does not.
-3. **A single ring in the dark.** Shadows do not read on dark grounds. Collapse to `0 0 0 1px oklch(1 0 0 / 0.08)`, hover `0.13`. Elevation in the dark comes from a slightly lighter surface plus the ring.
-4. **Hairlines are 1px, 0.5px on dense screens.** `--hairline: 1px`, overridden to `0.5px` at `min-resolution: 2dppx`. Anything thinner disappears; anything thicker reads as a rule, not a hairline.
+2. **Elevation is a step in value, not a shadow and not a line.** Surfaces separate because they are different tones of the same ground. Name the ladder as tokens and let every component pick a rung; nobody types a shadow and nobody draws a border to make a card visible. In the light the ground is the darkest rung and each layer above it is lighter; in the dark the ground is darkest and each layer is lighter too, so the direction of "up" never changes.
+
+   | Rung | Light | Dark |
+   |---|---|---|
+   | `--ground` | `oklch(96.5% C H)` | `oklch(12% C H)` |
+   | `--surface` | `oklch(98.5% C H)` | `oklch(16% C H)` |
+   | `--raised` | `oklch(100% 0 0)` | `oklch(20% C H)` |
+   | `--overlay` | `oklch(100% 0 0)` | `oklch(24% C H)` |
+
+   Steps run about 2 to 3 points of L in the light and 3 to 4 in the dark, where flare and low screen brightness eat the difference. `C` and `H` are the palette's own, at a chroma of roughly 0.004 to 0.016, so the greys are never dead and light and dark read as one palette at two lightnesses. Check: screenshot two adjacent rungs, sample both, and confirm the L difference; if you cannot see the separation, increase the step rather than reaching for a border.
+3. **Where a value step cannot work, and what to do instead.** Three cases. Over photography or video the ground is not a known value, so use a scrim or a material and set the text against that. Where two surfaces on the same rung must be told apart, such as rows inside one card, a hairline is correct because there is no step available; keep it to one place. Where the surface is transparent, the rung underneath is whatever scrolled behind it, so pick colours against the lightest and darkest content that can pass. Everywhere else, if two things are not separating, the step is too small. Check: grep for `border` and `box-shadow` on non-overlay components; each remaining one names which of these three cases it is.
+4. **When a hairline is genuinely needed it is 1px, 0.5px on dense screens.** `--hairline: 1px`, overridden to `0.5px` at `min-resolution: 2dppx`. Anything thinner disappears; anything thicker reads as a rule, not a hairline. A grid of cards each drawn with its own outline is the template tell; the value step should be doing that work.
 5. **Outline every user image.** `outline: 1px solid oklch(0 0 0 / 0.1)` in the light, `oklch(1 0 0 / 0.1)` in the dark, `outline-offset: -1px`. Pure black or white at 10%, never a tinted grey; a tinted outline reads as dirt on the image edge. Without it a white product shot floats loose on a white canvas.
-6. **Name your elevation ladder.** `--surface`, `--raised`, `--overlay` (and their hover variants) as tokens, each with its own background and shadow. Components pick a rung; nobody types a shadow.
-7. **Only true floating overlays get a drop shadow.** Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)`, tinted toward the canvas hue rather than neutral black. Cards, rows, and sections do not float and do not get one.
+6. **Hover moves a component up a rung.** Not a lift, not a new shadow: the background steps to the next tone over 150ms and nothing on the page moves. A card that translates upward is promising a click, so if the whole card is not a link it must not move. Check: hover a card and diff the two frames; only the background differs.
+7. **Only true floating overlays get a drop shadow, and the scrim carries most of the meaning.** Popovers, menus, toasts, dragged items: `0 12px 32px oklch(0 0 0 / 0.18)`, tinted toward the canvas hue rather than neutral black. Cards, rows, and sections do not float and do not get one. When surfaces are separated by value rather than shadow, a shadow becomes a word with exactly one meaning, "this is above the page and can be dismissed", and it should never be spent on anything else. A modal says the same thing far more loudly with a scrim and the page pushed back; the shadow is a supporting detail there, not the mechanism.
 8. **Bigger surfaces read thicker.** A full sheet gets a stronger blur and a deeper shadow than a tooltip. Depth cues scale with the size of the thing that is supposedly above the page.
 9. **Never stack two translucent surfaces.** Legibility collapses; text on the upper one is fighting two backgrounds. The second layer becomes solid.
 10. **Backdrop blur needs saturation and a budget.** `backdrop-filter: blur(20px) saturate(180%)`; without `saturate` it is grey mush. Two or three per screen, on static chrome (headers, bars, sheet frames) only. Never on a scrolling or animating element; it is the number-one frame killer.
@@ -8548,6 +8605,11 @@ Pair with `references/layout-and-spacing.md` for measure and rhythm and `referen
 22. **Variable-font axis honesty.** A face's weight axis may run 350–900 or 425–625, not 100–900. Map named weights (regular, medium, semibold, bold) to real axis values in exactly one place, and let every renderer (DOM, canvas, export) read that map. A "semibold" that resolves to the same number as "bold" is a bug you find at 2am.
 23. **Pair for contrast, not similarity.** Rarely more than three faces. A serif with a sans, a mono for data. "Display" in a font's name does not make it a display face; pick by size, and if the family ships Text and Display cuts, switch at about 20px.
 24. **X-height explains size mismatch.** Two faces at the same `font-size` look different sizes because their x-heights differ. Retune size and line-height per face; never swap faces at a fixed size.
+25. **Ligatures on in prose, off wherever a character must be read on its own.** `font-variant-ligatures: common-ligatures` is the default and should stay. Set `none` on anything a person has to transcribe, compare, or read aloud: codes, licence keys, serial numbers, IDs, passwords, filenames. An `fi` ligature in a booking reference is a character somebody cannot type back. Check: set a code field to a string containing `fi`, `fl` and `ffi` and confirm the glyphs stay separate.
+26. **Zeros that cannot be an O, wherever it matters.** `font-variant-numeric: slashed-zero` on codes, keys, IDs, and anything read over a phone. Not in prose, where a slashed zero reads as technical for no reason. Check: render `O0` in every code field; the two are unmistakable.
+27. **Figures have two jobs and one screen should not mix them.** Lining figures (the default) sit at cap height and belong in UI, tables, and anything aligned. Oldstyle figures (`font-variant-numeric: oldstyle-nums`) have ascenders and descenders and belong in running prose set in a serif, where lining figures shout. Pick per context and never both in one view. `diagonal-fractions` for real fractions, `ordinal` for `1st`, rather than superscript markup.
+28. **Real small caps, never faked ones.** `font-variant-caps: small-caps` uses drawn glyphs with the correct stroke weight. `text-transform: uppercase` at a smaller size produces letters that are too light for their neighbours, which is visible even to people who cannot name what is wrong. If the face has no small caps, do not use small caps. Check: set both next to each other at 14px and compare stroke weight.
+29. **Stylistic sets are a house choice, applied once at the root.** `font-feature-settings: "ss01"` for an alternate single-storey `a`, a straight-tailed `l`, a different `g`. Decide once, record it in the design contract, and set it on `:root` so the whole product agrees. A stylistic set applied to one component is how a product ends up with two typefaces that are the same typeface. Check: grep `font-feature-settings`; every stylistic set is declared in one place.
 
 ### Cheat sheet
 
