@@ -1,6 +1,6 @@
 # ultrapolish-ios: universal polish for Swift / SwiftUI apps
 
-_Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, premium, craft, cohesive, make it better, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, symbolEffect, microcopy, empty state, skeleton, onboarding, paywall, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, dark mode, OKLCH, design tokens._
+_Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, microcopy, empty state, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table._
 
 ---
 
@@ -291,6 +291,14 @@ The eye should land on the headline, then the primary action, within a second. I
 ### Buttons and controls → the buttons-and-controls reference below
 
 The press-down haptic is non-negotiable: the button heard you. Loading locks its width. Disabled is transparency with a reason. Success reverts in 1.5s. A row with an inner button captures the inner tap first. Sticky CTAs use `.safeAreaInset(edge: .bottom)` with `.background(.bar)` and scroll-react via `.onScrollGeometryChange`.
+
+### Lists, search and working with many things → the data-and-density reference below
+
+`List` for reading down, `Table` for comparing across and only at a regular width, with the compact fallback designed rather than accepted. One primary line per row and at most two supporting ones, checked at AX5. Compared figures are `.monospacedDigit()` and trailing-aligned. A dense row may be shorter than 44pt only if its tap target is not. Search results update in place and never blank the list; a no-results state names the query. Selection puts the count in the title, and "select all" meaning every match is a separate explicit choice. Bulk actions name the verb, the count and the noun. Swipe holds the one or two constant actions with full swipe off unless undoable; everything rarer is in a context menu that also exists somewhere without a long press. On iPad the hardware keyboard is a real input.
+
+### Forms and text input → the forms-and-inputs reference below
+
+Most of what makes a form feel careless is invisible in a screenshot. `.textContentType` is what turns autofill, QuickType, strong passwords and one-time codes on, and nothing works without it. The keyboard matches the content and the return key names its action. `@FocusState` advances on return and moves to whatever failed. Never disable submit until valid: validate on submit, then per keystroke only for a field that has already failed. Errors sit under their field, in words, with the value kept. Nothing important hides under the keyboard, and a number pad needs a Done button because it has no return key. One `TextField` with `.oneTimeCode`, never six boxes.
 
 ### Sheets, navigation and trays → the sheets-and-navigation reference below
 
@@ -1732,6 +1740,231 @@ VStack(spacing: 12) {
 - Use three different words for the same action across screens.
 - Manufacture warmth from randomness. The words stay steady; the data varies.
 - Truncate a label with an ellipsis when `ViewThatFits` and a shorter variant would do.
+
+<!-- references/data-and-density.md -->
+
+## Lists, search and working with many things
+
+Use this when a screen holds more rows than fit: a list, a table on iPad, a result set, an inbox. Covers dense rows, search, filtering, selection and bulk actions, swipe actions and context menus, and hardware keyboard use. The states each of these can be in are in `references/states.md`; the gestures behind them in `references/gestures-and-physics.md`.
+
+Most of this is about letting someone act on a hundred things without a hundred taps, and about the row still being usable at AX5.
+
+### Rules
+
+1. **`List` for reading down, `Table` for comparing across, and only on a regular width.** `Table` needs a pointer or a wide layout to earn its columns; on a compact width it collapses to a list anyway, so design that list deliberately rather than accepting the fallback. Check: run the same screen on an iPhone and an iPad and confirm both were designed.
+2. **A row has one primary line and at most two supporting ones.** Everything else belongs on the detail screen. A row that wraps to five lines at AX5 was carrying a detail view's worth of content. Check: read every row at `.accessibility5` and count the lines.
+3. **Numbers that are compared down a column are monospaced and trailing-aligned.** `.monospacedDigit()` with `.frame(alignment: .trailing)`. Otherwise a proportional font puts a 9 and a 1,000,000 at unrelated widths and the column stops meaning anything. Check: the digits line up by place value.
+4. **Row height is a decision, and the 44pt floor is about the tap target, not the visual.** A dense row may be shorter than 44pt provided the tappable area is expanded to meet it with `.contentShape` and padding. What is never acceptable is a 30pt row whose tap target is also 30pt. Check: the row height appears in the design contract, and a tap near the row's edge still registers.
+5. **`.searchable` belongs on the navigation content, not on a subview.** Placement decides whether it hides on scroll, and `.searchable(text:placement:)` with `.navigationBarDrawer(displayMode: .always)` is right when search is the point of the screen rather than an occasional need. Add `.searchScopes` when the same query means different things. Check: the field is where a person reaches for it before they have thought about it.
+6. **Results update in place; the previous set stays readable while the next loads.** Replacing the list with a spinner on every keystroke destroys the thing someone was reading. Debounce the request, keep the old rows, and dim rather than remove them. Never clear the query because a request failed. Check: type quickly and confirm the list never goes blank.
+7. **A search with no results names the query and offers the way out.** "No results for 'quarterly'" with a control that clears the filters. This is a different state from the list simply being empty, and it needs different words. Check: search for nonsense and confirm you can get back without leaving the screen.
+8. **Filters state themselves.** Active filters are visible and removable from the list itself, with a count of what is hidden, not buried behind a sheet someone must open to find out why they are looking at four rows. Check: apply filters, leave the screen and return; you can tell what is on without opening anything.
+9. **Selection has a count, and the page is not the set.** In edit mode the title becomes the count, "3 selected", and the toolbar holds the actions. A "Select All" that means every match rather than every loaded row is a separate, explicit choice, because acting on 340 things when you meant 25 is not something a toast can undo. Check: enter edit mode, select all, read the count.
+10. **A bulk action names the count and the noun.** "Delete 12 Projects" in the confirmation, never a bare "Delete". Destructive bulk actions confirm in a `.confirmationDialog` with the number in the title, and they get a longer undo window than a single-item action because the mistake is bigger. Check: read the confirmation; it tells you what happens to how many things.
+11. **Swipe actions are for the one or two things done constantly, and the destructive one is not first.** `.swipeActions(edge: .trailing)` with the most common action nearest the thumb. Set `allowsFullSwipe: false` unless a full swipe is genuinely undoable, because a full swipe is easy to trigger by accident while scrolling. Everything rarer belongs in the context menu. Check: try to scroll a list quickly with one thumb without triggering anything.
+12. **A context menu is a menu, not a dumping ground.** Up to about seven items, grouped, destructive last and marked `.destructive`, with a preview when the row has something worth previewing. Every action in it also exists somewhere reachable without a long press, because a long press is undiscoverable. Check: name the route to each context-menu action that does not involve a long press.
+13. **Pull to refresh only where content genuinely arrives from elsewhere.** `.refreshable` on a list of local data that cannot change behind your back is a gesture that teaches people the app is confused. Check: ask what changed on the server since the screen opened; if the answer is nothing, remove it.
+14. **On iPad, the hardware keyboard is a real input.** Arrow keys move the selection, Return opens, Space previews, Command-Delete deletes, and `.keyboardShortcut` puts the key next to the action in the menu so people learn it. Escape leaves search before it leaves the screen. Check: navigate and act on a list from a Magic Keyboard without touching the screen.
+15. **The loading state for a list is the list.** Skeleton rows at the real height, about ten of them, not a spinner in the middle of an empty screen, so nothing moves when the data lands. Check: throttle the network and confirm the layout does not shift on arrival.
+16. **Lists at scale stay lazy and stable.** `LazyVStack` or `List` with stable `id`s so rows are not rebuilt on every update, and a scroll position preserved with `.scrollPosition` across a re-sort so nobody loses their place. Check: sort a scrolled list; you are still looking at roughly the same region.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Table vs List | `Table` only at a regular width; design the compact list deliberately |
+| Row content | One primary line, at most two supporting |
+| Numeric column | `.monospacedDigit()` + trailing alignment |
+| Row height | Documented. Tap target still 44pt via `.contentShape` and padding |
+| Search placement | `.navigationBarDrawer(displayMode: .always)` when search is the point |
+| Results while typing | Keep and dim the old rows; never blank the list |
+| Filtered count | Always shown, and clearable from the list |
+| Selection title | The count: "3 selected" |
+| Bulk label | Verb, count, noun: "Delete 12 Projects" |
+| Swipe | Most common action nearest the thumb; `allowsFullSwipe: false` unless undoable |
+| Context menu | ~7 items, grouped, destructive last and marked |
+| Skeleton rows | ~10, at the real row height |
+
+### Code
+
+```swift
+List(selection: $selected) {
+    ForEach(rows) { row in
+        RowView(row)
+            // Dense rows keep a real target even when the visual is shorter.
+            .contentShape(Rectangle())
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) { archive(row) } label: {
+                    Label("Archive", systemImage: "archivebox")
+                }
+            }
+            .contextMenu {
+                Button("Rename") { rename(row) }
+                Divider()
+                Button("Delete", role: .destructive) { confirmDelete([row]) }
+            }
+    }
+}
+.searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always))
+// The title is the count, so the toolbar does not have to say it twice.
+.navigationTitle(editMode?.wrappedValue == .active && !selected.isEmpty
+                 ? "\(selected.count) selected" : "Projects")
+.confirmationDialog(
+    // The number is in the title, where it cannot be missed.
+    "Delete \(selected.count) \(selected.count == 1 ? "project" : "projects")?",
+    isPresented: $confirming, titleVisibility: .visible
+) {
+    Button("Delete", role: .destructive) { delete(selected) }
+    Button("Cancel", role: .cancel) {}
+}
+```
+
+### Checks
+
+- Read every row at `.accessibility5` and count the lines.
+- Put 9 and 1,000,000 in one column; the digits align by place value.
+- Type a query quickly; the list never goes blank and one request goes out.
+- Search for nonsense; the empty state names the query and offers the way back.
+- Enter edit mode and select all; the count says what was actually selected.
+- Scroll the list fast with one thumb; nothing triggers by accident.
+- On an iPad with a keyboard, move the selection and act on it without touching the screen.
+- Throttle the network; nothing shifts when the rows arrive.
+
+### Do not
+
+- Ship a `Table` without designing what a compact width shows instead.
+- Set a proportional font on figures that are compared down a column.
+- Let a dense row's tap target shrink with its height.
+- Blank the list on every keystroke.
+- Put a destructive action under a full swipe that cannot be undone.
+- Hide an action only behind a long press.
+- Add `.refreshable` to data that cannot change remotely.
+- Label a bulk action with a bare verb.
+
+<!-- references/forms-and-inputs.md -->
+
+## Forms and text input
+
+Use this when a screen asks anyone to type: sign-in, search, a compose field, a settings value, an address, a card, a one-time code. The web counterpart is a separate skill; this is the SwiftUI and UIKit half.
+
+Most of what makes an iOS form feel careless is invisible in a screenshot. It is the keyboard that comes up wrong, the autofill that never offers, the field that hides under the keyboard, and the return key that says "return" when it should say "Send".
+
+### Rules
+
+1. **Every field declares what it holds.** `.textContentType()` is what turns on autofill, the QuickType strip, and the strong-password and one-time-code flows, and none of them work without it. `.username`, `.password`, `.newPassword`, `.oneTimeCode`, `.emailAddress`, `.telephoneNumber`, `.name` and the address types cover almost everything. Never disable autofill on identity or payment fields; a person retyping a password from memory makes more mistakes than the keychain does. Check: on a device with saved credentials, the field offers them above the keyboard.
+2. **The keyboard matches the content.** `.keyboardType(.emailAddress)` removes the space bar's shift and adds the `@`; `.numberPad` for digits with no separators; `.decimalPad` for money; `.URL` for links. Pair with `.textInputAutocapitalization(.never)` and `.autocorrectionDisabled()` on emails, usernames, codes and anything case-sensitive, or the system will helpfully capitalise a login and reject it. Check: open every field and read the keyboard's bottom row.
+3. **The return key says what it does.** `.submitLabel(.next)` between fields, `.send`, `.search`, `.done`, `.join` or `.go` on the last one. A keyboard that says "return" in a two-field form is a keyboard that has not been thought about. Check: every field's return key names its action.
+4. **`@FocusState` moves the cursor, and something has to.** The return key advances to the next field, the screen opens with the first empty field focused when there is exactly one obvious starting point, and a validation failure moves focus to the field that failed. Focus after a sheet has finished presenting, roughly 350ms, or the keyboard fights the sheet animation. Check: fill a form using only the keyboard; you never reach for the screen to move between fields.
+5. **Never disable the submit button until the form is valid.** A dead button gives no reason and no route out. Leave it enabled, validate on submit, move focus to the first failure, and put the message under that field. The exception is a submit already in flight, which is disabled because it is busy and says so. Check: tap submit on an empty form; you learn what is wrong.
+6. **Validate on submit, then on change for the field already corrected.** Validating while someone is still typing their email tells them it is wrong before they have finished writing it. Once a field has failed, it may re-validate on each keystroke so the error clears the moment it is fixed. Check: type one character into an empty email field; nothing turns red.
+7. **The error sits under its field, in words, and keeps the value.** Never a toast, never an alert, never a red border with no text. Say what to do rather than what happened: "Add a domain ending, like .com" beats "Invalid email". Never clear what someone typed because it failed. Check: submit an invalid form; every value is still there and every message is next to its cause.
+8. **Nothing important hides under the keyboard.** SwiftUI moves focused fields above it, but not the button below them and not the error message. Put the form in a `ScrollView`, keep the primary action in a `.safeAreaInset(edge: .bottom)` so it rides above the keyboard, and test on the smallest device with the largest Dynamic Type. Check: focus the last field on a 4.7-inch screen at AX3 and confirm the submit button is reachable.
+9. **A keyboard needs a way down.** A `.numberPad` and `.decimalPad` have no return key at all, so they need a Done button in `.toolbar { ToolbarItemGroup(placement: .keyboard) }` or a scroll-to-dismiss. `.scrollDismissesKeyboard(.interactively)` is the right default in a long form. Check: open a number pad and dismiss it without leaving the screen.
+10. **Money, dates and codes are formatted as they are typed, not after.** `TextField(value:format:)` with a currency or number format applies grouping live. A one-time code field is a single `TextField` with `.oneTimeCode`, not six boxes; the six-box pattern breaks paste, breaks autofill, and breaks VoiceOver. Check: paste a six-digit code; it lands.
+11. **A field's label survives the typing.** A placeholder that vanishes when someone starts typing takes the question with it, which is a problem the moment they are interrupted. Use a persistent label above the field. Placeholders are for an example of the format, not for the name of the field. Check: type into every field and confirm you can still tell what each one is asking.
+12. **A destructive or irreversible form confirms with its noun and its consequence.** "Delete account" and a sentence about what goes with it, not "Are you sure?". Anything requiring the person to type a word to confirm should only be used where the consequence is genuinely unrecoverable. Check: read the confirmation aloud; it names the thing and the outcome.
+13. **Long forms are steps, not scrolls.** Four fields per screen with a pinned primary action beats twelve in one column. Group by what a person can answer without stopping to look something up, and never mix a field they know by heart with one they have to go and find. Check: count the fields on screen at once; more than about six wants splitting.
+14. **Secure fields are still fields.** `SecureField` with `.newPassword` gets the strong-password offer; a reveal toggle is expected and should be a real button with a label, not a bare eye glyph. Never impose a maximum length or a character set that the keychain cannot generate against. Check: tap New Password; the system offers to generate one.
+
+### Cheat sheet
+
+| Thing | Value |
+|---|---|
+| Autofill | `.textContentType(...)` on every identity, address, payment and code field |
+| Email field | `.keyboardType(.emailAddress)` + `.textInputAutocapitalization(.never)` + `.autocorrectionDisabled()` |
+| Return key | `.submitLabel(.next)` between, `.done` / `.send` / `.search` / `.go` at the end |
+| Focus after a sheet | ~350ms, after the presentation animation settles |
+| Submit button | Never disabled for invalid input; only while a submit is in flight |
+| First validation | On submit. Then per keystroke for a field that has already failed |
+| Error placement | Under the field, in words, value preserved |
+| Number pad dismissal | Keyboard toolbar Done, plus `.scrollDismissesKeyboard(.interactively)` |
+| One-time code | One `TextField` with `.oneTimeCode`, never six boxes |
+| Fields per screen | About six before it wants splitting into steps |
+
+### Code
+
+```swift
+enum Field: Hashable { case email, password }
+
+struct SignIn: View {
+    @State private var email = ""
+    @State private var password = ""
+    @State private var emailError: String?
+    @FocusState private var focus: Field?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                LabeledField("Work email", error: emailError) {
+                    TextField("you@company.com", text: $email)
+                        .textContentType(.username)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .submitLabel(.next)
+                        .focused($focus, equals: .email)
+                        // Only re-validates once it has already failed, so nobody
+                        // is told their address is wrong while they are writing it.
+                        .onChange(of: email) { if emailError != nil { validate() } }
+                }
+
+                LabeledField("Password", error: nil) {
+                    SecureField("", text: $password)
+                        .textContentType(.password)
+                        .submitLabel(.go)
+                        .focused($focus, equals: .password)
+                }
+            }
+            .padding(20)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .onSubmit {
+            switch focus {
+            case .email: focus = .password
+            default: submit()
+            }
+        }
+        // Rides above the keyboard instead of hiding behind it.
+        .safeAreaInset(edge: .bottom) {
+            Button("Sign in", action: submit)
+                .buttonStyle(.borderedProminent)
+                .padding(20)
+        }
+    }
+
+    private func validate() {
+        emailError = email.contains("@") && email.contains(".")
+            ? nil : "Add a domain ending, like .com"
+    }
+
+    private func submit() {
+        validate()
+        // Focus goes to what failed, so the fix is one tap away.
+        if emailError != nil { focus = .email; return }
+        // ...
+    }
+}
+```
+
+### Checks
+
+- On a device with saved credentials, every identity field offers autofill above the keyboard.
+- Every keyboard's bottom row and return key match the field they belong to.
+- The whole form can be completed without touching the screen between fields.
+- Submit on an empty form explains what is missing; nothing typed is lost.
+- On the smallest device at AX3, with the last field focused, the submit button is still reachable.
+- A pasted one-time code lands in the field.
+- Every placeholder is an example of a format, and every field still names itself while being typed into.
+
+### Do not
+
+- Ship a field without `.textContentType`, then wonder why autofill never appears.
+- Disable submit until valid.
+- Turn a validation failure into a toast, an alert, or a bare red border.
+- Build a six-box one-time-code input.
+- Use the placeholder as the label.
+- Clear a field because its value failed validation.
+- Put the primary action below the fold of a scrolling form with no safe-area inset.
 
 <!-- references/gestures-and-physics.md -->
 
@@ -3850,6 +4083,9 @@ It does not choose a typeface. It makes whatever face the project uses read as o
 18. **Zeros that cannot be an O, wherever it matters.** SF Pro ships an alternate slashed zero as a stylistic set; find the set number in Font Book rather than guessing it, and apply it through `UIFontDescriptor.featureSettings` with `kStylisticAlternativesType` on codes, keys and IDs only. Not in prose. Check: render `O0` in a code field; the two are unmistakable.
 19. **Real small caps or none.** Drawn small caps carry the correct stroke weight; `.uppercase` at a smaller point size produces letters too light for their neighbours, which reads as wrong without being nameable. SF Pro has no true small caps, so on the system face the answer is not to use them. Check: if the design calls for small caps, the face is a custom one that actually has them.
 20. **Use the real characters.** A typographic apostrophe and quotes, an ellipsis as one character rather than three periods, an en dash for ranges, a real multiplication sign in dimensions, a minus sign rather than a hyphen in negative figures, and a non-breaking space between a number and its unit so "12 MB" never breaks across lines. Check: grep the string catalogue for `'`, `"`, `...` and ` x `; each is a mistake.
+21. **Never build title case with a transform, and turn off the one the system applies.** There is no `.capitalized` that knows "iPhone" from "Iphone" or that "of" stays lowercase in a title, so write the string the way it should read. Grouped `Section` headers uppercase themselves; `.textCase(nil)` on the section restores the string you actually wrote, which is usually what a modern design wants. Check: search for `.uppercased()` and `.capitalized`; each hit is either a house all-caps decision or a bug.
+22. **`allowsTightening` before `minimumScaleFactor`, and both before truncation.** Tightening pulls character spacing in slightly and is invisible at one or two characters of overflow; scaling shrinks the whole string and is visible; truncation loses information. Order them that way, so `.allowsTightening(true)` sits on labels that occasionally run one character long and `.minimumScaleFactor` is reserved for hero numerals. Check: run the longest plausible string in German at AX3 and see which of the three fired.
+23. **SwiftUI has no `text-wrap: balance`, so bind the words yourself.** A headline whose last line is one word reads as a mistake, and `Text` will not fix it. Join the final two words with a non-breaking space (`\u{00A0}`) so they wrap together, or insert a line separator (`\u{2028}`) to force the break you want without starting a new paragraph. Do this on headlines only, never on body copy, and re-check at AX5 where the break moves. Check: every hard-coded headline is read at the smallest width the layout allows.
 
 ### Cheat sheet
 

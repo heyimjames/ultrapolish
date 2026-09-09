@@ -1,6 +1,6 @@
 ---
 name: ultrapolish-ios
-description: Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, premium, craft, cohesive, make it better, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, symbolEffect, microcopy, empty state, skeleton, onboarding, paywall, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, dark mode, OKLCH, design tokens.
+description: Universal polish for native Swift/SwiftUI apps. Takes a competent app to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining an iOS app and wants it to feel considered, cohesive, premium, and detailed. Covers motion and springs, gestures, colour (OKLCH, Display P3, dark mode), typography and Dynamic Type, 4pt layout, hierarchy, buttons, sheets, navigation, haptics, sound, SF Symbols, copy, forms and text input, lists and search, empty/loading/error states, onboarding, paywalls, StoreKit, widgets, Live Activities, Dynamic Island, Liquid Glass, accessibility. Triggers on polish, feels generic, audit UI, spring, .snappy, sheet, detent, haptic, sensoryFeedback, sound effect, button, CTA, SF Symbol, microcopy, empty state, widget, Live Activity, glassEffect, Dynamic Type, VoiceOver, Reduce Motion, tap target, design tokens, TextField, autofill, textContentType, searchable, swipe actions, Table.
 ---
 
 # ultrapolish-ios
@@ -290,6 +290,14 @@ The eye should land on the headline, then the primary action, within a second. I
 ### Buttons and controls → `references/buttons-and-controls.md`
 
 The press-down haptic is non-negotiable: the button heard you. Loading locks its width. Disabled is transparency with a reason. Success reverts in 1.5s. A row with an inner button captures the inner tap first. Sticky CTAs use `.safeAreaInset(edge: .bottom)` with `.background(.bar)` and scroll-react via `.onScrollGeometryChange`.
+
+### Lists, search and working with many things → `references/data-and-density.md`
+
+`List` for reading down, `Table` for comparing across and only at a regular width, with the compact fallback designed rather than accepted. One primary line per row and at most two supporting ones, checked at AX5. Compared figures are `.monospacedDigit()` and trailing-aligned. A dense row may be shorter than 44pt only if its tap target is not. Search results update in place and never blank the list; a no-results state names the query. Selection puts the count in the title, and "select all" meaning every match is a separate explicit choice. Bulk actions name the verb, the count and the noun. Swipe holds the one or two constant actions with full swipe off unless undoable; everything rarer is in a context menu that also exists somewhere without a long press. On iPad the hardware keyboard is a real input.
+
+### Forms and text input → `references/forms-and-inputs.md`
+
+Most of what makes a form feel careless is invisible in a screenshot. `.textContentType` is what turns autofill, QuickType, strong passwords and one-time codes on, and nothing works without it. The keyboard matches the content and the return key names its action. `@FocusState` advances on return and moves to whatever failed. Never disable submit until valid: validate on submit, then per keystroke only for a field that has already failed. Errors sit under their field, in words, with the value kept. Nothing important hides under the keyboard, and a number pad needs a Done button because it has no return key. One `TextField` with `.oneTimeCode`, never six boxes.
 
 ### Sheets, navigation and trays → `references/sheets-and-navigation.md`
 

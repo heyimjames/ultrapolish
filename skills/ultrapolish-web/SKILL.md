@@ -1,6 +1,6 @@
 ---
 name: ultrapolish-web
-description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, premium, craft, cohesive, make it better, audit UI, easing, cubic-bezier, spring, Motion, hover, focus ring, shadow, radius, modal, drawer, sheet, popover, tooltip, toast, form, input, button, icon, typography, OKLCH, contrast, dark mode, empty state, skeleton, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, pricing page, design tokens.
+description: Universal polish for web apps and sites built with React, TypeScript, and CSS. Takes a competent interface to a beloved one within its own visual style; never introduces a palette, typeface, or motion personality. Use whenever the user is building, reviewing, auditing, or refining a web UI and wants it to feel considered, cohesive, premium, and detailed. Covers easing and springs, gestures and scroll, colour (OKLCH, APCA, dark mode), typography, 4px layout, surfaces, buttons, forms, tables and dense data, overlays, haptics, icons, copy, states, onboarding and pricing, mobile web, performance, accessibility, marketing pages. Triggers on polish, feels generic, audit UI, easing, spring, Motion, hover, focus ring, shadow, radius, modal, drawer, sheet, popover, tooltip, toast, form, input, button, icon, typography, contrast, empty state, layout shift, iOS Safari, safe-area, reduced motion, a11y, landing page, design tokens, table, data grid, search, bulk actions, command palette, keyboard shortcut.
 ---
 
 # ultrapolish-web
@@ -299,6 +299,10 @@ Six states with exact values. Width-locked loading. The Done → Cancel · Save 
 ### Forms and inputs → `references/forms-and-inputs.md`
 
 Inputs ≥ 16px on mobile, `-webkit-appearance: none`, never disable submit until valid, validate on submit then `aria-invalid` + `aria-describedby` + focus the first invalid field, `autocomplete` tokens are a WCAG requirement, `inputmode` for OTP and money, never block paste, trim before validating, placeholders are examples not labels, focus after a sheet finishes animating, handle the virtual keyboard inset.
+
+### Tables, search and working with many things → `references/data-and-density.md`
+
+A dense tool is not a consumer app with smaller padding. Numbers right-align and go tabular so a magnitude is visible without reading; text left-aligns; nothing centres. Row height is a documented decision, and a professional table may sit between the 24px floor and the 40px pointer default where a consumer app may not. Headers stick and sort with `aria-sort`. Search debounces at 300ms and never replaces readable rows with a spinner. Active filters are visible chips with a count of what is hidden. Select-all means the page; "all 340" is a second explicit action. Bulk actions name the verb, the count and the noun. Arrows move, Space selects, Shift extends, single-key shortcuts never fire while someone is typing.
 
 ### Overlays → `references/overlays.md`
 
