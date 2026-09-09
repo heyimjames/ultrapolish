@@ -7,9 +7,9 @@ Use this when the interface will be used on a phone or tablet, in a browser or a
 1. **Ship the base layer once, at the root.** Tap highlight, text-size adjust, touch callout, touch-action, selection policy, focus policy, and input size (see Code). Why: these are per-page defaults that read as sloppiness on every screen at once. Check: the base layer exists in one file and is imported first.
 2. **Inputs are at least 16px.** `font-size: max(16px, 1rem)`. Why: below 16px iOS Safari zooms the viewport on focus and does not zoom back. Check: focus every input on a real iPhone; nothing zooms.
 3. **Never `user-scalable=no` or `maximum-scale=1`.** Safari ignores it for pinch, every other browser honours it, and it fails WCAG 1.4.4. Fix the zoom cause (rule 2) instead. Check: the viewport meta contains neither.
-4. **`viewport-fit=cover`, then add safe areas to padding.** `padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px))`. Never use the inset as the whole padding. For sheets, pad the contents, not the position. Why: without `viewport-fit=cover`, `env()` returns 0 and you will not notice until a device with a home indicator. Check: run on an iPhone with a home indicator; nothing sits under it.
+4. **`viewport-fit=cover`, then add safe areas to padding.** `padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px))`. Never use the inset as the whole padding. For sheets, pad the contents, not the position. Why: without `viewport-fit=cover`, `env()` returns 0 and you will not notice until a device with a home indicator. Declaring it and never reading `env()` anywhere is the trap, because it looks handled. How much it matters depends on the product: on a phone-first app it is HIGH, because the bottom chrome is under the home indicator which also swallows the taps. On a desktop-first app that happens to have set it, the finding is real but MEDIUM at most, and the fix is only needed on chrome that touches a screen edge, usually one footer or transport bar. Check: `grep -rn "safe-area-inset"`; if `viewport-fit=cover` is set and this returns nothing, find the bottom-most fixed chrome and decide which case you are in.
 5. **`dvh` for fill layouts, `svh` for fixed chrome, `vh` never.** `100vh` is the largest viewport on iOS and overflows under the URL bar. `dvh` reflows during scroll, so prefer `svh` for a composer or a bottom bar. Check: grep for `100vh`; each hit is a finding.
-6. **`overscroll-behavior: none` on html/body only in standalone mode.** In the browser, people expect pull-to-refresh and rubber-banding. Inside scroll containers use `overscroll-behavior: contain`. Check: the rule lives inside `@media (display-mode: standalone)`.
+6. **`overscroll-behavior: none` on html/body only in standalone mode, with one exception.** In the browser, people expect pull-to-refresh and rubber-banding. Inside scroll containers use `overscroll-behavior: contain`. The exception is an editor, a canvas, or anything holding unsaved state: those may pin `overscroll-behavior-x: none` globally, because an accidental edge swipe that navigates back destroys work, and losing work beats losing pull-to-refresh. Pin the axis you need rather than both. Record the decision in the design contract so the next reviewer reads it as a choice and not an oversight. Check: the rule lives inside `@media (display-mode: standalone)`, or the contract says why it does not.
 7. **Every hover-only affordance has a touch equivalent.** Wrap hover styles in `@media (hover: hover)`; expose the same action via a visible control, a long-press, or an always-on state. Why: a hover-revealed delete button does not exist on a phone. Check: emulate touch in DevTools; can you reach every action?
 8. **Targets are 44px on touch.** Visual size can be smaller; expand the hit area with a pseudo-element on the `<button>` or `<label>`, never on the `<input>`. No two hit areas overlap. See `references/accessibility.md`.
 9. **`touch-action: manipulation` on every control.** Removes the 300ms double-tap delay where it still exists and stops accidental zoom on rapid taps. Check: grep controls for `touch-action`.
@@ -31,7 +31,7 @@ Use this when the interface will be used on a phone or tablet, in a browser or a
 | Safe area | `calc(<pad> + env(safe-area-inset-*, 0px))` |
 | Touch target | 44px, pseudo-element on button/label |
 | Controls | `touch-action: manipulation` |
-| Overscroll (page) | `none` only in standalone; otherwise leave it |
+| Overscroll (page) | `none` only in standalone; `overscroll-behavior-x: none` globally is allowed for editors with unsaved state |
 | Overscroll (container) | `contain` |
 | Snap paging | `scroll-snap-type: x mandatory; scroll-snap-stop: always` |
 | Keyboard | VirtualKeyboard API, `visualViewport` fallback, move with `transform` |
@@ -151,7 +151,7 @@ Widely recommended, wrong today:
 - Focus every input on an iPhone: no zoom.
 - Viewport meta: `viewport-fit=cover`, no `user-scalable`, no `maximum-scale`.
 - `grep -rn "100vh"`: zero hits or each justified.
-- `grep -rn "overscroll-behavior"`: page-level rule only inside `display-mode: standalone`.
+- `grep -rn "overscroll-behavior"`: page-level rule only inside `display-mode: standalone`, or an editor with the decision written down.
 - DevTools touch emulation: every hover action reachable.
 - 320px width: no horizontal scrollbar.
 - Composer above the keyboard on iOS and Android.
@@ -161,7 +161,7 @@ Widely recommended, wrong today:
 
 - Disable zoom.
 - Use the safe-area inset as the whole padding.
-- Put `overscroll-behavior: none` on the page in a browser tab.
+- Put `overscroll-behavior: none` on the page in a browser tab, unless unsaved work is one edge swipe from being lost and the contract says so.
 - Hide an action behind hover with no touch path.
 - Focus an input while a sheet is still animating.
 - Build a custom scroller.

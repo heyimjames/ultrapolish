@@ -14,7 +14,7 @@ Two universal design-polish skills that take any app from 6/10 to 11/10 on atten
 
 <p align="center">
   <img src="https://img.shields.io/badge/skills-2-000?style=flat-square" alt="2 skills">
-  <img src="https://img.shields.io/badge/lines-9626-000?style=flat-square" alt="Total lines">
+  <img src="https://img.shields.io/badge/references-45-000?style=flat-square" alt="45 references">
   <img src="https://img.shields.io/badge/style-agnostic-000?style=flat-square" alt="Style agnostic">
   <a href="https://skills.sh/heyimjames/ultrapolish"><img src="https://img.shields.io/badge/skills.sh-listed-000?style=flat-square" alt="skills.sh"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-000?style=flat-square" alt="MIT"></a>

@@ -37,7 +37,13 @@ Read this before touching a pixel.
 | States | Which of empty / loading / error / success / offline exist | skeleton components, `Suspense` |
 | Copy | Case, voice, emoji, punctuation, verb-first or not | strings, `<Button>` children |
 
-If a row is empty, that is your first finding: the dimension has no system.
+A row can end in three states, and they are not the same finding:
+
+- **A value.** Record it. It now outranks every default in this skill.
+- **A rule instead of a token.** "Nested radius is always outer minus padding", applied at each site, is a system. Do not file it as a gap because it has no token file.
+- **Genuinely absent, or not applicable.** Absent is a finding. Not applicable is not: an app with no forms has no form system to miss. Write "n/a" and move on.
+
+Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
 ### 1.2 Mode
 
@@ -67,9 +73,9 @@ Always this shape. Group by root cause: a token or shared-component fix outranks
 ```
 Mode: quick audit · Path: sign-up → dashboard · Viewports: 375, 1280
 
-| # | Sev | Location | Before | After | What this changes for the user |
-|---|-----|----------|--------|-------|--------------------------------|
-| 1 | HIGH | Button.tsx:12 (every button) | Submit disabled until valid | Enabled; validate on submit; focus first invalid field | Users learn what is wrong instead of guessing why the button is dead |
+| # | Sev | Location | Where else | What is wrong, and what it should be | What this changes for the user |
+|---|-----|----------|-----------|--------------------------------------|--------------------------------|
+| 1 | HIGH | Button.tsx:12 | every button | Submit is disabled until the form validates, so the control that would explain the problem is the one switched off. Keep it enabled, validate on submit, focus the first invalid field | Users learn what is wrong instead of guessing why the button is dead |
 
 Considered but rejected
 | Candidate | Why not |
@@ -83,9 +89,13 @@ Verified how
 Verdict: Needs changes (1 HIGH, 4 MEDIUM)
 ```
 
-Severity: **HIGH** blocks a task, misleads, hides content, loses data, fails keyboard or screen-reader use, or is systemic. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+Severity: **HIGH** blocks a task, misleads, hides content, loses data, or fails keyboard or screen-reader use. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+
+**Systemic raises severity by one step; it is not a severity of its own.** A shared component or token defect that is otherwise MEDIUM becomes HIGH. This keeps HIGH meaning "someone is blocked or misled" while still making the upstream fix outrank the leaf symptoms it causes.
 
 Verdict vocabulary: `Ship`, `Needs changes`, `Block` (any HIGH).
+
+Two columns earn their place and are easy to get wrong. **Where else** is what makes a systemic finding legible as one row instead of five; write "only here" when it is genuinely local. **What is wrong, and what it should be** is one prose cell, not a two-word before and a two-word after: a real finding needs the defect, the fix, and the reason in the same breath.
 
 The "What this changes for the user" column is mandatory. It is the test of whether a finding is real.
 
@@ -97,7 +107,7 @@ These hold in every style. Break one only with a written reason.
 2. **Out is faster than in.** Exit at about 0.65× the entrance duration, with an accelerating curve and no bounce.
 3. **The 100× rule.** If someone triggers an interaction 100 times a day, do not animate it. Menu toggles, keyboard focus moves, arrow-key selection, tab switches in a tool: instant.
 4. **Opacity never springs; transforms may.** Springs are for objects with mass or for anything a gesture can interrupt. Colour, opacity, and hover use a short curve. Never `transition: all`; name the property.
-5. **The spinner travels.** Progress appears where the result will appear, never on the button that was clicked. No spinner before 300ms. A pending optimistic row is a ghost at 60% opacity, not a spinner.
+5. **The spinner travels.** Progress appears where the result will appear, not only on the control that was clicked. No spinner before 300ms. A pending optimistic row is a ghost at 60% opacity, not a spinner. The control may also carry progress once the result has a home of its own: a button that doubles as a progress bar is right when the work also appears where it will land, and wrong when that is the only place it appears.
 6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, 320px, 200% zoom, reduced motion, dark mode, keyboard-only.
 7. **No layout shift, ever.** Reserve every box: images have dimensions, skeletons match final size, loading buttons lock their width, tabular numbers, fonts with `size-adjust`.
 8. **A disabled control says why; a destructive action names its noun.** Never disable submit until valid. "Delete project" and "Cancel", never "Are you sure?" with OK.
@@ -137,7 +147,9 @@ Use `visualDuration` + `bounce` (Motion) or a generated CSS `linear()`; never ra
 | gentle | `{ visualDuration: 0.6, bounce: 0 }` | ~600ms | backdrops, hero reveals |
 | exit | `exitOf(token)` = `visualDuration × 0.65, bounce: 0` | | every exit |
 
-CSS `linear()` strings with 100+ points cost nothing at runtime. Generate them at build time from the same tokens (`assets/gen-springs.mjs`) and pair each with its measured settle duration; the settle is always longer than the visual duration.
+CSS `linear()` strings with 100+ points cost nothing at runtime. Generate them at build time from the same tokens (`assets/gen-springs.mjs`) and pair each with its measured settle duration.
+
+**Settle and visual duration are different numbers and the difference is large.** Visual duration is when the motion reads as finished; settle is when it has actually stopped, and a `linear()` needs the settle or it truncates. A spring with a 0.4s visual duration settles around 720ms. The 300ms guidance in the duration table above is about *visual* duration and about curves; it does not condemn a 720ms settle. Never compare the two numbers as if they measured the same thing.
 
 Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-flight (velocity handoff). Curves for: hover, focus, colour, opacity, tooltips.
 
@@ -175,7 +187,7 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 - **Grouping by space, not lines.** Gap between groups ≥ 2× the gap within (8 inside, 16+ between). Separators last, for dense data, never combined with a large gap.
 - **Controls**: 12px between adjacent filled controls; 24px clearance around borderless icon buttons; 24px+ between unrelated groups.
 - **Peek**: the next item in a horizontal scroller shows 16–32px past the edge, or nobody scrolls it.
-- **Radii**: at most three values; nested radius = outer − padding; above 24px padding treat layers as separate surfaces.
+- **Radii**: at most three *authored* values. Nested radii are then derived, not authored: inner = outer − padding. A project with one rule and twelve derived values has a radius system; a project with twelve unrelated literals does not. Above 24px of padding, treat the layers as separate surfaces and start again from the outer value.
 - **Full-bleed grid**: `grid-template-columns: 1fr min(65ch, calc(100% - 48px)) 1fr`.
 - **Safe areas are added to padding**: `padding-bottom: calc(16px + env(safe-area-inset-bottom))`. Requires `viewport-fit=cover`.
 - **Breakpoints from content, not devices.** Prefer container queries. Test 320px and the largest first.
@@ -195,7 +207,7 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 ### 3.7 Buttons and controls
 
 - Six states: rest, hover (≤ 150ms colour change; no lift unless the element is a link to somewhere), active (press scale), focus-visible (ring), loading (width locked, label swaps for a spinner in the same box), disabled (muted token, not opacity; paired with a reason).
-- Tap targets: 44px touch, 40px pointer, 24px WCAG floor with a 24px-circle spacing exception. Expand with a pseudo-element on the `<button>` or `<label>`, never on an `<input>`.
+- Tap targets: **24px is the floor that binds** (WCAG 2.5.8), with its spacing exception: a 24px circle centred on the target must not intersect another. 44px on touch and 40px with a pointer are consumer-app defaults, not standards. A dense professional tool with a documented row height is entitled to sit between 24 and 40; a consumer app is not. Expand with a pseudo-element on the `<button>` or `<label>`, never on an `<input>`.
 - `touch-action: manipulation` on every control; set `-webkit-tap-highlight-color` to match the design.
 - Tooltips: 200ms open delay, then a "warm" state where siblings open instantly for 300ms.
 - Copy-to-clipboard shows a check for 1.5s. Search debounces 300ms. A "Done → Cancel · Save" footer reserves its final width and cross-fades labels in 150ms.
@@ -323,6 +335,10 @@ Momentum is the platform's; do not fake it. Snap with `scroll-snap-stop: always`
 ### Performance → `references/performance.md`
 
 Budgets, the frame-killer ranking, `content-visibility`, prefetch on pointerdown, virtualisation thresholds, the theme-switch suppressor, and `visibilitychange` timer freezes.
+
+### Canvas and generated media → `references/canvas-and-media.md`
+
+When the product is the pixels, most of this skill's tooling stops working: the accessibility tree is empty, CSS reaches nothing, and the render loop is the real performance budget. Name the canvas with `role="img"` and a live label, put meaning in `aria-valuetext` rather than a raw number, and give every canvas-only action a real DOM control. Ask for `{ colorSpace: "display-p3" }` or wide-gamut values clamp silently, and remember an invalid `fillStyle` is a no-op that keeps the previous colour. Back the store at `devicePixelRatio`, stop the loop off screen and when hidden, restart from now, and check reduced motion in JS because CSS cannot reach a loop. One renderer for preview and export: if changing the export resolution does not change the pixel dimensions of the file, the export path is a lie.
 
 ### Accessibility as polish → `references/accessibility.md`
 

@@ -39,7 +39,13 @@ Produce this table first. It anchors every later decision and proves you read th
 | States | Which of empty / loading / error / success / offline exist | `ContentUnavailableView`, `ProgressView` |
 | Copy | Case, voice, emoji, punctuation, verb-first or not | strings, `Text(` |
 
-If a row is empty, that is your first finding: the dimension has no system.
+A row can end in three states, and they are not the same finding:
+
+- **A value.** Record it. It now outranks every default in this skill.
+- **A rule instead of a token.** "Nested radius is always outer minus padding", applied at each site, is a system. Do not file it as a gap because it has no token file.
+- **Genuinely absent, or not applicable.** Absent is a finding. Not applicable is not: an app with no forms has no form system to miss. Write "n/a" and move on.
+
+Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
 ### 1.2 Mode
 
@@ -69,9 +75,9 @@ Always this shape. Group by root cause: a token or shared-component fix outranks
 ```
 Mode: full audit · Screens: 6 · States checked: 9
 
-| # | Sev | Location | Before | After | What this changes for the user |
-|---|-----|----------|--------|-------|--------------------------------|
-| 1 | HIGH | ListView.swift:42, DetailView.swift:18 | Title animates out and back in on push | Title lives in NavigationStack parent; only content transitions | The screen feels like one place that changed, not two screens swapped |
+| # | Sev | Location | Where else | What is wrong, and what it should be | What this changes for the user |
+|---|-----|----------|-----------|--------------------------------------|--------------------------------|
+| 1 | HIGH | ListView.swift:42 | DetailView.swift:18, SettingsView.swift:64 | The title unmounts and remounts across the push, so a persistent element animates out and back in. Render it in the NavigationStack parent and transition only the content | The screen feels like one place that changed, not two screens swapped |
 
 Considered but rejected
 | Candidate | Why not |
@@ -85,7 +91,9 @@ Verified how
 Verdict: Needs changes (2 HIGH, 5 MEDIUM)
 ```
 
-Severity: **HIGH** blocks a task, misleads, hides content, loses data, or is systemic. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+Severity: **HIGH** blocks a task, misleads, hides content, or loses data. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+
+**Systemic raises severity by one step; it is not a severity of its own.** A shared component or token defect that is otherwise MEDIUM becomes HIGH. This keeps HIGH meaning "someone is blocked or misled" while still making the upstream fix outrank the leaf symptoms it causes.
 
 Verdict vocabulary: `Ship` (no HIGH, no MEDIUM), `Needs changes`, `Block` (any HIGH).
 
@@ -99,7 +107,7 @@ These hold in every style. Break one only with a written reason.
 2. **Out is faster than in.** Exit at about 0.65× the entrance duration, with zero bounce. People want out faster than they wanted in.
 3. **The 100× rule.** If someone sees an interaction 100 times a day, do not animate it. Tab switches, keyboard focus, list scrolling, arrow selection: instant.
 4. **What follows a finger is linear.** Sliders, scrubbers, crop dials, drag tracking: `.linear` or no animation. Springs begin only when the finger lets go, and they inherit its velocity.
-5. **The spinner travels.** Loading appears where the result will appear, never on the button that was tapped. A sent message shows progress in its bubble; a captured photo shows progress on the thumbnail.
+5. **The spinner travels.** Loading appears where the result will appear, not only on the control that was tapped. A sent message shows progress in its bubble; a captured photo shows progress on the thumbnail. The control may also carry progress once the result has a home of its own; it may never be the only place it appears.
 6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, permission denied, largest Dynamic Type, Reduce Motion, dark mode. The empty state is the first impression for every new user.
 7. **Persistent elements never leave and come back.** If a title, toolbar, pill, or hero exists on both sides of a transition, render it in a parent that survives the transition.
 8. **A disabled control says why; a destructive action names its noun.** Never a grey button with no explanation. Never "Are you sure?" with Yes/No. "Delete project" and "Cancel".

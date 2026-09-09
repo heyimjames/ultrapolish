@@ -40,7 +40,13 @@ Produce this table first. It anchors every later decision and proves you read th
 | States | Which of empty / loading / error / success / offline exist | `ContentUnavailableView`, `ProgressView` |
 | Copy | Case, voice, emoji, punctuation, verb-first or not | strings, `Text(` |
 
-If a row is empty, that is your first finding: the dimension has no system.
+A row can end in three states, and they are not the same finding:
+
+- **A value.** Record it. It now outranks every default in this skill.
+- **A rule instead of a token.** "Nested radius is always outer minus padding", applied at each site, is a system. Do not file it as a gap because it has no token file.
+- **Genuinely absent, or not applicable.** Absent is a finding. Not applicable is not: an app with no forms has no form system to miss. Write "n/a" and move on.
+
+Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
 ### 1.2 Mode
 
@@ -70,9 +76,9 @@ Always this shape. Group by root cause: a token or shared-component fix outranks
 ```
 Mode: full audit · Screens: 6 · States checked: 9
 
-| # | Sev | Location | Before | After | What this changes for the user |
-|---|-----|----------|--------|-------|--------------------------------|
-| 1 | HIGH | ListView.swift:42, DetailView.swift:18 | Title animates out and back in on push | Title lives in NavigationStack parent; only content transitions | The screen feels like one place that changed, not two screens swapped |
+| # | Sev | Location | Where else | What is wrong, and what it should be | What this changes for the user |
+|---|-----|----------|-----------|--------------------------------------|--------------------------------|
+| 1 | HIGH | ListView.swift:42 | DetailView.swift:18, SettingsView.swift:64 | The title unmounts and remounts across the push, so a persistent element animates out and back in. Render it in the NavigationStack parent and transition only the content | The screen feels like one place that changed, not two screens swapped |
 
 Considered but rejected
 | Candidate | Why not |
@@ -86,7 +92,9 @@ Verified how
 Verdict: Needs changes (2 HIGH, 5 MEDIUM)
 ```
 
-Severity: **HIGH** blocks a task, misleads, hides content, loses data, or is systemic. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+Severity: **HIGH** blocks a task, misleads, hides content, or loses data. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+
+**Systemic raises severity by one step; it is not a severity of its own.** A shared component or token defect that is otherwise MEDIUM becomes HIGH. This keeps HIGH meaning "someone is blocked or misled" while still making the upstream fix outrank the leaf symptoms it causes.
 
 Verdict vocabulary: `Ship` (no HIGH, no MEDIUM), `Needs changes`, `Block` (any HIGH).
 
@@ -100,7 +108,7 @@ These hold in every style. Break one only with a written reason.
 2. **Out is faster than in.** Exit at about 0.65× the entrance duration, with zero bounce. People want out faster than they wanted in.
 3. **The 100× rule.** If someone sees an interaction 100 times a day, do not animate it. Tab switches, keyboard focus, list scrolling, arrow selection: instant.
 4. **What follows a finger is linear.** Sliders, scrubbers, crop dials, drag tracking: `.linear` or no animation. Springs begin only when the finger lets go, and they inherit its velocity.
-5. **The spinner travels.** Loading appears where the result will appear, never on the button that was tapped. A sent message shows progress in its bubble; a captured photo shows progress on the thumbnail.
+5. **The spinner travels.** Loading appears where the result will appear, not only on the control that was tapped. A sent message shows progress in its bubble; a captured photo shows progress on the thumbnail. The control may also carry progress once the result has a home of its own; it may never be the only place it appears.
 6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, permission denied, largest Dynamic Type, Reduce Motion, dark mode. The empty state is the first impression for every new user.
 7. **Persistent elements never leave and come back.** If a title, toolbar, pill, or hero exists on both sides of a transition, render it in a parent that survives the transition.
 8. **A disabled control says why; a destructive action names its noun.** Never a grey button with no explanation. Never "Are you sure?" with Yes/No. "Delete project" and "Cancel".
@@ -1012,20 +1020,22 @@ Use this when auditing or building any screen. The apps people describe as "beau
 1. **Test four settings before calling anything done:** Dynamic Type at `.accessibility5`, Reduce Motion, Increase Contrast, VoiceOver. Why: each one exposes a different class of shortcut. Check: a launch scheme exists for each (see Code).
 2. **Dynamic Type to AX5 without clipping.** Use semantic `Font` styles. Wrap any row with a variable string in `ViewThatFits` with a tighter variant. Let `VStack`s replace `HStack`s at large sizes with `@Environment(\.dynamicTypeSize)`. Cap scaling only on chrome that must not grow (`.dynamicTypeSize(...DynamicTypeSize.xxxLarge)`), never on body content. Why: about a third of users run larger-than-default text; AX sizes are common among older users. Check: run at AX5; every label readable, no overlapping, no truncated buttons.
 3. **Reduce Motion means crossfade, not nothing.** Replace travel, scale, and 3D with an 180ms `.easeInOut` opacity change. Keep haptics and functional feedback. Replace `matchedGeometryEffect` with a fast crossfade. Stop ambient loops. Why: stripping all animation makes the app feel broken; iOS itself substitutes crossfades. Check: `@Environment(\.accessibilityReduceMotion)` is read in every custom transition; toggling it changes behaviour.
-4. **Reduce Transparency means solid fills.** Every `Material` gets a solid fallback via `@Environment(\.accessibilityReduceTransparency)`. Why: blurred surfaces are unreadable for many low-vision users. Check: toggle the setting; no blur remains.
-5. **Increase Contrast is a real pass, not a hope.** Read `@Environment(\.colorSchemeContrast)`; when `.increased`, lift secondary text to at least 4.5:1 and borders to 3:1. Why: your muted tertiary text at 3:1 is invisible to a meaningful share of users. Check: toggle; secondary and tertiary text darken.
-6. **VoiceOver reads every screen in a sensible order.** Group rows with `.accessibilityElement(children: .combine)`. Give every image a label or hide it with `.accessibilityHidden(true)` if decorative. Never let the reading order differ from the visual order without a reason. Why: a card that reads "image, 12, chevron, Bank transfer" is not usable. Check: swipe through the screen with VoiceOver; every element says what it is and what it does.
-7. **Custom controls carry traits and values.** `.accessibilityAddTraits(.isButton)` on tappable non-buttons; `.accessibilityValue` on anything with a state; `.accessibilityRepresentation { Slider(...) }` on custom sliders and dials so VoiceOver gets the real gestures. Why: a gesture-driven dial is invisible to a screen reader without a representation. Check: every `onTapGesture` on a non-Button has a trait.
-8. **Progress dots are hidden; the container carries the value.** `.accessibilityHidden(true)` on the dots, `.accessibilityValue("Step 2 of 4")` on the flow container. Why: five unlabeled circles read as "button, button, button". Check: VoiceOver says "Step 2 of 4" once.
-9. **Move focus after a sheet opens or a destructive confirm appears.** `@AccessibilityFocusState` bound to the sheet title or the least destructive action. Why: without it VoiceOver stays on the element behind the sheet. Check: open a sheet with VoiceOver on; the first announcement is the sheet's title.
-10. **44×44pt targets.** A 24pt glyph gets padding to 44 and `.contentShape(Rectangle())`. Why: without `.contentShape` only the glyph is tappable. Check: tap the padding around every icon button; it responds.
-11. **Colour never carries meaning alone.** Pair with a symbol, a label, or a shape. Honour `@Environment(\.accessibilityDifferentiateWithoutColor)` by adding shapes or labels when it is on. Why: about 8% of men cannot separate red from green. Check: view the screen in greyscale; every status still reads.
-12. **Voice Control names match visible labels.** If a button shows "Save", its accessibility label starts with "Save". Why: users say what they see. Check: no `.accessibilityLabel` that renames a visible label.
-13. **Bold Text and Button Shapes are supported, not fought.** Read `@Environment(\.legibilityWeight)`; do not hard-code `.regular` on body. With Button Shapes on, plain-text buttons gain an underline; make sure that reads fine. Why: these are system promises; overriding them breaks trust. Check: toggle both; nothing looks broken.
-14. **Photos and artwork ignore Smart Invert.** `.accessibilityIgnoresInvertColors()` on images, video, and colour swatches. Why: an inverted photo is an error, not a preference. Check: Smart Invert on; photos stay natural.
-15. **Assistive Access is a distinct shape.** If the app opts in, provide a simplified scene with large controls; do not just ship the default. Check: `UISupportsFullScreenInAssistiveAccess` and a tested layout.
-16. **Announce what changes off-screen.** `AccessibilityNotification.Announcement("Saved").post()` for outcomes the user cannot see; use it sparingly and never for every keystroke. Check: a save with VoiceOver on says "Saved" once.
-17. **Haptics are not gated by motion settings.** Reduce Motion does not turn off haptics; keep firing them. Check: with Reduce Motion on, the press haptic still fires.
+4. **The environment value does not reach every kind of motion.** `@Environment(\.accessibilityReduceMotion)` and `UIAccessibility.isReduceMotionEnabled` change nothing on their own; they are values you must read. Four kinds of motion live outside the SwiftUI transition system and keep moving unless you guard them by hand: a `CADisplayLink` or `Timer` render loop, `TimelineView(.animation)`, a SpriteKit, SceneKit, or Metal scene, and an autoplaying `AVPlayer` or looping `VideoMaterial`. Why: this is the single most common Reduce Motion bug, because the rest of the app looks correct while the largest movement on screen carries on. Check: `grep -rn "TimelineView(.animation)\|CADisplayLink\|\.autoplay\|SKView\|MTKView" Sources` and confirm each hit reads the value; then turn Reduce Motion on and watch the screen for five seconds with your hands off the device.
+5. **Reduce Transparency means solid fills.** Every `Material` gets a solid fallback via `@Environment(\.accessibilityReduceTransparency)`. Why: blurred surfaces are unreadable for many low-vision users. Check: toggle the setting; no blur remains.
+6. **Increase Contrast is a real pass, not a hope.** Read `@Environment(\.colorSchemeContrast)`; when `.increased`, lift secondary text to at least 4.5:1 and borders to 3:1. Why: your muted tertiary text at 3:1 is invisible to a meaningful share of users. Check: toggle; secondary and tertiary text darken.
+7. **VoiceOver reads every screen in a sensible order.** Group rows with `.accessibilityElement(children: .combine)`. Give every image a label or hide it with `.accessibilityHidden(true)` if decorative. Never let the reading order differ from the visual order without a reason. Why: a card that reads "image, 12, chevron, Bank transfer" is not usable. Check: swipe through the screen with VoiceOver; every element says what it is and what it does.
+8. **Custom controls carry traits and values.** `.accessibilityAddTraits(.isButton)` on tappable non-buttons; `.accessibilityValue` on anything with a state; `.accessibilityRepresentation { Slider(...) }` on custom sliders and dials so VoiceOver gets the real gestures. Why: a gesture-driven dial is invisible to a screen reader without a representation. Check: every `onTapGesture` on a non-Button has a trait.
+9. **Audit the custom controls by counting them.** Every control you build by hand owes VoiceOver what the system control would have given for free: a label, a role, and a value. The fastest way to find the gaps is to count the two sides and compare. Run `grep -rc "onTapGesture" Sources` against `grep -rc "accessibilityAddTraits" Sources`, and `grep -rc "DragGesture" Sources` against `grep -rc "accessibilityRepresentation" Sources`. Why: a tap gesture with no trait is a control VoiceOver cannot see is a control, and this is invisible in every visual review. Check: the counts are close, and each unmatched hit is a deliberate decision you can name.
+10. **Progress dots are hidden; the container carries the value.** `.accessibilityHidden(true)` on the dots, `.accessibilityValue("Step 2 of 4")` on the flow container. Why: five unlabeled circles read as "button, button, button". Check: VoiceOver says "Step 2 of 4" once.
+11. **Move focus after a sheet opens or a destructive confirm appears.** `@AccessibilityFocusState` bound to the sheet title or the least destructive action. Why: without it VoiceOver stays on the element behind the sheet. Check: open a sheet with VoiceOver on; the first announcement is the sheet's title.
+12. **44×44pt targets.** A 24pt glyph gets padding to 44 and `.contentShape(Rectangle())`. Why: without `.contentShape` only the glyph is tappable. Check: tap the padding around every icon button; it responds.
+13. **Colour never carries meaning alone.** Pair with a symbol, a label, or a shape. Honour `@Environment(\.accessibilityDifferentiateWithoutColor)` by adding shapes or labels when it is on. Why: about 8% of men cannot separate red from green. Check: view the screen in greyscale; every status still reads.
+14. **Voice Control names match visible labels.** If a button shows "Save", its accessibility label starts with "Save". Why: users say what they see. Check: no `.accessibilityLabel` that renames a visible label.
+15. **Bold Text and Button Shapes are supported, not fought.** Read `@Environment(\.legibilityWeight)`; do not hard-code `.regular` on body. With Button Shapes on, plain-text buttons gain an underline; make sure that reads fine. Why: these are system promises; overriding them breaks trust. Check: toggle both; nothing looks broken.
+16. **Photos and artwork ignore Smart Invert.** `.accessibilityIgnoresInvertColors()` on images, video, and colour swatches. Why: an inverted photo is an error, not a preference. Check: Smart Invert on; photos stay natural.
+17. **Assistive Access is a distinct shape.** If the app opts in, provide a simplified scene with large controls; do not just ship the default. Check: `UISupportsFullScreenInAssistiveAccess` and a tested layout.
+18. **Announce what changes off-screen.** `AccessibilityNotification.Announcement("Saved").post()` for outcomes the user cannot see; use it sparingly and never for every keystroke. Check: a save with VoiceOver on says "Saved" once.
+19. **Haptics are not gated by motion settings.** Reduce Motion does not turn off haptics; keep firing them. Check: with Reduce Motion on, the press haptic still fires.
 
 ### Cheat sheet
 
@@ -1039,6 +1049,13 @@ Use this when auditing or building any screen. The apps people describe as "beau
 | Bold Text | `legibilityWeight` | let it flow; no hard-coded regular |
 | Smart Invert | none | `.accessibilityIgnoresInvertColors()` on media |
 | VoiceOver running | `accessibilityVoiceOverEnabled` | move focus, group rows, announce outcomes |
+
+| Motion that the environment value does not stop by itself | Guard |
+|---|---|
+| `CADisplayLink` or `Timer` render loop | read the value; do not start, or render the settled frame |
+| `TimelineView(.animation)` | swap the schedule for `.everyMinute` or a static value |
+| SpriteKit, SceneKit, Metal scene | pause the scene, or set it to its resting state |
+| Autoplaying `AVPlayer`, looping video | do not autoplay; show a poster and a play control |
 
 Targets: 44×44pt. Contrast: body 7:1 (4.5 floor), secondary 4.5:1, UI 3:1.
 
@@ -1058,6 +1075,24 @@ Reduce Motion aware transition:
 
 var arrive: Animation { reduceMotion ? .easeInOut(duration: 0.18) : Motion.settle }
 var transition: AnyTransition { reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity) }
+```
+
+Motion that lives outside the transition system, guarded by hand:
+
+```swift
+@Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+// TimelineView: swap the schedule, do not just change the body.
+TimelineView(reduceMotion ? .everyMinute : .animation) { context in
+    Wash(date: context.date)
+}
+
+// Display link: never start it.
+.onAppear { if !reduceMotion { link.add(to: .main, forMode: .common) } }
+.onChange(of: reduceMotion) { _, reduce in reduce ? link.invalidate() : link.add(to: .main, forMode: .common) }
+
+// Video: a poster and a control, not autoplay.
+if reduceMotion { PosterFrame(asset: asset) } else { LoopingPlayer(asset: asset) }
 ```
 
 Solid fallback for a material:
@@ -1119,6 +1154,8 @@ HStack { icon; VStack { title; subtitle }; Spacer(); amount }
 
 - Run the app at AX5 in German; every screen scrolls, nothing overlaps, every button is reachable.
 - Toggle Reduce Motion: transitions crossfade in ~180ms; haptics still fire; ambient loops stop.
+- With Reduce Motion on, put your hands down and watch each screen for five seconds; nothing moves on its own, including video, particles, and any Metal or SpriteKit surface.
+- Compare `grep -rc "onTapGesture"` with `grep -rc "accessibilityAddTraits"`; every unmatched hit is a decision you can defend.
 - Toggle Reduce Transparency: no blurred surface remains.
 - Toggle Increase Contrast: secondary text darkens; hairlines strengthen.
 - VoiceOver swipe pass on each screen: order matches visual, every element has a name and a role, sheets take focus.
@@ -1132,6 +1169,8 @@ HStack { icon; VStack { title; subtitle }; Spacer(); amount }
 - Turn off all animation under Reduce Motion.
 - Rename a visible label in `.accessibilityLabel`.
 - Ship an `onTapGesture` without a button trait.
+- Assume reading `accessibilityReduceMotion` somewhere means every kind of motion is covered.
+- Leave a `TimelineView(.animation)`, display link, or autoplaying video running under Reduce Motion.
 - Rely on the default reading order of a custom card.
 - Use `accessibilityHidden` to hide something because it was awkward to label.
 - Announce every keystroke or every scroll position.
@@ -3532,7 +3571,7 @@ The empty state is the first impression for every new user, and the error state 
 
 1. **Every list, fetch, and form has empty, loading, error, and success.** Why: a screen that only works when data is present only works in the demo. Check: force each state with a debug flag or a fake store; none is a blank white view.
 2. **Follow the loading ladder.** 0–500ms silent; 500ms–2s subtle inline; 2s+ explicit progress with a label; 10s+ a Live Activity or notification. Why: a spinner for 300ms reads as a flicker, and a silent 5s reads as broken. Check: time the network call on a slow simulator profile and see the right rung.
-3. **The spinner travels.** Progress appears where the result will land, never on the control that was tapped. Why: the eye follows one location; anchor it to the destination. Check: after tapping Send, the send button is at rest and the bubble shows the progress.
+3. **The spinner travels.** Progress appears where the result will land, not only on the control that was tapped. Why: the eye follows one location, so anchor it to the destination. The control may carry progress as well once the result has a home of its own; it may never be the only place it appears. Check: after tapping Send, the bubble shows the progress, whether or not the button does too.
 4. **Skeletons structurally match.** Same bar count, widths, and positions as the real content. Why: three bars for five-line content breaks the illusion the moment it resolves. Check: overlay the skeleton on a loaded cell; the boxes line up.
 5. **Optimistic first.** Apply the change immediately; a pending item is a ghost at opacity 0.6; revert with an inline reason on failure. Why: the user's action causes the visible effect; the network is an implementation detail. Check: airplane mode, tap Like; the heart fills, then reverts with a line under it.
 6. **Empty states invite.** A symbol or small illustration, one warm line of why, one action. Never "No items". Why: it is the only screen every new user sees. Check: the copy names what to do next and there is one button or a pointer to one.
@@ -3543,6 +3582,10 @@ The empty state is the first impression for every new user, and the error state 
 11. **Offline is a state, not an error.** Cached content stays usable; a quiet banner says what is stale. Check: airplane mode; the app is still useful.
 12. **Overflow is a state.** 200 items, a 60-character title, a 4-line description. Check: run with a fake store of 5000 rows and a long-string locale.
 13. **Permission denied has its own screen with a Settings path.** Why: the system alert only appears once; after that the app must explain and offer `UIApplication.openSettingsURLString`. Check: deny in Settings, relaunch, see the screen.
+14. **A long local job is a different shape from a network wait.** A video export, a batch of photos, or an on-device model run takes tens of seconds on the user's own hardware, reports real per-unit progress, and can be cancelled. Give it determinate progress with a count ("14 of 60"), a Cancel that actually stops the work rather than hiding the sheet, and a surface that survives the job. Why: the loading ladder above is written for a request you are waiting on, not for work you are doing. Check: start the longest job in the app, press Cancel, and confirm the CPU drops and no file is written.
+15. **The progress surface must not disappear in the same frame as the failure.** If the job's sheet unmounts the moment it throws, the message lands somewhere the user is not looking and the thing they were watching vanishes at the same time. Keep the surface, swap its contents to the error, and let the user dismiss it. Why: this is the most common way a real failure becomes invisible. Check: force the job to fail; the message appears where the progress was.
+16. **A job that outlives the foreground ends in a system surface.** If the app can be backgrounded mid-job, completion is a Live Activity or a local notification, not a toast nobody sees. Register a background task so the work is not suspended halfway. Why: a 40 second export is exactly long enough for someone to switch apps. Check: start the job, background the app, and confirm you are told when it finishes.
+17. **One channel per severity, and only one.** Two implementations of "tell the user something went wrong", with the important path wired to the older one, is a common and invisible bug: the newer channel wraps, persists, and is reachable, and the path that matters still uses the string that predates it. Why: nobody notices the second channel because each one works in isolation. Check: grep for every way the app can surface an error (`Toast`, `banner`, `alert`, a status `String` on a view model) and confirm there is exactly one per severity; if there are two, list every call site of the older one and move them.
 
 ### Cheat sheet
 
@@ -3570,6 +3613,14 @@ The empty state is the first impression for every new user, and the error state 
 | Error (full screen, nothing cached) | Symbol, plain reason, Retry |
 | Offline | Banner "Showing saved data" and content still usable |
 | Permission denied | Why the app needs it, what works without it, "Open Settings" |
+
+| Long local job | Treatment |
+|---|---|
+| Progress | Determinate, with a count ("14 of 60"), in a surface that survives the job |
+| Cancel | Always reachable; stops the work, not just the sheet |
+| Failure | Replaces the contents of the same surface; never unmounts it |
+| Partial success | Report the split ("58 exported, 2 skipped") and keep the failures identifiable |
+| Backgrounded | Live Activity or local notification, plus a background task so it is not suspended |
 
 Error strip shape (from a shipped control-surface app): rises from the bottom edge of the failing region in 280ms with `.spring(duration: 0.28, bounce: 0)`, dwells 4s, sinks away. It is inside the region, not above the whole screen.
 
@@ -3730,6 +3781,10 @@ ContentUnavailableView {
 - Every Undo restores model state, not just the UI.
 - Count celebration triggers; each is rare.
 - Deny a permission in Settings; the app explains and links out.
+- Run the longest job in the app, press Cancel, and watch the CPU drop; nothing is written.
+- Force that job to fail; the message appears where the progress was, and stays.
+- Start it, background the app, and confirm completion still reaches you.
+- List every way the app can report an error; there is one per severity, not two.
 
 ### Do not
 
@@ -3738,6 +3793,9 @@ ContentUnavailableView {
 - Put a field error in a toast, or the only Undo in a toast that vanishes.
 - Ship a skeleton with a different structure from the content.
 - Fail silently. A swallowed error is worse than a visible one.
+- Unmount the progress surface in the same frame the job fails.
+- Offer a Cancel that hides the sheet and leaves the work running.
+- Keep a second, older error channel alive because the newer one arrived after it.
 - Celebrate a routine save.
 - Reuse the empty state for the error state; they are different questions.
 - Park crucial persistent information in an empty state; it disappears with the first item.

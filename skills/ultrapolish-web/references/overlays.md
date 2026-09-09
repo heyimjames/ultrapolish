@@ -7,26 +7,27 @@ The project's overlay library is fine; these rules apply on top of Vaul, Base UI
 
 1. **Paired elements share easing and duration.** Modal and backdrop, tooltip and arrow, drawer and scrim move as one object. Two curves on one gesture read as two things. Check: replay at 10% speed; nothing lags its partner.
 2. **Exits are shorter and accelerate.** 0.65× the entrance, `cubic-bezier(0.4, 0, 1, 1)`, no bounce. Sometimes the right exit is none: remove immediately when the user is already looking elsewhere. Check: close feels faster than open.
-3. **Use `<dialog>` with `showModal()`.** You get the focus trap, `inert` on everything else, Escape, and the top layer for free. If you cannot, set `inert` on the app root yourself. Check: Tab never leaves the modal; Escape closes it.
-4. **Focus the least destructive action on destructive confirms.** The default focus in "Delete project?" is Cancel. Enter should never delete. Check: open the confirm, press Enter, nothing is lost.
-5. **Return focus to the trigger on close.** Otherwise keyboard users land at the top of the document. Check: close with Escape; the opening button has the ring.
-6. **`overscroll-behavior: contain` inside every scrolling overlay.** Reaching the end of a sheet's content must not scroll the page behind it. Check: scroll to the bottom of the sheet and keep going.
-7. **Lock page scroll without `position: fixed` on body.** `html { overflow: hidden; scrollbar-gutter: stable }` while open, so the layout does not jump by the scrollbar width and iOS does not lose its scroll position. Check: open and close a modal; the page has not moved.
-8. **Escape closes what opened last.** Tooltip, then menu, then dialog. One press, one layer. Check: open a menu inside a modal, press Escape twice.
-9. **Popovers grow from their trigger.** `transform-origin` at the trigger's edge; scale 0.95 → 1 plus opacity, 150–200ms, ease-out-quart. Flip placement near viewport edges. Check: the popover appears to come out of the button.
-10. **Submenus get a diagonal safe area.** A triangle (`clip-path: polygon(0 0, 100% 0, 100% 100%)`) over the gap so the cursor can travel diagonally without the submenu closing. Check: move the cursor from the parent item to the far corner of the submenu.
-11. **Sheets arrive as containers with contents inside.** Backdrop: opacity tween 250ms ease-out at t=0. Panel: `y: 100% → 0` on the `smooth` spring at t=0. Contents: fade and rise at t=80ms with a 30ms stagger. The 80ms offset is why native sheets feel like they carry things. Check: contents never lead the panel.
-12. **Sheets dismiss on velocity.** Down-flick over 500px/s dismisses regardless of position; otherwise over 50% of height. An upward flick always cancels, even below the threshold. Velocity beats position. Check: a short fast flick closes it; a long slow drag under half snaps back.
-13. **Pad sheet contents for the safe area, not the sheet's position.** `padding-bottom: calc(16px + env(safe-area-inset-bottom))` on the content. The sheet itself sits at `bottom: 0`. Check: on a phone with a home indicator the last row is fully visible.
-14. **The source view may recede.** Scaling the page to 0.94 with a 14px radius behind a full sheet is a legitimate depth cue. Only for full-height sheets. Check: never combined with a half sheet.
-15. **Stacked overlays differ in height by 25% or more.** Two same-height sheets read as one sheet that swapped content. Check: measure both.
-16. **Toasts: 5s floor, pause on hover and focus, persist when they carry an action or an error.** A toast holding the only Undo that vanishes on a timer is data loss on a schedule. Check: hover a toast; the timer stops.
-17. **One toast visible.** Queue the rest. A stack of toasts is a log, not feedback. Check: fire three; one shows.
-18. **Toasts are `role="status"`, never focused.** Bottom-centre on mobile, top-right on desktop, or the project's own corner used consistently. Check: screen reader announces without moving focus.
-19. **Contextual outcomes go inline, not in a toast.** A field error belongs on the field; a saved row shows saved on the row. Toasts are for minor, reversible, global outcomes ("Archived. Undo"). Check: could the person be looking somewhere else when this appears? If not, do not toast it.
-20. **Confirmation dialogs name the noun.** "Delete this project?" with "Delete project" and "Cancel". Never "Are you sure?" with OK. Check: read only the buttons; you know what happens.
-21. **`position: fixed` breaks inside a transformed ancestor.** A parent with `transform`, `filter`, or `will-change: transform` becomes the containing block. Render overlays in a portal at the document root. Check: open the overlay inside an animated card.
-22. **Reduced motion: crossfade.** Sheets and modals fade in place, 150–200ms. Keep the backdrop. Check: enable Reduce Motion; nothing slides.
+3. **Use `<dialog>` with `showModal()`.** You get the focus trap, `inert` on everything else, Escape, and the top layer for free. Check: Tab never leaves the modal; Escape closes it.
+4. **A hand-rolled portal owes you the three things `<dialog>` gave you free.** `createPortal` with `role="dialog"` is the common case in React and it is usually 90% right, which is why the missing 10% survives review. You owe: `aria-modal="true"` on the panel, `inert` on the app root while it is open and removed after, and `document.activeElement` stored before you open and refocused on close. Of those, `aria-modal` is the one to check first: without it you have not merely failed to trap focus, you have actively told assistive technology the background is still available while it is covered. That is a worse failure than no trap at all, because it is a lie rather than an omission. Check: with the overlay open, run the screen reader's next-item command past the last control; you should not reach the page underneath.
+5. **Focus the least destructive action on destructive confirms.** The default focus in "Delete project?" is Cancel. Enter should never delete. Check: open the confirm, press Enter, nothing is lost.
+6. **Return focus to the trigger on close.** Otherwise keyboard users land at the top of the document. Check: close with Escape; the opening button has the ring.
+7. **`overscroll-behavior: contain` inside every scrolling overlay.** Reaching the end of a sheet's content must not scroll the page behind it. Check: scroll to the bottom of the sheet and keep going.
+8. **Lock page scroll without `position: fixed` on body.** `html { overflow: hidden; scrollbar-gutter: stable }` while open, so the layout does not jump by the scrollbar width and iOS does not lose its scroll position. Check: open and close a modal; the page has not moved.
+9. **Escape closes what opened last.** Tooltip, then menu, then dialog. One press, one layer. Check: open a menu inside a modal, press Escape twice.
+10. **Popovers grow from their trigger.** `transform-origin` at the trigger's edge; scale 0.95 → 1 plus opacity, 150–200ms, ease-out-quart. Flip placement near viewport edges. Check: the popover appears to come out of the button.
+11. **Submenus get a diagonal safe area.** A triangle (`clip-path: polygon(0 0, 100% 0, 100% 100%)`) over the gap so the cursor can travel diagonally without the submenu closing. Check: move the cursor from the parent item to the far corner of the submenu.
+12. **Sheets arrive as containers with contents inside.** Backdrop: opacity tween 250ms ease-out at t=0. Panel: `y: 100% → 0` on the `smooth` spring at t=0. Contents: fade and rise at t=80ms with a 30ms stagger. The 80ms offset is why native sheets feel like they carry things. Check: contents never lead the panel.
+13. **Sheets dismiss on velocity.** Down-flick over 500px/s dismisses regardless of position; otherwise over 50% of height. An upward flick always cancels, even below the threshold. Velocity beats position. Check: a short fast flick closes it; a long slow drag under half snaps back.
+14. **Pad sheet contents for the safe area, not the sheet's position.** `padding-bottom: calc(16px + env(safe-area-inset-bottom))` on the content. The sheet itself sits at `bottom: 0`. Check: on a phone with a home indicator the last row is fully visible.
+15. **The source view may recede.** Scaling the page to 0.94 with a 14px radius behind a full sheet is a legitimate depth cue. Only for full-height sheets. Check: never combined with a half sheet.
+16. **Stacked overlays differ in height by 25% or more.** Two same-height sheets read as one sheet that swapped content. Check: measure both.
+17. **Toasts: 5s floor, pause on hover and focus, persist when they carry an action or an error.** A toast holding the only Undo that vanishes on a timer is data loss on a schedule. Check: hover a toast; the timer stops.
+18. **One toast visible.** Queue the rest. A stack of toasts is a log, not feedback. Check: fire three; one shows.
+19. **Toasts are `role="status"`, never focused.** Bottom-centre on mobile, top-right on desktop, or the project's own corner used consistently. Check: screen reader announces without moving focus.
+20. **Contextual outcomes go inline, not in a toast.** A field error belongs on the field; a saved row shows saved on the row. Toasts are for minor, reversible, global outcomes ("Archived. Undo"). Check: could the person be looking somewhere else when this appears? If not, do not toast it.
+21. **Confirmation dialogs name the noun.** "Delete this project?" with "Delete project" and "Cancel". Never "Are you sure?" with OK. Check: read only the buttons; you know what happens.
+22. **`position: fixed` breaks inside a transformed ancestor.** A parent with `transform`, `filter`, or `will-change: transform` becomes the containing block. Render overlays in a portal at the document root. Check: open the overlay inside an animated card.
+23. **Reduced motion: crossfade.** Sheets and modals fade in place, 150–200ms. Keep the backdrop. Check: enable Reduce Motion; nothing slides.
 
 ## Cheat sheet
 
@@ -73,6 +74,36 @@ export function Modal({ open, onClose, children }: Props) {
       onClick={(e) => { if (e.target === ref.current) onClose(); }}>
       <div className="modal-panel">{children}</div>
     </dialog>
+  );
+}
+```
+
+```tsx
+// If you cannot use <dialog>: aria-modal, inert on the root, focus restored.
+export function PortalModal({ open, onClose, children }: Props) {
+  const trigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    trigger.current = document.activeElement as HTMLElement;
+    const root = document.getElementById("app-root")!;
+    root.inert = true;
+    document.documentElement.classList.add("scroll-locked");
+    return () => {
+      root.inert = false;
+      document.documentElement.classList.remove("scroll-locked");
+      // Restore after the overlay has gone, or focus lands on a dying node.
+      requestAnimationFrame(() => trigger.current?.focus());
+    };
+  }, [open]);
+  if (!open) return null;
+  return createPortal(
+    <div className="scrim" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-labelledby="t"
+           className="modal-panel" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>,
+    document.body,
   );
 }
 ```
@@ -153,6 +184,9 @@ function schedule(toast: Toast) {
 - Enable Reduce Motion; every overlay fades in place.
 
 ## Do not
+
+- Ship `role="dialog"` without `aria-modal="true"`; it tells assistive tech the background is reachable while it is not.
+- Leave focus where it was when an overlay closes.
 
 - Animate the backdrop and the panel on different curves or durations.
 - Put the only Undo in a toast that expires.

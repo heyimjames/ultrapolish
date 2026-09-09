@@ -7,7 +7,7 @@ The empty state is the first impression for every new user, and the error state 
 
 1. **Every list, fetch, and form has empty, loading, error, and success.** Why: a screen that only works when data is present only works in the demo. Check: force each state with a debug flag or a fake store; none is a blank white view.
 2. **Follow the loading ladder.** 0–500ms silent; 500ms–2s subtle inline; 2s+ explicit progress with a label; 10s+ a Live Activity or notification. Why: a spinner for 300ms reads as a flicker, and a silent 5s reads as broken. Check: time the network call on a slow simulator profile and see the right rung.
-3. **The spinner travels.** Progress appears where the result will land, never on the control that was tapped. Why: the eye follows one location; anchor it to the destination. Check: after tapping Send, the send button is at rest and the bubble shows the progress.
+3. **The spinner travels.** Progress appears where the result will land, not only on the control that was tapped. Why: the eye follows one location, so anchor it to the destination. The control may carry progress as well once the result has a home of its own; it may never be the only place it appears. Check: after tapping Send, the bubble shows the progress, whether or not the button does too.
 4. **Skeletons structurally match.** Same bar count, widths, and positions as the real content. Why: three bars for five-line content breaks the illusion the moment it resolves. Check: overlay the skeleton on a loaded cell; the boxes line up.
 5. **Optimistic first.** Apply the change immediately; a pending item is a ghost at opacity 0.6; revert with an inline reason on failure. Why: the user's action causes the visible effect; the network is an implementation detail. Check: airplane mode, tap Like; the heart fills, then reverts with a line under it.
 6. **Empty states invite.** A symbol or small illustration, one warm line of why, one action. Never "No items". Why: it is the only screen every new user sees. Check: the copy names what to do next and there is one button or a pointer to one.
@@ -18,6 +18,10 @@ The empty state is the first impression for every new user, and the error state 
 11. **Offline is a state, not an error.** Cached content stays usable; a quiet banner says what is stale. Check: airplane mode; the app is still useful.
 12. **Overflow is a state.** 200 items, a 60-character title, a 4-line description. Check: run with a fake store of 5000 rows and a long-string locale.
 13. **Permission denied has its own screen with a Settings path.** Why: the system alert only appears once; after that the app must explain and offer `UIApplication.openSettingsURLString`. Check: deny in Settings, relaunch, see the screen.
+14. **A long local job is a different shape from a network wait.** A video export, a batch of photos, or an on-device model run takes tens of seconds on the user's own hardware, reports real per-unit progress, and can be cancelled. Give it determinate progress with a count ("14 of 60"), a Cancel that actually stops the work rather than hiding the sheet, and a surface that survives the job. Why: the loading ladder above is written for a request you are waiting on, not for work you are doing. Check: start the longest job in the app, press Cancel, and confirm the CPU drops and no file is written.
+15. **The progress surface must not disappear in the same frame as the failure.** If the job's sheet unmounts the moment it throws, the message lands somewhere the user is not looking and the thing they were watching vanishes at the same time. Keep the surface, swap its contents to the error, and let the user dismiss it. Why: this is the most common way a real failure becomes invisible. Check: force the job to fail; the message appears where the progress was.
+16. **A job that outlives the foreground ends in a system surface.** If the app can be backgrounded mid-job, completion is a Live Activity or a local notification, not a toast nobody sees. Register a background task so the work is not suspended halfway. Why: a 40 second export is exactly long enough for someone to switch apps. Check: start the job, background the app, and confirm you are told when it finishes.
+17. **One channel per severity, and only one.** Two implementations of "tell the user something went wrong", with the important path wired to the older one, is a common and invisible bug: the newer channel wraps, persists, and is reachable, and the path that matters still uses the string that predates it. Why: nobody notices the second channel because each one works in isolation. Check: grep for every way the app can surface an error (`Toast`, `banner`, `alert`, a status `String` on a view model) and confirm there is exactly one per severity; if there are two, list every call site of the older one and move them.
 
 ## Cheat sheet
 
@@ -45,6 +49,14 @@ The empty state is the first impression for every new user, and the error state 
 | Error (full screen, nothing cached) | Symbol, plain reason, Retry |
 | Offline | Banner "Showing saved data" and content still usable |
 | Permission denied | Why the app needs it, what works without it, "Open Settings" |
+
+| Long local job | Treatment |
+|---|---|
+| Progress | Determinate, with a count ("14 of 60"), in a surface that survives the job |
+| Cancel | Always reachable; stops the work, not just the sheet |
+| Failure | Replaces the contents of the same surface; never unmounts it |
+| Partial success | Report the split ("58 exported, 2 skipped") and keep the failures identifiable |
+| Backgrounded | Live Activity or local notification, plus a background task so it is not suspended |
 
 Error strip shape (from a shipped control-surface app): rises from the bottom edge of the failing region in 280ms with `.spring(duration: 0.28, bounce: 0)`, dwells 4s, sinks away. It is inside the region, not above the whole screen.
 
@@ -205,6 +217,10 @@ ContentUnavailableView {
 - Every Undo restores model state, not just the UI.
 - Count celebration triggers; each is rare.
 - Deny a permission in Settings; the app explains and links out.
+- Run the longest job in the app, press Cancel, and watch the CPU drop; nothing is written.
+- Force that job to fail; the message appears where the progress was, and stays.
+- Start it, background the app, and confirm completion still reaches you.
+- List every way the app can report an error; there is one per severity, not two.
 
 ## Do not
 
@@ -213,6 +229,9 @@ ContentUnavailableView {
 - Put a field error in a toast, or the only Undo in a toast that vanishes.
 - Ship a skeleton with a different structure from the content.
 - Fail silently. A swallowed error is worse than a visible one.
+- Unmount the progress surface in the same frame the job fails.
+- Offer a Cancel that hides the sheet and leaves the work running.
+- Keep a second, older error channel alive because the newer one arrived after it.
 - Celebrate a routine save.
 - Reuse the empty state for the error state; they are different questions.
 - Park crucial persistent information in an empty state; it disappears with the first item.

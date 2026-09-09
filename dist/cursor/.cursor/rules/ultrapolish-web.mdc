@@ -38,7 +38,13 @@ Read this before touching a pixel.
 | States | Which of empty / loading / error / success / offline exist | skeleton components, `Suspense` |
 | Copy | Case, voice, emoji, punctuation, verb-first or not | strings, `<Button>` children |
 
-If a row is empty, that is your first finding: the dimension has no system.
+A row can end in three states, and they are not the same finding:
+
+- **A value.** Record it. It now outranks every default in this skill.
+- **A rule instead of a token.** "Nested radius is always outer minus padding", applied at each site, is a system. Do not file it as a gap because it has no token file.
+- **Genuinely absent, or not applicable.** Absent is a finding. Not applicable is not: an app with no forms has no form system to miss. Write "n/a" and move on.
+
+Read the project's own rules before the code, but do not read all of them. A mature `CLAUDE.md` can run to a hundred kilobytes. In quick mode take the headings first (`grep '^#'`), then the design, theming and token sections, then the token file itself. Reading the whole document is a full-audit cost, not a two-minute one.
 
 ### 1.2 Mode
 
@@ -68,9 +74,9 @@ Always this shape. Group by root cause: a token or shared-component fix outranks
 ```
 Mode: quick audit · Path: sign-up → dashboard · Viewports: 375, 1280
 
-| # | Sev | Location | Before | After | What this changes for the user |
-|---|-----|----------|--------|-------|--------------------------------|
-| 1 | HIGH | Button.tsx:12 (every button) | Submit disabled until valid | Enabled; validate on submit; focus first invalid field | Users learn what is wrong instead of guessing why the button is dead |
+| # | Sev | Location | Where else | What is wrong, and what it should be | What this changes for the user |
+|---|-----|----------|-----------|--------------------------------------|--------------------------------|
+| 1 | HIGH | Button.tsx:12 | every button | Submit is disabled until the form validates, so the control that would explain the problem is the one switched off. Keep it enabled, validate on submit, focus the first invalid field | Users learn what is wrong instead of guessing why the button is dead |
 
 Considered but rejected
 | Candidate | Why not |
@@ -84,9 +90,13 @@ Verified how
 Verdict: Needs changes (1 HIGH, 4 MEDIUM)
 ```
 
-Severity: **HIGH** blocks a task, misleads, hides content, loses data, fails keyboard or screen-reader use, or is systemic. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+Severity: **HIGH** blocks a task, misleads, hides content, loses data, or fails keyboard or screen-reader use. **MEDIUM** harms comprehension, efficiency, or consistency. **LOW** isolated polish, full mode only.
+
+**Systemic raises severity by one step; it is not a severity of its own.** A shared component or token defect that is otherwise MEDIUM becomes HIGH. This keeps HIGH meaning "someone is blocked or misled" while still making the upstream fix outrank the leaf symptoms it causes.
 
 Verdict vocabulary: `Ship`, `Needs changes`, `Block` (any HIGH).
+
+Two columns earn their place and are easy to get wrong. **Where else** is what makes a systemic finding legible as one row instead of five; write "only here" when it is genuinely local. **What is wrong, and what it should be** is one prose cell, not a two-word before and a two-word after: a real finding needs the defect, the fix, and the reason in the same breath.
 
 The "What this changes for the user" column is mandatory. It is the test of whether a finding is real.
 
@@ -98,7 +108,7 @@ These hold in every style. Break one only with a written reason.
 2. **Out is faster than in.** Exit at about 0.65× the entrance duration, with an accelerating curve and no bounce.
 3. **The 100× rule.** If someone triggers an interaction 100 times a day, do not animate it. Menu toggles, keyboard focus moves, arrow-key selection, tab switches in a tool: instant.
 4. **Opacity never springs; transforms may.** Springs are for objects with mass or for anything a gesture can interrupt. Colour, opacity, and hover use a short curve. Never `transition: all`; name the property.
-5. **The spinner travels.** Progress appears where the result will appear, never on the button that was clicked. No spinner before 300ms. A pending optimistic row is a ghost at 60% opacity, not a spinner.
+5. **The spinner travels.** Progress appears where the result will appear, not only on the control that was clicked. No spinner before 300ms. A pending optimistic row is a ghost at 60% opacity, not a spinner. The control may also carry progress once the result has a home of its own: a button that doubles as a progress bar is right when the work also appears where it will land, and wrong when that is the only place it appears.
 6. **Every state gets equal care.** Empty, loading, error, success, offline, first-run, overflow, 320px, 200% zoom, reduced motion, dark mode, keyboard-only.
 7. **No layout shift, ever.** Reserve every box: images have dimensions, skeletons match final size, loading buttons lock their width, tabular numbers, fonts with `size-adjust`.
 8. **A disabled control says why; a destructive action names its noun.** Never disable submit until valid. "Delete project" and "Cancel", never "Are you sure?" with OK.
@@ -138,7 +148,9 @@ Use `visualDuration` + `bounce` (Motion) or a generated CSS `linear()`; never ra
 | gentle | `{ visualDuration: 0.6, bounce: 0 }` | ~600ms | backdrops, hero reveals |
 | exit | `exitOf(token)` = `visualDuration × 0.65, bounce: 0` | | every exit |
 
-CSS `linear()` strings with 100+ points cost nothing at runtime. Generate them at build time from the same tokens (`assets/gen-springs.mjs`) and pair each with its measured settle duration; the settle is always longer than the visual duration.
+CSS `linear()` strings with 100+ points cost nothing at runtime. Generate them at build time from the same tokens (`assets/gen-springs.mjs`) and pair each with its measured settle duration.
+
+**Settle and visual duration are different numbers and the difference is large.** Visual duration is when the motion reads as finished; settle is when it has actually stopped, and a `linear()` needs the settle or it truncates. A spring with a 0.4s visual duration settles around 720ms. The 300ms guidance in the duration table above is about *visual* duration and about curves; it does not condemn a 720ms settle. Never compare the two numbers as if they measured the same thing.
 
 Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-flight (velocity handoff). Curves for: hover, focus, colour, opacity, tooltips.
 
@@ -176,7 +188,7 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 - **Grouping by space, not lines.** Gap between groups ≥ 2× the gap within (8 inside, 16+ between). Separators last, for dense data, never combined with a large gap.
 - **Controls**: 12px between adjacent filled controls; 24px clearance around borderless icon buttons; 24px+ between unrelated groups.
 - **Peek**: the next item in a horizontal scroller shows 16–32px past the edge, or nobody scrolls it.
-- **Radii**: at most three values; nested radius = outer − padding; above 24px padding treat layers as separate surfaces.
+- **Radii**: at most three *authored* values. Nested radii are then derived, not authored: inner = outer − padding. A project with one rule and twelve derived values has a radius system; a project with twelve unrelated literals does not. Above 24px of padding, treat the layers as separate surfaces and start again from the outer value.
 - **Full-bleed grid**: `grid-template-columns: 1fr min(65ch, calc(100% - 48px)) 1fr`.
 - **Safe areas are added to padding**: `padding-bottom: calc(16px + env(safe-area-inset-bottom))`. Requires `viewport-fit=cover`.
 - **Breakpoints from content, not devices.** Prefer container queries. Test 320px and the largest first.
@@ -196,7 +208,7 @@ Springs for: drag release, sheet dismiss, reorder, anything retriggerable mid-fl
 ### 3.7 Buttons and controls
 
 - Six states: rest, hover (≤ 150ms colour change; no lift unless the element is a link to somewhere), active (press scale), focus-visible (ring), loading (width locked, label swaps for a spinner in the same box), disabled (muted token, not opacity; paired with a reason).
-- Tap targets: 44px touch, 40px pointer, 24px WCAG floor with a 24px-circle spacing exception. Expand with a pseudo-element on the `<button>` or `<label>`, never on an `<input>`.
+- Tap targets: **24px is the floor that binds** (WCAG 2.5.8), with its spacing exception: a 24px circle centred on the target must not intersect another. 44px on touch and 40px with a pointer are consumer-app defaults, not standards. A dense professional tool with a documented row height is entitled to sit between 24 and 40; a consumer app is not. Expand with a pseudo-element on the `<button>` or `<label>`, never on an `<input>`.
 - `touch-action: manipulation` on every control; set `-webkit-tap-highlight-color` to match the design.
 - Tooltips: 200ms open delay, then a "warm" state where siblings open instantly for 300ms.
 - Copy-to-clipboard shows a check for 1.5s. Search debounces 300ms. A "Done → Cancel · Save" footer reserves its final width and cross-fades labels in 150ms.
@@ -324,6 +336,10 @@ Momentum is the platform's; do not fake it. Snap with `scroll-snap-stop: always`
 ### Performance → the performance reference below
 
 Budgets, the frame-killer ranking, `content-visibility`, prefetch on pointerdown, virtualisation thresholds, the theme-switch suppressor, and `visibilitychange` timer freezes.
+
+### Canvas and generated media → the canvas-and-media reference below
+
+When the product is the pixels, most of this skill's tooling stops working: the accessibility tree is empty, CSS reaches nothing, and the render loop is the real performance budget. Name the canvas with `role="img"` and a live label, put meaning in `aria-valuetext` rather than a raw number, and give every canvas-only action a real DOM control. Ask for `{ colorSpace: "display-p3" }` or wide-gamut values clamp silently, and remember an invalid `fillStyle` is a no-op that keeps the previous colour. Back the store at `devicePixelRatio`, stop the loop off screen and when hidden, restart from now, and check reduced motion in JS because CSS cannot reach a loop. One renderer for preview and export: if changing the export resolution does not change the pixel dimensions of the file, the export path is a lie.
 
 ### Accessibility as polish → the accessibility reference below
 
@@ -962,20 +978,31 @@ Use this when building or reviewing any interactive component, form, overlay, or
 4. **Escape closes whatever opened last.** Tooltip, then menu, then dialog. Check: open a menu inside a dialog; Escape closes the menu only.
 5. **Custom widgets keep the APG keyboard promise.** A role is a contract (see cheat sheet). Check: implement the table row for every `role=` you ship.
 6. **Reduced motion is opt-in, and reduced, not eliminated.** Wrap motion in `@media (prefers-reduced-motion: no-preference)`. If you must use a global kill switch, set durations to `0.01ms`, not `none`, so `animationend` and `transitionend` still fire. Disable parallax, autoplay, and large-scale movement; replace slides and zooms with opacity crossfades; keep spinners, focus rings, and brief functional feedback. Check: emulate reduced motion in DevTools; the app still responds visibly to every action.
-7. **Anything that moves, blinks, or updates for more than five seconds has a visible pause.** Toasts stay at least 5s, pause on hover and focus, and persist when they carry an action or an error. Check: hover a toast; the timer stops.
-8. **Zoom to 200% and reflow at 320px.** Text scales, nothing clips, no horizontal scrolling except in data tables and diagrams that scroll inside their own container. Check: 1280px wide at 400% zoom, and DevTools at 320px.
-9. **`rem` for type, text containers, and breakpoints; `px` for hairlines, rings, and shadows.** Why: users who scale text expect layout to scale with it; borders should not. Check: grep breakpoints; media queries use `rem` or `em`.
-10. **Visually hidden text uses the canonical `.sr-only` block.** 1px, not 0; `clip-path: inset(50%)`; `white-space: nowrap`. Never `display: none` for content a screen reader should read. Check: the class matches the block below.
-11. **Choose how to announce.** Move focus for a new view; `aria-describedby` for context on a control; `role="status"` for polite updates; `role="alert"` only for urgent interruptions. Keep a stable, empty live region in the DOM for repeated polite updates. Check: a screen reader hears "Saved" once, not twice, and not the whole form.
-12. **Never disable submit until valid.** Keep it enabled, validate on submit, set `aria-invalid="true"` and `aria-describedby` on each failing field, focus the first invalid field. Disable only once the request starts, keeping the label beside the spinner. Check: submit an empty form; focus lands on the first error and the error is read.
-13. **`autocomplete` is a WCAG requirement (1.3.5).** `name`, `email`, `tel`, `street-address`, `postal-code`, `cc-number`, `cc-exp`, `cc-csc`, `username`, `current-password`, `new-password`, `one-time-code`. Never `autocomplete="off"` on identity or payment fields. Never block paste. Check: every identity field has a token.
-14. **Alt by purpose.** Decorative: `alt=""` present, never missing (a missing alt reads the filename). Functional: name the action, `alt="Search"`, not the picture. Complex: a short summary plus a data table nearby. SVG: decorative gets `aria-hidden="true" focusable="false"`; meaningful gets `role="img"` and `aria-label`. Check: `grep -rn "<img" | grep -v "alt="` returns nothing.
-15. **The visible label is in the accessible name.** Name precedence: `aria-labelledby` > `aria-label` > native label, text, alt > `title`. A button that shows "Save" must not be named "Submit form". Mark brand names and identifiers `translate="no"`. Check: inspect the accessibility tree; names match what is on screen.
-16. **`aria-disabled` or `disabled`, never both.** With `aria-disabled` you must block pointer, keyboard, and submission in code and style it yourself. Check: grep for elements carrying both.
-17. **Route changes announce themselves.** Update `document.title`, move focus to the new view's `<h1 tabindex="-1">` or `<main>`, restore scroll on back and forward, scroll to top on forward. Check: navigate with a screen reader running; the new page title is spoken.
-18. **Hit areas: 24px floor, 44 touch, 40 pointer.** Expand with a pseudo-element on the wrapping `<button>` or `<label>`, never on the `<input>` (replaced elements do not render pseudo-elements reliably). Two hit areas never overlap. The 24px floor has a spacing exception: a 24px circle centred on the target must not intersect another target. Check: DevTools, hover each control, read the box.
-19. **Colour never carries meaning alone.** Pair with a symbol, a label, or a pattern. Check: view in greyscale; can you still tell error from success?
-20. **Respect `prefers-contrast: more` and `prefers-reduced-transparency`.** Widen the lightness gap by at least 0.15 L; swap translucent surfaces for solid. Check: emulate both in DevTools.
+7. **The global kill switch is a floor, not a solution.** A `*` selector reaches CSS animations and transitions in the document, and nothing else. It does not reach five things, each of which is capable of being the single largest movement in your app. A project that honours reduced motion in a dozen hand-written CSS blocks still fails if its biggest slide is driven by JavaScript. Check: list every animation over 100px of travel, then name the mechanism driving each one.
+8. **Anything that moves, blinks, or updates for more than five seconds has a visible pause.** Toasts stay at least 5s, pause on hover and focus, and persist when they carry an action or an error. Check: hover a toast; the timer stops.
+9. **Zoom to 200% and reflow at 320px.** Text scales, nothing clips, no horizontal scrolling except in data tables and diagrams that scroll inside their own container. Check: 1280px wide at 400% zoom, and DevTools at 320px.
+10. **`rem` for type, text containers, and breakpoints; `px` for hairlines, rings, and shadows.** Why: users who scale text expect layout to scale with it; borders should not. Check: grep breakpoints; media queries use `rem` or `em`.
+11. **Visually hidden text uses the canonical `.sr-only` block.** 1px, not 0; `clip-path: inset(50%)`; `white-space: nowrap`. Never `display: none` for content a screen reader should read. Check: the class matches the block below.
+12. **Choose how to announce.** Move focus for a new view; `aria-describedby` for context on a control; `role="status"` for polite updates; `role="alert"` only for urgent interruptions. Keep a stable, empty live region in the DOM for repeated polite updates. Check: a screen reader hears "Saved" once, not twice, and not the whole form.
+13. **Never disable submit until valid.** Keep it enabled, validate on submit, set `aria-invalid="true"` and `aria-describedby` on each failing field, focus the first invalid field. Disable only once the request starts, keeping the label beside the spinner. Check: submit an empty form; focus lands on the first error and the error is read.
+14. **`autocomplete` is a WCAG requirement (1.3.5).** `name`, `email`, `tel`, `street-address`, `postal-code`, `cc-number`, `cc-exp`, `cc-csc`, `username`, `current-password`, `new-password`, `one-time-code`. Never `autocomplete="off"` on identity or payment fields. Never block paste. Check: every identity field has a token.
+15. **Alt by purpose.** Decorative: `alt=""` present, never missing (a missing alt reads the filename). Functional: name the action, `alt="Search"`, not the picture. Complex: a short summary plus a data table nearby. SVG: decorative gets `aria-hidden="true" focusable="false"`; meaningful gets `role="img"` and `aria-label`. Check: `grep -rn "<img" | grep -v "alt="` returns nothing.
+16. **The visible label is in the accessible name.** Name precedence: `aria-labelledby` > `aria-label` > native label, text, alt > `title`. A button that shows "Save" must not be named "Submit form". Mark brand names and identifiers `translate="no"`. Check: inspect the accessibility tree; names match what is on screen.
+17. **`aria-disabled` or `disabled`, never both.** With `aria-disabled` you must block pointer, keyboard, and submission in code and style it yourself. Check: grep for elements carrying both.
+18. **Route changes announce themselves.** Update `document.title`, move focus to the new view's `<h1 tabindex="-1">` or `<main>`, restore scroll on back and forward, scroll to top on forward. Check: navigate with a screen reader running; the new page title is spoken.
+19. **Hit areas: 24px floor, 44 touch, 40 pointer.** Expand with a pseudo-element on the wrapping `<button>` or `<label>`, never on the `<input>` (replaced elements do not render pseudo-elements reliably). Two hit areas never overlap. The 24px floor has a spacing exception: a 24px circle centred on the target must not intersect another target. Check: DevTools, hover each control, read the box.
+20. **Colour never carries meaning alone.** Pair with a symbol, a label, or a pattern. Check: view in greyscale; can you still tell error from success?
+21. **Respect `prefers-contrast: more` and `prefers-reduced-transparency`.** Widen the lightness gap by at least 0.15 L; swap translucent surfaces for solid. Check: emulate both in DevTools.
+
+### Cheat sheet: what the kill switch does not reach
+
+| Not reached | Why | Fix |
+|---|---|---|
+| Motion, GSAP, `element.animate()` | JS and WAAPI animations are not CSS; no selector touches them | `<MotionConfig reducedMotion="user">` at the root; `useReducedMotion()` to guard hand-rolled WAAPI |
+| `::view-transition-*` | The transition pseudo-elements live in their own tree, outside the document | A separate `@media` block targeting `::view-transition-group(*)` and siblings |
+| Canvas and WebGL render loops | A `requestAnimationFrame` loop is code, not style | `matchMedia("(prefers-reduced-motion: reduce)")` before you start the loop |
+| `<video autoplay>`, animated GIF and WebP | Playback is not animation | Drop `autoplay`, or swap the poster for the animated source only under `no-preference` |
+| Scroll-linked effects | `animation-timeline: scroll()` is still an animation, but a JS scroll handler is not | Guard the handler with the same `matchMedia` check |
 
 ### Cheat sheet: APG keyboard contracts
 
@@ -991,6 +1018,8 @@ Use this when building or reviewing any interactive component, form, overlay, or
 Universal: arrows move inside a composite, Tab moves between composites. Enter submits the focused input's form; in a `<textarea>` Enter inserts a newline and Cmd/Ctrl+Enter submits.
 
 ### Cheat sheet: announcement ladder
+
+This is the canonical statement of the ladder. Other references point here rather than repeating it.
 
 | Change | Mechanism | Example |
 |---|---|---|
@@ -1030,13 +1059,23 @@ Pick the lowest rung that works. Two rungs for one change is a double announceme
 @media (prefers-reduced-motion: no-preference) {
   .card { transition: transform 200ms cubic-bezier(0.165, 0.84, 0.44, 1); }
 }
-/* Fallback kill switch for legacy code */
+/* Fallback kill switch for legacy code. A floor, not a solution: this
+   reaches CSS animations and transitions in the document and nothing else. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* View transitions live in their own tree, which the rule above cannot enter. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 
@@ -1051,6 +1090,19 @@ Pick the lowest rung that works. Two rungs for one change is a double announceme
 <input id="email" type="email" autoComplete="email" inputMode="email"
   aria-invalid={!!error} aria-describedby={error ? "email-error" : undefined} />
 {error && <p id="email-error" role="alert">{error}</p>}
+
+// Motion, GSAP, and any WAAPI animation need their own guard.
+<MotionConfig reducedMotion="user">
+  <App />
+</MotionConfig>
+
+// A render loop is code, so ask before you start it.
+const still = matchMedia("(prefers-reduced-motion: reduce)");
+function start() {
+  if (still.matches) { drawOneFrame(); return; }
+  raf = requestAnimationFrame(tick);
+}
+still.addEventListener("change", () => { cancelAnimationFrame(raf); start(); });
 
 // Route change
 useEffect(() => {
@@ -1069,6 +1121,19 @@ useEffect(() => {
 5. Emulate `prefers-reduced-motion`, `prefers-contrast: more`, `prefers-reduced-transparency`, `forced-colors`.
 6. Greyscale screenshot: state still legible.
 7. `grep -rn 'tabindex="[1-9]'`, `grep -rn "<img" | grep -v alt=`, `grep -rn 'autocomplete="off"'`: zero hits or each justified.
+8. **Audit every role against its keyboard handling.** A role is a contract, and a broken one is invisible to a mouse, which is why this is often the most productive grep in a review. Count the composite roles you ship, then count the keyboard code in the same files:
+
+   ```bash
+   grep -rEn 'role="(radiogroup|tablist|menu|menubar|listbox|tree|grid)"' src | wc -l
+   grep -rn 'onKeyDown\|tabIndex' src | wc -l
+   # then, per file:
+   grep -rlE 'role="(radiogroup|tablist|menu|listbox)"' src \
+     | xargs -I{} sh -c 'printf "%s roles=%s keys=%s\n" {} \
+         "$(grep -cE "role=\"(radiogroup|tablist|menu|listbox)\"" {})" \
+         "$(grep -c "onKeyDown" {})"'
+   ```
+
+   Any file with roles and zero `onKeyDown` is a promise the markup makes and the code does not keep.
 
 ### Do not
 
@@ -1079,6 +1144,7 @@ useEffect(() => {
 - Block paste.
 - Announce the same change twice (focus move plus alert).
 - Handle reduced motion with `animation: none`.
+- Ship a global kill switch and assume JavaScript animation is covered.
 - Ship a `role=` without its keyboard contract.
 
 <!-- references/buttons-and-controls.md -->
@@ -1264,6 +1330,232 @@ async function copy(text: string) {
 - Build a slider from divs when `<input type="range">` will do.
 
 See `references/forms-and-inputs.md` for submit rules, `references/overlays.md` for confirm dialogs, `references/motion.md` for the easing tokens.
+
+<!-- references/canvas-and-media.md -->
+
+## Canvas and generated media
+
+Use this when the product *is* the pixels: a design tool, an editor, a chart engine, a generative or game surface, anything drawn with `<canvas>`, WebGL, or WebGPU and anything that exports an image or a video.
+A canvas is invisible to every tool the rest of this skill relies on. The DOM inspector shows one element, the accessibility tree shows nothing, and CSS reaches none of it. Everything below has to be done by hand.
+
+### Rules
+
+1. **A canvas is an image with no alt.** Give it `role="img"` and an `aria-label` that describes the current state in words, rebuilt whenever the state changes ("Isometric grid, 12 by 8, amber on charcoal"). A canvas with no name is announced as "canvas" or skipped entirely. Check: turn on VoiceOver or NVDA, land on the canvas, and hear a sentence that tells you what is drawn.
+2. **A canvas that takes input is a control surface, not an image.** Pointer handlers on the element give a keyboard user nothing. Every action reachable by clicking the canvas needs a real focusable DOM control somewhere: a toolbar button, a list of layers, an arrow-key handler on a `tabIndex={0}` wrapper with `role="application"`. Check: unplug the mouse and complete the primary task.
+3. **Changes that exist only as pixels must be announced in words.** A slider that redraws the canvas gives a sighted user instant feedback and a screen reader user silence. Put the meaning in `aria-valuetext`, not the raw number: `aria-valuetext="Grid spacing 24 pixels"`, not `24`. Check: drag every slider with a screen reader on; each one says what it changed, not a bare integer.
+4. **Ask for the colour space or lose it silently.** `getContext("2d", { colorSpace: "display-p3" })` is required for wide-gamut output; without it every P3 value is clamped to sRGB with no warning. WebGL needs `drawingBufferColorSpace` and `unpackColorSpace`. Check: draw the same colour as P3 and as sRGB side by side on a wide-gamut display; if they match, the flag did not take.
+5. **An invalid `fillStyle` is a silent no-op.** Assign an unparseable or out-of-gamut string and the assignment is ignored, the *previous* fill stays, and nothing throws. A whole render can come out in the last colour that happened to parse. Validate before assigning, or read the property back and compare. Check: assign a deliberately broken colour in the console; the canvas keeps painting, which is the bug.
+6. **Back the canvas at `devicePixelRatio`, size it in CSS.** Set `canvas.width = cssWidth * dpr` and `canvas.style.width = cssWidth + "px"`, then `ctx.scale(dpr, dpr)`. A canvas sized only in CSS is blurry on every retina screen. Re-back it on resize *and* on a DPR change, which fires when a window moves between displays. Check: drag the window from a retina display to an external monitor and back; the drawing stays sharp.
+7. **The render loop is the performance budget, not page load.** A 60fps loop leaves 16.7ms per frame and 8.3ms at 120Hz. Nothing else in `references/performance.md` matters if the loop misses. Check: the Performance panel shows frames inside budget while the loop runs, not just a fast first paint.
+8. **Stop the loop when nobody can see it.** `IntersectionObserver` to stop when the canvas scrolls off screen, `visibilitychange` to stop when the tab is hidden. An unattended `requestAnimationFrame` is a battery bug that only shows up in someone else's laptop fan. Check: scroll the canvas away and hide the tab; the loop's frame counter stops.
+9. **Restart from now, not from where you left off.** On resume, reset the loop's time origin. Restarting from a stale timestamp replays every millisecond the tab was hidden as one enormous jump. Check: hide the tab for a minute, return, and nothing fast-forwards.
+10. **Never drive a render loop from React state.** A `setState` per frame re-renders the tree sixty times a second to change numbers React does not own. Keep the loop outside React and let it read a ref that React writes. Check: React DevTools' profiler records no commits while the canvas animates.
+11. **Reduced motion reaches the loop only if you check it.** A CSS kill switch cannot touch `requestAnimationFrame`. Read `matchMedia("(prefers-reduced-motion: reduce)")` before starting ambient animation and render the settled frame instead, and listen for changes so a mid-session toggle takes effect. Motion that is the point of the product (a preview the user pressed play on) may continue; ambient drift may not. Check: enable Reduce Motion and reload; nothing moves on its own.
+12. **One renderer, never a second draw path for export.** The export must call the same function as the preview with a different scale, or the file will diverge from what was on screen, quietly, forever. Check: export at preview size and diff against a screenshot of the canvas.
+13. **Draw in design space and scale once.** Author coordinates against a fixed design size (`1920 × 1080`, say), and pass a scale factor into the renderer. Reading the on-screen size inside drawing code is what makes exports depend on the size of the browser window. Check: resize the window and export again; the file is identical.
+14. **If changing the export resolution does not change the number of pixels in the file, the export path is a lie.** A resolution control that only changes metadata is worse than no control. Check: export at 1× and 4× and compare the actual pixel dimensions and file size.
+15. **Await fonts and images before rendering for export.** `document.fonts.ready` and decoded images, or the export races the preview and drops a typeface that was visible on screen. Check: hard-reload and export immediately; the file has the right font.
+16. **Give the result a real filename and a real type.** `toBlob` over `toDataURL` for anything large, an explicit MIME type and quality, and a filename with the document name and dimensions in it, not `download.png`. Check: export twice with different settings; the two files are distinguishable in a Downloads folder.
+17. **Drag out and paste in.** A canvas people build things in should support dragging the result to the desktop (`DataTransfer` with `DownloadURL`) and pasting an image from the clipboard. Both are cheap and both are expected. Check: drag the canvas to the desktop; paste a screenshot into the app.
+18. **Long jobs are states, not spinners.** An encode or a large export follows the loading ladder, keeps a cancel, and survives failure without unmounting the progress surface. See `references/states.md`; do not invent a second pattern here.
+19. **Test in greyscale.** A generative surface is exactly where colour becomes the only channel carrying meaning. Check: DevTools Rendering, emulate achromatopsia; the drawing still reads.
+20. **Guard the context.** `getContext` returns `null` when the canvas is too large, memory is exhausted, or the GPU process has died, and WebGL contexts are lost on sleep and on tab pressure. Handle `webglcontextlost` and re-create. Check: force a context loss with `WEBGL_lose_context`; the app recovers instead of showing a blank rectangle.
+
+### Cheat sheet
+
+| Budget | Value |
+|---|---|
+| Frame at 60Hz | 16.7ms |
+| Frame at 120Hz | 8.3ms |
+| Backing store | `cssSize × devicePixelRatio` |
+| Design space | one fixed size, scale passed in |
+| Export | `toBlob`, explicit MIME and quality |
+
+| Concern | Mechanism |
+|---|---|
+| Name the canvas | `role="img"` + live `aria-label` |
+| Announce a pixel-only change | `aria-valuetext` on the control that caused it |
+| Keyboard access | real DOM controls, or `role="application"` + arrow keys |
+| Wide gamut | `{ colorSpace: "display-p3" }` on the context |
+| Stop off screen | `IntersectionObserver` |
+| Stop when hidden | `visibilitychange` |
+| Reduced motion | `matchMedia`, checked in JS |
+| Long export | `references/states.md` ladder |
+
+| Trap | What happens |
+|---|---|
+| No `colorSpace` | wide-gamut values clamp to sRGB, silently |
+| Invalid `fillStyle` | assignment ignored, previous colour persists, no error |
+| CSS-only sizing | blurry on every retina display |
+| Loop resumed from stale time | one enormous jump on return |
+| Second draw path for export | file diverges from preview, quietly |
+| `setState` per frame | sixty React commits a second |
+
+### Code
+
+Backing store, DPR, and re-backing on display change:
+
+```ts
+function fit(canvas: HTMLCanvasElement, cssW: number, cssH: number) {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = `${cssW}px`;
+  canvas.style.height = `${cssH}px`;
+  const ctx = canvas.getContext("2d", { colorSpace: "display-p3" });
+  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return ctx;
+}
+
+// devicePixelRatio changes when the window moves between displays.
+function watchDpr(onChange: () => void) {
+  let mq: MediaQueryList;
+  const listen = () => {
+    mq = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mq.addEventListener("change", () => { onChange(); listen(); }, { once: true });
+  };
+  listen();
+}
+```
+
+An invalid colour is a no-op, so validate before assigning:
+
+```ts
+const probe = document.createElement("canvas").getContext("2d")!;
+export function isPaintable(colour: string) {
+  probe.fillStyle = "#000";
+  probe.fillStyle = colour;            // ignored if unparseable
+  const black = probe.fillStyle;
+  probe.fillStyle = "#fff";
+  probe.fillStyle = colour;
+  return black === probe.fillStyle;    // same result from both starts means it parsed
+}
+```
+
+A loop that stops when unseen, respects reduced motion, and never sets React state:
+
+```ts
+export function startLoop(canvas: HTMLCanvasElement, state: { current: Params }) {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  let raf = 0, origin = 0, visible = true, onScreen = true;
+
+  const frame = (now: number) => {
+    if (!origin) origin = now;              // restart from now, not from a stale origin
+    render(canvas, state.current, now - origin);
+    raf = requestAnimationFrame(frame);
+  };
+  const run = () => {
+    if (raf || !visible || !onScreen) return;
+    if (reduce.matches) { render(canvas, state.current, Number.POSITIVE_INFINITY); return; }
+    origin = 0;
+    raf = requestAnimationFrame(frame);
+  };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+
+  const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; onScreen ? run() : stop(); });
+  io.observe(canvas);
+  const onVis = () => { visible = !document.hidden; visible ? run() : stop(); };
+  document.addEventListener("visibilitychange", onVis);
+  reduce.addEventListener("change", () => { stop(); run(); });
+
+  run();
+  return () => { stop(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
+}
+```
+
+One renderer, two callers, design space in and a scale factor:
+
+```ts
+const DESIGN = { w: 1920, h: 1080 };
+
+export function render(target: CanvasRenderingContext2D, p: Params, t: number, scale = 1) {
+  target.save();
+  target.scale(scale, scale);            // every coordinate below is design space
+  drawScene(target, p, t, DESIGN);
+  target.restore();
+}
+
+export async function exportPng(p: Params, multiplier: number) {
+  await document.fonts.ready;
+  const c = document.createElement("canvas");
+  c.width = DESIGN.w * multiplier;       // resolution really changes the pixels
+  c.height = DESIGN.h * multiplier;
+  const ctx = c.getContext("2d", { colorSpace: "display-p3" })!;
+  render(ctx, p, 0, multiplier);         // the same function the preview calls
+  return new Promise<Blob>((res) => c.toBlob((b) => res(b!), "image/png"));
+}
+```
+
+Name the canvas and announce what a control changed:
+
+```tsx
+<canvas
+  ref={ref}
+  role="img"
+  aria-label={`Isometric grid, ${cols} by ${rows}, ${paletteName}`}
+/>
+
+<input
+  type="range"
+  min={8} max={64}
+  value={spacing}
+  aria-label="Grid spacing"
+  aria-valuetext={`Grid spacing ${spacing} pixels`}
+  onChange={(e) => setSpacing(+e.target.value)}
+/>
+```
+
+Drag the artwork out as a file, and accept a pasted image:
+
+```ts
+canvas.addEventListener("dragstart", (e) => {
+  const url = canvas.toDataURL("image/png");
+  e.dataTransfer?.setData("DownloadURL", `image/png:${name}.png:${url}`);
+});
+
+window.addEventListener("paste", async (e) => {
+  const file = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith("image/"));
+  if (file) place(await createImageBitmap(file));
+});
+```
+
+Recover a lost WebGL context:
+
+```ts
+canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); stop(); });
+canvas.addEventListener("webglcontextrestored", () => { rebuildResources(); run(); });
+```
+
+### Checks
+
+- Screen reader lands on the canvas and hears a description of what is drawn, not "canvas".
+- Every slider announces meaning, not a bare number.
+- Unplug the mouse and complete the primary task.
+- Enable Reduce Motion, reload; nothing moves on its own; a pressed play still plays.
+- Scroll away and hide the tab; the frame counter stops. Return; nothing fast-forwards.
+- React profiler records no commits while the canvas animates.
+- Move the window between displays; the canvas stays sharp.
+- Export at 1× and 4×; pixel dimensions differ by exactly 4.
+- Export at preview size and diff against a screenshot of the canvas.
+- DevTools Rendering, emulate achromatopsia; the drawing still reads.
+- Force a context loss with `WEBGL_lose_context`; the app recovers.
+
+### Do not
+
+- Ship a `<canvas>` with no accessible name.
+- Put the only path to an action behind a click on the canvas.
+- Send a raw number to `aria-valuetext`.
+- Assume a colour assigned to `fillStyle` was accepted.
+- Size a canvas in CSS alone.
+- Leave `requestAnimationFrame` running off screen or in a hidden tab.
+- Resume a loop from the timestamp it was paused at.
+- Call `setState` inside a frame callback.
+- Write a second draw path for export.
+- Ship a resolution control that does not change the file's pixel dimensions.
+- Export before `document.fonts.ready`.
+- Name the file `download.png`.
+
+See `references/performance.md` for the frame budget and `visibilitychange`, `references/states.md` for long exports, `references/color.md` for OKLCH and gamut, `references/accessibility.md` for live regions and reduced motion.
 
 <!-- references/color.md -->
 
@@ -2734,26 +3026,27 @@ The project's overlay library is fine; these rules apply on top of Vaul, Base UI
 
 1. **Paired elements share easing and duration.** Modal and backdrop, tooltip and arrow, drawer and scrim move as one object. Two curves on one gesture read as two things. Check: replay at 10% speed; nothing lags its partner.
 2. **Exits are shorter and accelerate.** 0.65× the entrance, `cubic-bezier(0.4, 0, 1, 1)`, no bounce. Sometimes the right exit is none: remove immediately when the user is already looking elsewhere. Check: close feels faster than open.
-3. **Use `<dialog>` with `showModal()`.** You get the focus trap, `inert` on everything else, Escape, and the top layer for free. If you cannot, set `inert` on the app root yourself. Check: Tab never leaves the modal; Escape closes it.
-4. **Focus the least destructive action on destructive confirms.** The default focus in "Delete project?" is Cancel. Enter should never delete. Check: open the confirm, press Enter, nothing is lost.
-5. **Return focus to the trigger on close.** Otherwise keyboard users land at the top of the document. Check: close with Escape; the opening button has the ring.
-6. **`overscroll-behavior: contain` inside every scrolling overlay.** Reaching the end of a sheet's content must not scroll the page behind it. Check: scroll to the bottom of the sheet and keep going.
-7. **Lock page scroll without `position: fixed` on body.** `html { overflow: hidden; scrollbar-gutter: stable }` while open, so the layout does not jump by the scrollbar width and iOS does not lose its scroll position. Check: open and close a modal; the page has not moved.
-8. **Escape closes what opened last.** Tooltip, then menu, then dialog. One press, one layer. Check: open a menu inside a modal, press Escape twice.
-9. **Popovers grow from their trigger.** `transform-origin` at the trigger's edge; scale 0.95 → 1 plus opacity, 150–200ms, ease-out-quart. Flip placement near viewport edges. Check: the popover appears to come out of the button.
-10. **Submenus get a diagonal safe area.** A triangle (`clip-path: polygon(0 0, 100% 0, 100% 100%)`) over the gap so the cursor can travel diagonally without the submenu closing. Check: move the cursor from the parent item to the far corner of the submenu.
-11. **Sheets arrive as containers with contents inside.** Backdrop: opacity tween 250ms ease-out at t=0. Panel: `y: 100% → 0` on the `smooth` spring at t=0. Contents: fade and rise at t=80ms with a 30ms stagger. The 80ms offset is why native sheets feel like they carry things. Check: contents never lead the panel.
-12. **Sheets dismiss on velocity.** Down-flick over 500px/s dismisses regardless of position; otherwise over 50% of height. An upward flick always cancels, even below the threshold. Velocity beats position. Check: a short fast flick closes it; a long slow drag under half snaps back.
-13. **Pad sheet contents for the safe area, not the sheet's position.** `padding-bottom: calc(16px + env(safe-area-inset-bottom))` on the content. The sheet itself sits at `bottom: 0`. Check: on a phone with a home indicator the last row is fully visible.
-14. **The source view may recede.** Scaling the page to 0.94 with a 14px radius behind a full sheet is a legitimate depth cue. Only for full-height sheets. Check: never combined with a half sheet.
-15. **Stacked overlays differ in height by 25% or more.** Two same-height sheets read as one sheet that swapped content. Check: measure both.
-16. **Toasts: 5s floor, pause on hover and focus, persist when they carry an action or an error.** A toast holding the only Undo that vanishes on a timer is data loss on a schedule. Check: hover a toast; the timer stops.
-17. **One toast visible.** Queue the rest. A stack of toasts is a log, not feedback. Check: fire three; one shows.
-18. **Toasts are `role="status"`, never focused.** Bottom-centre on mobile, top-right on desktop, or the project's own corner used consistently. Check: screen reader announces without moving focus.
-19. **Contextual outcomes go inline, not in a toast.** A field error belongs on the field; a saved row shows saved on the row. Toasts are for minor, reversible, global outcomes ("Archived. Undo"). Check: could the person be looking somewhere else when this appears? If not, do not toast it.
-20. **Confirmation dialogs name the noun.** "Delete this project?" with "Delete project" and "Cancel". Never "Are you sure?" with OK. Check: read only the buttons; you know what happens.
-21. **`position: fixed` breaks inside a transformed ancestor.** A parent with `transform`, `filter`, or `will-change: transform` becomes the containing block. Render overlays in a portal at the document root. Check: open the overlay inside an animated card.
-22. **Reduced motion: crossfade.** Sheets and modals fade in place, 150–200ms. Keep the backdrop. Check: enable Reduce Motion; nothing slides.
+3. **Use `<dialog>` with `showModal()`.** You get the focus trap, `inert` on everything else, Escape, and the top layer for free. Check: Tab never leaves the modal; Escape closes it.
+4. **A hand-rolled portal owes you the three things `<dialog>` gave you free.** `createPortal` with `role="dialog"` is the common case in React and it is usually 90% right, which is why the missing 10% survives review. You owe: `aria-modal="true"` on the panel, `inert` on the app root while it is open and removed after, and `document.activeElement` stored before you open and refocused on close. Of those, `aria-modal` is the one to check first: without it you have not merely failed to trap focus, you have actively told assistive technology the background is still available while it is covered. That is a worse failure than no trap at all, because it is a lie rather than an omission. Check: with the overlay open, run the screen reader's next-item command past the last control; you should not reach the page underneath.
+5. **Focus the least destructive action on destructive confirms.** The default focus in "Delete project?" is Cancel. Enter should never delete. Check: open the confirm, press Enter, nothing is lost.
+6. **Return focus to the trigger on close.** Otherwise keyboard users land at the top of the document. Check: close with Escape; the opening button has the ring.
+7. **`overscroll-behavior: contain` inside every scrolling overlay.** Reaching the end of a sheet's content must not scroll the page behind it. Check: scroll to the bottom of the sheet and keep going.
+8. **Lock page scroll without `position: fixed` on body.** `html { overflow: hidden; scrollbar-gutter: stable }` while open, so the layout does not jump by the scrollbar width and iOS does not lose its scroll position. Check: open and close a modal; the page has not moved.
+9. **Escape closes what opened last.** Tooltip, then menu, then dialog. One press, one layer. Check: open a menu inside a modal, press Escape twice.
+10. **Popovers grow from their trigger.** `transform-origin` at the trigger's edge; scale 0.95 → 1 plus opacity, 150–200ms, ease-out-quart. Flip placement near viewport edges. Check: the popover appears to come out of the button.
+11. **Submenus get a diagonal safe area.** A triangle (`clip-path: polygon(0 0, 100% 0, 100% 100%)`) over the gap so the cursor can travel diagonally without the submenu closing. Check: move the cursor from the parent item to the far corner of the submenu.
+12. **Sheets arrive as containers with contents inside.** Backdrop: opacity tween 250ms ease-out at t=0. Panel: `y: 100% → 0` on the `smooth` spring at t=0. Contents: fade and rise at t=80ms with a 30ms stagger. The 80ms offset is why native sheets feel like they carry things. Check: contents never lead the panel.
+13. **Sheets dismiss on velocity.** Down-flick over 500px/s dismisses regardless of position; otherwise over 50% of height. An upward flick always cancels, even below the threshold. Velocity beats position. Check: a short fast flick closes it; a long slow drag under half snaps back.
+14. **Pad sheet contents for the safe area, not the sheet's position.** `padding-bottom: calc(16px + env(safe-area-inset-bottom))` on the content. The sheet itself sits at `bottom: 0`. Check: on a phone with a home indicator the last row is fully visible.
+15. **The source view may recede.** Scaling the page to 0.94 with a 14px radius behind a full sheet is a legitimate depth cue. Only for full-height sheets. Check: never combined with a half sheet.
+16. **Stacked overlays differ in height by 25% or more.** Two same-height sheets read as one sheet that swapped content. Check: measure both.
+17. **Toasts: 5s floor, pause on hover and focus, persist when they carry an action or an error.** A toast holding the only Undo that vanishes on a timer is data loss on a schedule. Check: hover a toast; the timer stops.
+18. **One toast visible.** Queue the rest. A stack of toasts is a log, not feedback. Check: fire three; one shows.
+19. **Toasts are `role="status"`, never focused.** Bottom-centre on mobile, top-right on desktop, or the project's own corner used consistently. Check: screen reader announces without moving focus.
+20. **Contextual outcomes go inline, not in a toast.** A field error belongs on the field; a saved row shows saved on the row. Toasts are for minor, reversible, global outcomes ("Archived. Undo"). Check: could the person be looking somewhere else when this appears? If not, do not toast it.
+21. **Confirmation dialogs name the noun.** "Delete this project?" with "Delete project" and "Cancel". Never "Are you sure?" with OK. Check: read only the buttons; you know what happens.
+22. **`position: fixed` breaks inside a transformed ancestor.** A parent with `transform`, `filter`, or `will-change: transform` becomes the containing block. Render overlays in a portal at the document root. Check: open the overlay inside an animated card.
+23. **Reduced motion: crossfade.** Sheets and modals fade in place, 150–200ms. Keep the backdrop. Check: enable Reduce Motion; nothing slides.
 
 ### Cheat sheet
 
@@ -2800,6 +3093,36 @@ export function Modal({ open, onClose, children }: Props) {
       onClick={(e) => { if (e.target === ref.current) onClose(); }}>
       <div className="modal-panel">{children}</div>
     </dialog>
+  );
+}
+```
+
+```tsx
+// If you cannot use <dialog>: aria-modal, inert on the root, focus restored.
+export function PortalModal({ open, onClose, children }: Props) {
+  const trigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    trigger.current = document.activeElement as HTMLElement;
+    const root = document.getElementById("app-root")!;
+    root.inert = true;
+    document.documentElement.classList.add("scroll-locked");
+    return () => {
+      root.inert = false;
+      document.documentElement.classList.remove("scroll-locked");
+      // Restore after the overlay has gone, or focus lands on a dying node.
+      requestAnimationFrame(() => trigger.current?.focus());
+    };
+  }, [open]);
+  if (!open) return null;
+  return createPortal(
+    <div className="scrim" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-labelledby="t"
+           className="modal-panel" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>,
+    document.body,
   );
 }
 ```
@@ -2880,6 +3203,9 @@ function schedule(toast: Toast) {
 - Enable Reduce Motion; every overlay fades in place.
 
 ### Do not
+
+- Ship `role="dialog"` without `aria-modal="true"`; it tells assistive tech the background is reachable while it is not.
+- Leave focus where it was when an overlay closes.
 
 - Animate the backdrop and the panel on different curves or durations.
 - Put the only Undo in a toast that expires.
@@ -3370,7 +3696,7 @@ Every state gets the same care as the happy path; the empty state is the first t
 ### Rules
 
 1. **Follow the loading ladder.** 0–300ms: nothing, or the optimistic result. 300ms–2s: a skeleton at the exact final size, or inline progress where the result will land. 2s+: explicit progress with a label and a cancel. 10s+: let the person leave and notify them. Check: throttle the network to Slow 3G and watch each threshold.
-2. **The spinner travels.** Progress appears where the result will appear, never on the control that was clicked. A sent comment shows pending in the list; an uploaded file shows progress on its row. Check: after a click, where does the eye go? That is where the indicator belongs.
+2. **The spinner travels.** Progress appears where the result will appear, not only on the control that was clicked. A sent comment shows pending in the list; an uploaded file shows progress on its row. The control may carry progress as well once the result has a home of its own, which is why a button that doubles as a progress bar is right when the work also appears where it will land and wrong when that is the only place it appears. Check: after a click, where does the eye go? That is where the indicator belongs, and it is not allowed to be nowhere.
 3. **No spinner before 300ms.** A flash of spinner for a 120ms request reads as slower than no indicator at all. Check: set a 300ms delay before any spinner mounts.
 4. **Skeletons match the structure.** Same number of lines, same widths, same positions as the content that will replace them. Three bars for five lines is a broken promise. Shimmer 1.2–1.5s, subtle, static under `prefers-reduced-motion`. Check: overlay the skeleton on the loaded state; edges align.
 5. **Optimistic first, ghost while pending.** Apply the change immediately at 60% opacity, confirm to 100% on success, revert with an inline reason on failure. Not a spinner; a ghost. Check: send a message with the network off; it appears, then reverts with a reason next to it.
@@ -3385,10 +3711,12 @@ Every state gets the same care as the happy path; the empty state is the first t
 14. **Feedback follows the taxonomy.** Minor and reversible: a toast with Undo. Contextual: inline at the thing that changed. The app acted for you: a receipt card that stays. Destructive: confirm with the noun, then resolve in place. Check: classify each feedback moment; the mechanism follows.
 15. **Undo actually undoes.** The row comes back, the server is told, the state matches. Hiding the toast is not undo. Check: delete, undo, reload.
 16. **Success is acknowledged once, where the result appears.** A saved row shows "Saved" on the row for 1.5s, or the new item appears in its place. Not a toast plus a banner plus a checkmark. Check: count the acknowledgements; one.
-17. **Announce state changes with the ladder.** Move focus for page-level outcomes, `aria-describedby` for field outcomes, `role="status"` for polite updates, `role="alert"` only for urgent ones. Keep a stable empty live region in the DOM for repeated polite updates. Check: screen reader hears each transition once.
+17. **Announce state changes with the ladder.** Pick the lowest rung that works and use each change once; the ladder itself lives in `references/accessibility.md`. Check: screen reader hears each transition once.
 18. **Suspense boundaries wrap components, not pages.** A page-level boundary turns one slow widget into a blank page. Wrap the widget. Check: slow one query; the rest of the page renders.
 19. **Stream without shifting.** Reserve the box before the data arrives (`min-height`, aspect ratio, skeleton at final size). Content that streams in must land in space that already exists. Check: record the load; CLS is zero.
 20. **Retry is visible and backed off.** Automatic retry with exponential backoff behind the scenes, plus a Retry control the person can press. Never an infinite spinner. Check: fail three times; the person sees a button.
+21. **A long local job needs a surface of its own.** The ladder above is written for a network request that returns JSON. A forty-second export, encode, or render on the person's own CPU is a different shape, and five things follow from it. Progress lives in a surface that survives the whole job and shows the artefact being worked on, not only as a sweep on the control that started it. The cancel is reachable throughout and actually stops the work, rather than hiding the progress. When the job fails, the progress surface does not unmount in the same frame the error appears, or the failure lands somewhere the eye is not; hold the surface and show the reason inside it. Completion while the person has tabbed away is announced through `role="status"`, not a toast that expires before they look. And when the result is a file, the download or the save is the completion; progress reaching 100% is not. Check: start the job, switch tabs, come back. Then fail it on purpose and watch where your eye goes.
+22. **One channel per severity, and grep for a second.** The taxonomy above assumes one implementation of each mechanism. The common failure is two: a toast system, plus an older status string in a toolbar or a status bar that predates it and still has call sites, usually on the paths that were written first and matter most. The symptom is a message surface that nothing new is wired to and nothing old was migrated off. Check: grep for every function that displays a message; if there are two, list the call sites of the older one and route them through the newer.
 
 ### Cheat sheet
 
@@ -3407,6 +3735,14 @@ Every state gets the same care as the happy path; the empty state is the first t
 | Destructive | confirm naming the noun, resolve in place |
 | Field invalid | error on the label row |
 | Page-level failure | summary at top, focus moved |
+
+| Long local job | Where it belongs |
+|---|---|
+| Progress | a surface that outlives the job, showing the artefact |
+| Cancel | reachable throughout; stops the work, not just the display |
+| Failure | inside the progress surface, which stays put |
+| Completion, tabbed away | `role="status"`, not an expiring toast |
+| Completion, result is a file | the save or download, not 100% |
 
 | State | Must exist for |
 |---|---|
@@ -3492,6 +3828,34 @@ async function archive(item: Item) {
 <div role="status" aria-live="polite" className="sr-only" id="status">{statusText}</div>
 ```
 
+```tsx
+// A long local job: the surface outlives the job, and failure lands in it.
+type Job =
+  | { phase: "idle" }
+  | { phase: "running"; done: number; total: number }
+  | { phase: "failed"; reason: string }
+  | { phase: "saved"; name: string };
+
+// One surface for all three non-idle phases. It does not unmount on failure,
+// so the reason appears where the person was already looking.
+{job.phase !== "idle" && (
+  <section className="job" aria-labelledby="job-title">
+    <h2 id="job-title">Exporting</h2>
+    <Preview frame={job.phase === "running" ? job.done : undefined} />
+    {job.phase === "running" && (
+      <>
+        <progress value={job.done} max={job.total} />
+        <button onClick={cancel}>Cancel</button>
+      </>
+    )}
+    {job.phase === "failed" && <p className="error">{job.reason}</p>}
+    <p role="status" className="sr-only">
+      {job.phase === "saved" ? `Export saved as ${job.name}` : ""}
+    </p>
+  </section>
+)}
+```
+
 ### Checks
 
 - Throttle to Slow 3G; watch the 300ms, 2s, and 10s thresholds behave.
@@ -3502,6 +3866,8 @@ async function archive(item: Item) {
 - Filter to zero; the empty state clears the filter.
 - Screen reader through a submit: one announcement per outcome.
 - Record a page load; CLS is zero.
+- Start a long job, switch tabs, return: you are told it finished. Fail it on purpose: the reason is in the surface you were watching.
+- Grep every message-display function; if there are two, the older one has no call sites left.
 
 ### Do not
 
@@ -3513,6 +3879,8 @@ async function archive(item: Item) {
 - Hide the toast and call it undo.
 - Wrap the page in one Suspense boundary.
 - Retry silently forever.
+- Unmount the progress surface in the same frame the error appears.
+- Leave a superseded message channel wired to the paths that matter most.
 
 See `references/overlays.md` for toasts, `references/forms-and-inputs.md` for field errors, `references/accessibility.md` for live regions.
 
@@ -3854,9 +4222,9 @@ Use this when the interface will be used on a phone or tablet, in a browser or a
 1. **Ship the base layer once, at the root.** Tap highlight, text-size adjust, touch callout, touch-action, selection policy, focus policy, and input size (see Code). Why: these are per-page defaults that read as sloppiness on every screen at once. Check: the base layer exists in one file and is imported first.
 2. **Inputs are at least 16px.** `font-size: max(16px, 1rem)`. Why: below 16px iOS Safari zooms the viewport on focus and does not zoom back. Check: focus every input on a real iPhone; nothing zooms.
 3. **Never `user-scalable=no` or `maximum-scale=1`.** Safari ignores it for pinch, every other browser honours it, and it fails WCAG 1.4.4. Fix the zoom cause (rule 2) instead. Check: the viewport meta contains neither.
-4. **`viewport-fit=cover`, then add safe areas to padding.** `padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px))`. Never use the inset as the whole padding. For sheets, pad the contents, not the position. Why: without `viewport-fit=cover`, `env()` returns 0 and you will not notice until a device with a home indicator. Check: run on an iPhone with a home indicator; nothing sits under it.
+4. **`viewport-fit=cover`, then add safe areas to padding.** `padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px))`. Never use the inset as the whole padding. For sheets, pad the contents, not the position. Why: without `viewport-fit=cover`, `env()` returns 0 and you will not notice until a device with a home indicator. Declaring it and never reading `env()` anywhere is the trap, because it looks handled. How much it matters depends on the product: on a phone-first app it is HIGH, because the bottom chrome is under the home indicator which also swallows the taps. On a desktop-first app that happens to have set it, the finding is real but MEDIUM at most, and the fix is only needed on chrome that touches a screen edge, usually one footer or transport bar. Check: `grep -rn "safe-area-inset"`; if `viewport-fit=cover` is set and this returns nothing, find the bottom-most fixed chrome and decide which case you are in.
 5. **`dvh` for fill layouts, `svh` for fixed chrome, `vh` never.** `100vh` is the largest viewport on iOS and overflows under the URL bar. `dvh` reflows during scroll, so prefer `svh` for a composer or a bottom bar. Check: grep for `100vh`; each hit is a finding.
-6. **`overscroll-behavior: none` on html/body only in standalone mode.** In the browser, people expect pull-to-refresh and rubber-banding. Inside scroll containers use `overscroll-behavior: contain`. Check: the rule lives inside `@media (display-mode: standalone)`.
+6. **`overscroll-behavior: none` on html/body only in standalone mode, with one exception.** In the browser, people expect pull-to-refresh and rubber-banding. Inside scroll containers use `overscroll-behavior: contain`. The exception is an editor, a canvas, or anything holding unsaved state: those may pin `overscroll-behavior-x: none` globally, because an accidental edge swipe that navigates back destroys work, and losing work beats losing pull-to-refresh. Pin the axis you need rather than both. Record the decision in the design contract so the next reviewer reads it as a choice and not an oversight. Check: the rule lives inside `@media (display-mode: standalone)`, or the contract says why it does not.
 7. **Every hover-only affordance has a touch equivalent.** Wrap hover styles in `@media (hover: hover)`; expose the same action via a visible control, a long-press, or an always-on state. Why: a hover-revealed delete button does not exist on a phone. Check: emulate touch in DevTools; can you reach every action?
 8. **Targets are 44px on touch.** Visual size can be smaller; expand the hit area with a pseudo-element on the `<button>` or `<label>`, never on the `<input>`. No two hit areas overlap. See `references/accessibility.md`.
 9. **`touch-action: manipulation` on every control.** Removes the 300ms double-tap delay where it still exists and stops accidental zoom on rapid taps. Check: grep controls for `touch-action`.
@@ -3878,7 +4246,7 @@ Use this when the interface will be used on a phone or tablet, in a browser or a
 | Safe area | `calc(<pad> + env(safe-area-inset-*, 0px))` |
 | Touch target | 44px, pseudo-element on button/label |
 | Controls | `touch-action: manipulation` |
-| Overscroll (page) | `none` only in standalone; otherwise leave it |
+| Overscroll (page) | `none` only in standalone; `overscroll-behavior-x: none` globally is allowed for editors with unsaved state |
 | Overscroll (container) | `contain` |
 | Snap paging | `scroll-snap-type: x mandatory; scroll-snap-stop: always` |
 | Keyboard | VirtualKeyboard API, `visualViewport` fallback, move with `transform` |
@@ -3998,7 +4366,7 @@ Widely recommended, wrong today:
 - Focus every input on an iPhone: no zoom.
 - Viewport meta: `viewport-fit=cover`, no `user-scalable`, no `maximum-scale`.
 - `grep -rn "100vh"`: zero hits or each justified.
-- `grep -rn "overscroll-behavior"`: page-level rule only inside `display-mode: standalone`.
+- `grep -rn "overscroll-behavior"`: page-level rule only inside `display-mode: standalone`, or an editor with the decision written down.
 - DevTools touch emulation: every hover action reachable.
 - 320px width: no horizontal scrollbar.
 - Composer above the keyboard on iOS and Android.
@@ -4008,7 +4376,7 @@ Widely recommended, wrong today:
 
 - Disable zoom.
 - Use the safe-area inset as the whole padding.
-- Put `overscroll-behavior: none` on the page in a browser tab.
+- Put `overscroll-behavior: none` on the page in a browser tab, unless unsaved work is one edge swipe from being lost and the contract says so.
 - Hide an action behind hover with no touch path.
 - Focus an input while a sheet is still animating.
 - Build a custom scroller.
