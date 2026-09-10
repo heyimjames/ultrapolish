@@ -432,112 +432,52 @@ Reject on sight. Each of these reads as "made by nobody in particular".
 - Haptic on every scroll tick, every read receipt, every foreground notification
 
 ## 6. The 6 → 11 checklist
-
-Each item is checkable in under a minute. Full mode runs the whole list; quick mode runs the starred items.
-
 ### States
 - [ ] ★ Empty state exists for every list, search, and filter, with one action
 - [ ] ★ Loading follows the ladder; nothing spins under 500ms
 - [ ] ★ Error appears in context with the last good value still visible
-- [ ] Success is acknowledged once, where the result appears
-- [ ] Offline state exists and cached content stays usable
-- [ ] First-run state differs from the empty state (it invites; it does not apologise)
-- [ ] Overflow: 200 items, a 60-character title, a 4-line description all hold
-- [ ] Permission denied has its own screen with a path to Settings
 
 ### Motion and continuity
 - [ ] ★ Every `.animation` has a `value:`
 - [ ] ★ Persistent chrome survives transitions in a parent
 - [ ] ★ Exit durations are shorter than entrances and have no bounce
-- [ ] One `Animation` constant per datum; siblings animate together
-- [ ] Stagger only on first appearance, 30–80ms, ≤ 8 items
-- [ ] Nothing that follows a finger uses a spring
-- [ ] Hero transitions animate radius with size
-- [ ] Ambient loops use `TimelineView`, ≥ 1.2s period, and stop when off-screen
-- [ ] Reduce Motion swaps to an 180ms crossfade; haptics remain
-- [ ] Numbers use `.numericText` + `.monospacedDigit()`
 
 ### Hierarchy and layout
 - [ ] ★ Eye lands on headline then primary action within a second
 - [ ] ★ One primary action per view
 - [ ] ★ Same screen margin on every screen
-- [ ] Spacing values come from the grid (4/8/12/16/20/24/32)
-- [ ] Group gaps ≥ 2× intra-group gaps; no separator plus large gap
-- [ ] Hero numerals have 24pt of air
-- [ ] At most three radii; nested radius = outer − padding; all `.continuous`
-- [ ] Optical nudges on icons and squares-in-circles
-- [ ] Critical actions are never under the keyboard or below the fold of a fixed sheet
-- [ ] Safe areas are added to padding, not used as padding
 
 ### Typography
 - [ ] ★ Three sizes carry the hierarchy; weight and opacity do the rest
 - [ ] ★ AX5 does not clip; `ViewThatFits` where strings vary
-- [ ] Body is leading-aligned
-- [ ] No weight under `.regular` below 18pt
-- [ ] Tracking untouched except all-caps and 60pt+ display
-- [ ] Prose line height ≥ 1.45×
-- [ ] Changing numbers are monospaced
-- [ ] German and Finnish do not break any label
 
 ### Colour and material
 - [ ] ★ Every colour has a light and dark pair, hand-checked in both
 - [ ] ★ Body contrast ≥ 7:1; secondary ≥ 4.5:1; UI ≥ 3:1
-- [ ] Every literal specifies `.displayP3`
-- [ ] Gradients use explicit OKLCH stops and ≤ 5% grain
-- [ ] Shadows are tinted and faint; dark mode uses a hairline instead
-- [ ] Materials only on floating chrome; content stays legible
-- [ ] Meaning never carried by colour alone
-- [ ] One accent per view; primary colour sits on the background of the CTA
 
 ### Controls
 - [ ] ★ Every tap target ≥ 44pt with `.contentShape`
 - [ ] ★ Press-down haptic + 0.97 scale on every button
 - [ ] ★ Loading buttons lock their width
-- [ ] Disabled is transparency plus a reason
-- [ ] Success reverts after 1.5s
-- [ ] Destructive actions name the noun and use `role: .destructive`
-- [ ] Sheets use named detents and the project's radius; stacked sheets differ ≥ 25%
-- [ ] Sheets inherit tint and scheme from the presenter
-- [ ] Drag-dismiss commits on 120pt or 600pt/s; upward flick cancels
-- [ ] Sliders and dials are linear; `.selection` haptic at detents only
 
 ### Haptics and sound
 - [ ] ★ Nothing fires on scroll, launch, or foreground notifications
-- [ ] One `.success` per commit
-- [ ] Generators are prepared before predictable moments
-- [ ] Sound cues < 200ms, `.ambient` + `.mixWithOthers`, toggle in Settings
-- [ ] Haptic and sound land within 10ms of each other
-- [ ] Nothing double-fires a system haptic
 
 ### Icons
 - [ ] ★ One family, one stroke weight, matched to text weight
-- [ ] State changes use `.symbolEffect(.replace)`
-- [ ] No idle animation on any symbol
-- [ ] Selected = `.fill` variant; unselected = outline
 
 ### Copy and naming
 - [ ] ★ Buttons are verb-first and name the noun
 - [ ] ★ Errors say what happened and what to do
-- [ ] One capitalisation policy per element type
-- [ ] An action keeps its name across the flow
-- [ ] Navigation named by contents
-- [ ] Empty states invite; they do not apologise
-- [ ] Toggles label the ON state
-- [ ] Emoji and dash policy matches the design contract
 
 ### Accessibility
 - [ ] ★ VoiceOver reads every screen in a sensible order
 - [ ] ★ Reduce Motion, Reduce Transparency, Increase Contrast each tested
-- [ ] Custom controls carry traits and values
-- [ ] Progress dots hidden; container carries "Step n of m"
-- [ ] Focus lands sensibly after a sheet opens or a destructive confirm appears
 
-### Onboarding, paywall, widgets (when present)
-- [ ] Onboarding ≤ 5 rooms; dots not bars; CTA pinned
-- [ ] Permission primer only where the next step needs it; one button
-- [ ] Paywall: Close visible from frame one, price plain, one CTA, restore link, no urgency theatre
-- [ ] Widgets: `ContainerRelativeShape`, content margins, three render modes tested, StandBy red tint tested
-- [ ] Live Activity ≤ 160pt; compact ≤ 5 characters; ends with a short summary
+The starred set above is quick mode: the twenty or so that catch most of what is wrong
+on a primary path. The full list, every item with a column for how to verify it and what
+severity to file it at, is the audit-checklist reference below, along with the one-hour audit
+running order. Read that file for a full audit rather than working from this one.
 
 ## 7. Decisions register
 
@@ -5224,96 +5164,46 @@ Reject on sight. Each reads as "made by nobody in particular".
 - Reduced motion handled by `animation: none` (breaks `animationend` listeners) or not handled at all
 
 ## 6. The 6 → 11 checklist
-
-Each item is checkable in under a minute. Full mode runs the whole list; quick mode runs the starred items.
-
 ### Accessibility and states
 - [ ] ★ Keyboard-only pass: every control reachable, focus visible at every stop, Escape closes what opened last
 - [ ] ★ Every interactive element is a `<button>` or `<a>` with an accessible name
 - [ ] ★ Empty, loading, error, success each exist for every list, form, and fetch
-- [ ] Offline state exists; cached content stays usable
-- [ ] 320px width reflows with vertical scroll only; 200% zoom holds
-- [ ] Reduced motion swaps vestibular motion for crossfades; functional feedback remains
-- [ ] Screen reader announces route changes, live updates, and errors via the ladder
-- [ ] Overflow: 200 rows, a 60-character title, German labels all hold
 
 ### Layout and hierarchy
 - [ ] ★ Eye lands on headline then primary action within a second
 - [ ] ★ One primary action per view
 - [ ] ★ Same container padding on every page
-- [ ] Spacing from the grid; group gaps ≥ 2× inner gaps
-- [ ] Controls 12px apart; borderless controls with 24px clearance
-- [ ] At most three radii; nested = outer − padding
-- [ ] Horizontal scrollers peek 16–32px
-- [ ] Nothing critical under the keyboard or below a fixed pane's fold
-- [ ] Safe areas added to padding; `viewport-fit=cover` set
 
 ### Copy and naming
 - [ ] ★ Buttons verb-first, naming the noun
 - [ ] ★ Errors say what happened and what to do; no apology, no "Oops"
-- [ ] One capitalisation policy per element type
-- [ ] An action keeps its name across the flow
-- [ ] Links describe their destination
-- [ ] Toggles label the ON state
-- [ ] Empty states name the thing and offer one action
-- [ ] Emoji and dash policy matches the design contract
 
 ### Typography
 - [ ] ★ Roles carry hierarchy; emphasis is one weight step
 - [ ] ★ Inputs ≥ 16px on mobile; no `maximum-scale`
-- [ ] Measure ≤ 75ch; 3+ line text has line-height ≥ 1.4
-- [ ] `text-wrap: balance` on headings, `pretty` on cards, neither on long-form
-- [ ] Changing numbers are tabular
-- [ ] No weight under 400 below 28px
-- [ ] Font smoothing set once on the root; `.woff2` only
-- [ ] Underlines from the font; only colour animates
 
 ### Colour and surfaces
 - [ ] ★ APCA ≥ 75 body, ≥ 60 secondary, ≥ 30 UI (or WCAG 4.5 / 3)
 - [ ] ★ Every colour pair re-checked in dark mode
-- [ ] One accent per view; colour on the primary's background
-- [ ] Muted text is one ink stepped in alpha
-- [ ] Shadow-as-border in light; single ring in dark
-- [ ] Images outlined at 10% black/white inset
-- [ ] Backdrop blur has `saturate`, ≤ 3 per screen, static only
-- [ ] Theme switch suppresses transitions for one frame with a backstop
-- [ ] Meaning never carried by colour alone
 
 ### Motion
 - [ ] ★ No `transition: all`; every transition names its property
 - [ ] ★ Exits shorter than entrances, accelerating, no bounce
 - [ ] ★ Paired elements share easing and duration
-- [ ] Opacity and colour never spring
-- [ ] Stagger 30–40ms, first appearance only, ≤ 8 items
-- [ ] Press scale within the ladder; nothing below 0.9
-- [ ] No entrance animation on above-the-fold chrome at page load
-- [ ] Animations replayed at 10% speed and look right
-- [ ] Gesture-driven motion starts from the current value and inherits velocity
 
 ### Controls, forms, overlays
 - [ ] ★ Targets ≥ 44px touch / 40px pointer / 24px floor, expanded on the button not the input
 - [ ] ★ Submit never disabled until valid; first invalid field focused on submit
 - [ ] ★ Loading buttons lock their width; disabled has a reason
-- [ ] `autocomplete` and `inputmode` set on every identity, payment, and OTP field
-- [ ] Modals use `<dialog>` or `inert`; focus returns to the trigger
-- [ ] Sheets dismiss on velocity; contents arrive 80ms after the container
-- [ ] Tooltips delay 200ms and warm; toasts persist when they carry an action
-- [ ] Copy-to-clipboard holds a check 1.5s; search debounces 300ms
-- [ ] Hover changes only colour unless the element navigates
 
 ### Performance as felt
 - [ ] ★ No layout shift on load, on font swap, on data arrival, on button loading
 - [ ] ★ INP < 200ms on the primary path
-- [ ] No `backdrop-filter` or big blurred shadow on anything that moves
-- [ ] Lists past ~100 rows virtualised or `content-visibility: auto`
-- [ ] Prefetch on `pointerdown`; LCP image `fetchpriority="high"`
-- [ ] No `setState` inside a drag handler
 
-### Onboarding, pricing, marketing (when present)
-- [ ] Onboarding ≤ 5 steps; dots not bars; CTA pinned
-- [ ] Pricing plain: total and per-month, one paid tier, Close from frame one, no countdowns
-- [ ] Marketing: no scroll-triggered fades, no hijack, no autoplay carousel, one orchestrated moment
-- [ ] OG image tested at 200px wide and in greyscale
+The starred set above is quick mode: the twenty or so that catch most of what is wrong
+on a primary path. The full list, every item with a column for how to verify it and what
+severity to file it at, is the audit-checklist reference below, along with the one-hour audit
+running order. Read that file for a full audit rather than working from this one.
 
 ## 7. Decisions register
 
