@@ -17,7 +17,7 @@ Read this before touching a pixel.
 2. **Never introduce what the project does not have.** No new typeface, no new palette, no new radius language, no new motion personality. If the site is sharp and flat, polish it sharp and flat. If it is soft and rounded, polish it soft and rounded.
 3. **Numbers here are defaults for projects without an established value.** The project's own token wins whenever it is used consistently. Inconsistency is the finding; the value is not.
 4. **The anti-pattern list is a negative list.** It says what reads as generic or careless. It does not imply a positive style.
-5. **No system? Propose one before polishing.** Offer the 15-line design contract from `references/design-contract-template.md`, get it agreed, then work inside it. Polishing without a contract produces a second, competing style.
+5. **No system? Build one with them before polishing.** Do not hand over the technical template: it asks for OKLCH values and line-height ratios, and someone without a design system cannot fill that in. Run the six plain-language questions in `references/finding-the-vibe.md`, derive the numbers yourself, and show them what you derived in words they can push back on. The result is the 15-line contract in `references/design-contract-template.md`, agreed and committed before any pixel moves. Polishing without a contract produces a second, competing style.
 6. **Restraint is a deliverable.** The right change is often "remove", "align", or "reuse". Every finding must name what the user gains. If you cannot, it is not a finding.
 
 7. **Look at it.** Reading the code tells you what was intended; only the rendered result tells you what happened. Render the screen, screenshot it, and play any motion back at a tenth speed before writing a finding about it. Half the findings worth having are invisible in the source: the thing that lands a frame late, the two greys that turned out identical, the row that reflows at the second breakpoint, the state nobody wired up. A finding you have not seen is a guess, and it belongs in the output marked as one.
@@ -120,6 +120,21 @@ They will. A transition that makes a flow continuous costs a frame. A denser tab
 The order maps onto severity, which is why it is worth stating rather than assuming: a finding that breaches 1, 2 or 3 is HIGH. One that breaches 4 or 5 is MEDIUM. One that breaches 6 or 7 is LOW, before the systemic step is applied.
 
 It also settles the argument the other way. **Character that costs anything above it is a defect, not a feature**, and should be reported as one. An animation that delays a destructive confirmation, a hover that makes a dense table jitter, a celebration that blocks the next action: each of those is a finding, not a flourish, and the row says so.
+
+### 1.6 Asking, rather than guessing
+
+Most of this skill is answerable from the code. A few things are not, and guessing at those is where an audit goes wrong quietly: how often a screen is used, who is using it and under what pressure, whether a colour is a brand constraint or an accident, whether a dense table is a deliberate choice or neglect, and everything in `references/finding-the-vibe.md` when there is no system to read.
+
+When the answer changes the work and is not in the repo, ask.
+
+- **Use the host's structured question tool if there is one.** In Claude Code that is AskUserQuestion, which takes up to four questions at once and renders the options as choices. Elsewhere, ask numbered questions in a single message.
+- **Batch them.** One question per turn is exhausting and people start answering to make it stop, which is worse than not asking.
+- **Always offer options, and mark one as your recommendation.** A blank question is work handed back. Three named choices with a sentence each is a decision someone makes in ten seconds. Put the recommendation first and say that it is one.
+- **Never ask for a value you should derive.** Not a hex code, not a duration, not a radius. Ask about the feeling and the frequency; the numbers are your job.
+- **Do not ask what you can measure.** Anything visible in a token file, a screenshot, or a computed style is not a question.
+- **Ask before the work, not after.** A question that arrives with the findings is a finding that was written on an assumption.
+
+Two or three well-chosen questions before an audit routinely change more of the output than an extra hour of reading.
 
 ## 2. The ten laws
 
@@ -538,6 +553,8 @@ Where sources disagree, this skill takes these positions. Change them only in th
 | Conflicting findings | Correctness, reach, comprehension, the project's conventions, responsiveness, continuity, character, in that order. A lower concern never overrides a higher one, and the order maps onto severity |
 | Data in motion | Interpolate the presentation, never the value. A number a person could act on is never smoothed through figures that were not true |
 | Icon transitions | Rotate when it is the same shape at another angle; only morph or replace when the drawings genuinely differ |
+| Asking the user | Ask when the answer changes the work and is not in the repo: frequency, who it is for, brand constraints, and anything in the vibe interview. Batch the questions, always offer options with a recommendation marked, never ask for a value you should derive |
+| No design system | The six plain-language questions in `references/finding-the-vibe.md` first, then derive the contract yourself and show it back in words they can argue with |
 
 ## 8. Further reading inside this skill
 
